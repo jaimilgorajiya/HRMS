@@ -211,13 +211,11 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const location = useLocation();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard']);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpand = (label: string) => {
-    setExpandedItems(prev =>
-      prev.includes(label)
-        ? prev.filter(item => item !== label)
-        : [...prev, label]
+    setExpandedItems(prev => 
+      prev.includes(label) ? [] : [label]
     );
   };
 
@@ -262,18 +260,18 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 <button
                   onClick={() => toggleExpand(item.label)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all ${
-                    isParentActive(item.children)
-                      ? 'bg-[#4F46E5] text-white'
+                    isParentActive(item.children) || expandedItems.includes(item.label)
+                      ? 'bg-blue-50 text-blue-600 font-medium'
                       : 'text-[#374151] hover:bg-[#f3f4f6]'
                   }`}
                   title={isCollapsed ? item.label : ''}
                 >
-                  <div className="flex items-center gap-3">
-                    {item.icon}
-                    {!isCollapsed && <span>{item.label}</span>}
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="shrink-0">{item.icon}</div>
+                    {!isCollapsed && <span className="whitespace-nowrap truncate">{item.label}</span>}
                   </div>
                   {!isCollapsed && (
-                    <span>
+                    <span className="shrink-0">
                       {expandedItems.includes(item.label) ? (
                         <ChevronDown className="w-4 h-4" />
                       ) : (
@@ -283,19 +281,19 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                   )}
                 </button>
                 {!isCollapsed && expandedItems.includes(item.label) && (
-                  <div className="ml-3 mt-1 space-y-1">
+                  <div className="ml-3 mt-1 space-y-1 border-l-2 border-gray-100 pl-2">
                     {item.children.map((child) => (
                       <Link
                         key={child.label}
                         to={child.path || '#'}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all whitespace-nowrap ${
                           isActive(child.path)
                             ? 'bg-[#4F46E5] text-white'
-                            : 'text-[#374151] hover:bg-[#f3f4f6]'
+                            : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
                         }`}
                       >
-                        {child.icon}
-                        <span>{child.label}</span>
+                         <span className="shrink-0">-</span>
+                        <span className="truncate">{child.label}</span>
                       </Link>
                     ))}
                   </div>
@@ -304,15 +302,15 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             ) : (
               <Link
                 to={item.path || '#'}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all overflow-hidden ${
                   isActive(item.path)
                     ? 'bg-[#4F46E5] text-white'
                     : 'text-[#374151] hover:bg-[#f3f4f6]'
                 }`}
                 title={isCollapsed ? item.label : ''}
               >
-                {item.icon}
-                {!isCollapsed && <span>{item.label}</span>}
+                <div className="shrink-0">{item.icon}</div>
+                {!isCollapsed && <span className="whitespace-nowrap truncate">{item.label}</span>}
               </Link>
             )}
           </div>
