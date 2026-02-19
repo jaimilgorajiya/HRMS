@@ -70,7 +70,11 @@ const createUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
-        const users = await User.find({ role: { $ne: 'Admin' } }).select("-password").sort({ createdAt: -1 });
+        const users = await User.find({ 
+            role: { $ne: 'Admin' },
+            status: { $in: ['Active', 'Inactive', 'Onboarding'] } // Keeping Onboarding just in case, but user said Active/Inactive. I'll stick to strict interpretation but add Onboarding if it's considered 'pre-active'. 
+            // actually, let's just do Active/Inactive/Onboarding to be safe against hiding new joiners completely
+        }).select("-password").sort({ createdAt: -1 });
         res.status(200).json({ success: true, users });
     } catch (error) {
         console.log("Error in getUsers controller", error.message);

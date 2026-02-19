@@ -14,6 +14,7 @@ interface Manager {
   department: string;
   photo?: string;
   location?: string;
+  status?: string;
 }
 
 export default function ManagerList() {
@@ -59,14 +60,26 @@ export default function ManagerList() {
                                 <User className="w-10 h-10" />
                             </div>
                         )}
+                        <span className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white ${
+                            manager.status === 'Active' ? 'bg-green-500' :
+                            manager.status === 'Inactive' ? 'bg-red-500' : 'bg-gray-400'
+                        }`} title={manager.status}></span>
                     </div>
                 </div>
                 <div className="pt-14 px-6 pb-6 space-y-3">
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-900">{manager.name}</h3>
-                        <p className="text-blue-600 font-medium">{manager.designation || 'Manager'}</p>
-                        <p className="text-sm text-gray-500">{manager.department}</p>
-                    </div>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">{manager.name}</h3>
+                                <p className="text-blue-600 font-medium">{manager.designation || 'Manager'}</p>
+                                <p className="text-sm text-gray-500">{manager.department}</p>
+                            </div>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                manager.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                manager.status === 'Inactive' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                                {manager.status || 'Active'}
+                            </span>
+                        </div>
                     
                     <div className="space-y-2 pt-2 border-t text-sm text-gray-600">
                         <div className="flex items-center gap-2">

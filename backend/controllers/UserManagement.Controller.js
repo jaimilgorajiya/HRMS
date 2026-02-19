@@ -3,6 +3,7 @@ import Role from "../models/Role.Model.js";
 import Grade from "../models/Grade.Model.js";
 import Resignation from "../models/Resignation.Model.js";
 import ExitRecord from "../models/ExitRecord.Model.js";
+import Onboarding from "../models/Onboarding.Model.js";
 
 // MANAGERS LIST
 const getManagers = async (req, res) => {
@@ -17,7 +18,29 @@ const getManagers = async (req, res) => {
 // EX-EMPLOYEES LIST
 const getExEmployees = async (req, res) => {
     try {
-        const exEmployees = await User.find({ status: { $in: ['Resigned', 'Terminated', 'Inactive'] } }).select("-password");
+        const users = await User.find({ 
+            status: { $in: ['Resigned', 'Terminated', 'Inactive', 'Absconding', 'Retired'] } 
+        }).select("-password");
+
+        const userIds = users.map(user => user._id);
+        const exitRecords = await ExitRecord.find({ userId: { $in: userIds } });
+
+        const exEmployees = users.map(user => {
+            const exitRecord = exitRecords.find(record => record.userId.toString() === user._id.toString());
+            return {
+                ...user.toObject(),
+                joiningDate: user.createdAt,
+                exitDate: exitRecord ? exitRecord.exitDate : null,
+                exitReason: exitRecord ? exitRecord.reason : 'Not Recorded',
+                settlementStatus: exitRecord ? exitRecord.status : 'Pending',
+                paymentStatus: exitRecord && exitRecord.fullAndFinal ? exitRecord.fullAndFinal.paymentStatus : 'Pending',
+                settlementAmount: exitRecord && exitRecord.fullAndFinal ? exitRecord.fullAndFinal.settlementAmount : 0,
+                documentsIssued: exitRecord ? exitRecord.documentsIssued : { experienceLetter: false, relievingLetter: false },
+                departmentClearance: exitRecord ? exitRecord.departmentClearance : {},
+                isActive: false // For archive logic
+            };
+        });
+
         res.status(200).json({ success: true, exEmployees });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -27,9 +50,77 @@ const getExEmployees = async (req, res) => {
 // NEW JOINERS (ONBOARDING PIPELINE)
 const getNewJoiners = async (req, res) => {
     try {
-        // Assume 'Onboarding' status means not fully active yet
         const newJoiners = await User.find({ status: 'Onboarding' }).select("-password");
-        res.status(200).json({ success: true, newJoiners });
+        const userIds = newJoiners.map(u => u._id);
+        const onboardingRecords = await Onboarding.find({ userId: { $in: userIds } });
+
+        const detailedJoiners = newJoiners.map(user => {
+            const record = onboardingRecords.find(r => r.userId.toString() === user._id.toString());
+            // Calculate progress
+            let completedTasks = 0;
+            let totalTasks = 0;
+            if (record) {
+                const checklistVals = Object.values(record.checklist || {});
+                const itVals = Object.values(record.itSetup || {});
+                completedTasks = checklistVals.filter(v => v === true).length + itVals.filter(v => v === true).length;
+                totalTasks = checklistVals.length + itVals.length;
+            }
+
+            return {
+                ...user.toObject(),
+                onboardingStatus: record ? record.status : 'Pre-Boarding',
+                joiningDate: record ? record.joiningDate : user.createdAt,
+                checklistProgress: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+                buddyId: record ? record.buddy : null,
+                inductionDate: record ? record.inductionDate : null
+            };
+        });
+
+        res.status(200).json({ success: true, newJoiners: detailedJoiners });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+const getOnboardingDetails = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        let record = await Onboarding.findOne({ userId }).populate('buddy', 'name email designation');
+        
+        if (!record) {
+             const user = await User.findById(userId);
+             if (user && user.status === 'Onboarding') {
+                 record = await Onboarding.create({
+                     userId,
+                     joiningDate: user.createdAt,
+                     status: 'Pre-Boarding'
+                 });
+             } else {
+                 return res.status(404).json({ success: false, message: "Onboarding record not found" });
+             }
+        }
+        res.status(200).json({ success: true, record });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+const updateOnboardingDetails = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const updates = req.body;
+        const record = await Onboarding.findOneAndUpdate(
+            { userId }, 
+            updates, 
+            { new: true, upsert: true }
+        );
+
+        // Auto-activate user if onboarding is completed
+        if (updates.status === 'Completed') {
+            await User.findByIdAndUpdate(userId, { status: 'Active' });
+        }
+
+        res.status(200).json({ success: true, record });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -122,5 +213,7 @@ export {
     getUpcomingRetirements, 
     getOtherEmployees,
     getExitRecord,
-    updateExitRecord
+    updateExitRecord,
+    getOnboardingDetails,
+    updateOnboardingDetails
 };

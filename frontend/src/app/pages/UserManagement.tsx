@@ -167,8 +167,7 @@ export function UserManagement() {
               options={[
                 { value: 'all', label: 'All Status' },
                 { value: 'Active', label: 'Active' },
-                { value: 'Inactive', label: 'Inactive' },
-                { value: 'Onboarding', label: 'Onboarding' }
+                { value: 'Inactive', label: 'Inactive' }
               ]}
             />
           </div>
@@ -313,7 +312,6 @@ export function UserManagement() {
                             >
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
-                                <option value="Onboarding">Onboarding</option>
                                 <option value="Resigned">Resigned</option>
                                 <option value="Terminated">Terminated</option>
                                 <option value="Absconding">Absconding</option>

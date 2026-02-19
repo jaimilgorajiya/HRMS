@@ -238,10 +238,12 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <div className="flex items-center justify-between h-16 px-4 border-b border-[#e5e7eb]">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#4F46E5] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">HR</span>
+            <div className="w-8 h-8 bg-[#4F46E5] rounded-lg flex items-center justify-center text-white p-1.5">
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+               </svg>
             </div>
-            <span className="text-gray-900">HRMS Portal</span>
+            <span className="text-gray-900 font-bold text-lg">HRMS Portal</span>
           </div>
         )}
         <button

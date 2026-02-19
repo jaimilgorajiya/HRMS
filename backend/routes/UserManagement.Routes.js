@@ -1,5 +1,5 @@
 import express from "express";
-import { getManagers, getExEmployees, getNewJoiners, getUpcomingRetirements, getOtherEmployees, getExitRecord, updateExitRecord } from "../controllers/UserManagement.Controller.js";
+import { getManagers, getExEmployees, getNewJoiners, getUpcomingRetirements, getOtherEmployees, getExitRecord, updateExitRecord, getOnboardingDetails, updateOnboardingDetails } from "../controllers/UserManagement.Controller.js";
 import Role from "../models/Role.Model.js";
 import Grade from "../models/Grade.Model.js";
 import Resignation from "../models/Resignation.Model.js";
@@ -90,6 +90,10 @@ router.get("/other-employees", getOtherEmployees);
 // --- EXIT MANAGEMENT ---
 router.get("/exit-record/:userId", getExitRecord);
 router.put("/exit-record/:userId", updateExitRecord);
+
+// --- ONBOARDING ---
+router.get("/onboarding-record/:userId", getOnboardingDetails);
+router.put("/onboarding-record/:userId", updateOnboardingDetails);
 
 // --- RESIGNATIONS ---
 router.post("/resignations", async (req, res) => { // User submits

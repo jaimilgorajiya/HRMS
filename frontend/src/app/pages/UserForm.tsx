@@ -121,8 +121,9 @@ const initialFormData: FormData = {
   verification: { status: 'Pending', verifiedBy: '', verificationDate: '' }
 };
 
-export default function UserForm() {
-  const { id } = useParams();
+export default function UserForm({ userId: propUserId, onClose, isModal = false }: { userId?: string, onClose?: () => void, isModal?: boolean }) {
+  const { id: paramId } = useParams();
+  const id = propUserId || paramId;
   const navigate = useNavigate();
   const isEditMode = !!id;
   
@@ -262,8 +263,12 @@ export default function UserForm() {
           } else {
               await axios.post(`${import.meta.env.VITE_API_URL}/users/create`, formData, { headers });
           }
-          navigate('/employees');
           alert(`User ${isEditMode ? 'updated' : 'created'} successfully!`);
+          if (onClose) {
+              onClose();
+          } else {
+              navigate('/employees');
+          }
       } catch (error: any) {
           console.error("Submit error", error);
           alert(error.response?.data?.message || "Operation failed");
@@ -281,15 +286,17 @@ export default function UserForm() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" className="p-2" onClick={() => navigate('/employees')}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-           <h1 className="text-2xl font-bold text-gray-900">{isEditMode ? 'Edit Employee' : 'Add New Employee'}</h1>
-           <p className="text-sm text-gray-500">Complete the onboarding process</p>
+      {!isModal && (
+        <div className="flex items-center gap-4 mb-6">
+            <Button variant="ghost" className="p-2" onClick={() => navigate('/employees')}>
+            <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+            <h1 className="text-2xl font-bold text-gray-900">{isEditMode ? 'Edit Employee' : 'Add New Employee'}</h1>
+            <p className="text-sm text-gray-500">Manage employee details</p>
+            </div>
         </div>
-      </div>
+      )}
 
       {/* Stepper */}
       <Card className="mb-6">
@@ -383,6 +390,7 @@ export default function UserForm() {
           {activeStep === 2 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                       <Input label="Employee ID" value={formData.employeeId} disabled={!isEditMode && !!formData.employeeId} onChange={(e) => handleInputChange('employeeId', e.target.value)} />
                       
                       <Select
@@ -473,6 +481,12 @@ export default function UserForm() {
                             value={formData.role}
                             onChange={(value) => handleInputChange('role', value)}
                         />
+                         <Select 
+                            label="Employee Status"
+                            options={[{value: 'Active', label: 'Active'}, {value: 'Inactive', label: 'Inactive'}]}
+                            value={formData.status}
+                            onChange={(value) => handleInputChange('status', value)}
+                        />
                    </div>
 
                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -547,7 +561,7 @@ export default function UserForm() {
 
           {/* Navigation Buttons */}
           <div className="flex justify-between items-center mt-8 pt-4 border-t border-gray-100">
-               <Button variant="secondary" onClick={activeStep === 1 ? () => navigate('/employees') : handleBack}>
+               <Button variant="secondary" onClick={onClose || (activeStep === 1 ? () => navigate('/employees') : handleBack)}>
                    {activeStep === 1 ? 'Cancel' : 'Back'}
                </Button>
                

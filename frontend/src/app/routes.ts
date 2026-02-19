@@ -20,6 +20,8 @@ import RoleList from './pages/user-management/RoleList';
 import GradeList from './pages/user-management/GradeList';
 import ManagerList from './pages/user-management/ManagerList';
 import ExEmployeeList from './pages/user-management/ExEmployeeList';
+
+import OffboardingList from './pages/user-management/OffboardingList';
 import ResignationList from './pages/user-management/ResignationList';
 
 export const router = createBrowserRouter([
@@ -46,8 +48,8 @@ export const router = createBrowserRouter([
           { path: 'employees/view/:id', Component: UserView },
           { path: 'management', Component: ManagerList },
           { path: 'ex-employees', Component: ExEmployeeList },
-          { path: 'onboarding', Component: PlaceholderPage },
-          { path: 'offboarding', Component: PlaceholderPage },
+          { path: 'onboarding', Component: UserForm },
+          { path: 'offboarding', Component: OffboardingList },
           { path: 'roles', Component: RoleList },
           { path: 'levels', Component: GradeList },
           { path: 'profile-changes', Component: PlaceholderPage },
