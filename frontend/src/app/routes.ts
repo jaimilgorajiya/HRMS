@@ -15,6 +15,13 @@ import DepartmentList from './pages/DepartmentList';
 import DesignationList from './pages/DesignationList';
 import LocationList from './pages/LocationList';
 
+// User Management Pages
+import RoleList from './pages/user-management/RoleList';
+import GradeList from './pages/user-management/GradeList';
+import ManagerList from './pages/user-management/ManagerList';
+import ExEmployeeList from './pages/user-management/ExEmployeeList';
+import ResignationList from './pages/user-management/ResignationList';
+
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -37,17 +44,17 @@ export const router = createBrowserRouter([
           { path: 'employees/create', Component: UserForm },
           { path: 'employees/edit/:id', Component: UserForm },
           { path: 'employees/view/:id', Component: UserView },
-          { path: 'management', Component: PlaceholderPage },
-          { path: 'ex-employees', Component: PlaceholderPage },
+          { path: 'management', Component: ManagerList },
+          { path: 'ex-employees', Component: ExEmployeeList },
           { path: 'onboarding', Component: PlaceholderPage },
           { path: 'offboarding', Component: PlaceholderPage },
-          { path: 'roles', Component: PlaceholderPage },
-          { path: 'levels', Component: PlaceholderPage },
+          { path: 'roles', Component: RoleList },
+          { path: 'levels', Component: GradeList },
           { path: 'profile-changes', Component: PlaceholderPage },
           { path: 'change-branch', Component: PlaceholderPage },
           { path: 'bulk-id-update', Component: PlaceholderPage },
           { path: 'hierarchy', Component: PlaceholderPage },
-          { path: 'resignation', Component: PlaceholderPage },
+          { path: 'resignation', Component: ResignationList },
           { path: 'other-employee', Component: PlaceholderPage },
           { path: 'retirement', Component: PlaceholderPage },
           { path: 'bulk-upload', Component: PlaceholderPage },

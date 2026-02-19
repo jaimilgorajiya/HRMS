@@ -386,23 +386,29 @@ export default function UserForm() {
                       <Input label="Employee ID" value={formData.employeeId} disabled={!isEditMode && !!formData.employeeId} onChange={(e) => handleInputChange('employeeId', e.target.value)} />
                       
                       <Select
-                             label="Designation / Position"
-                             options={[
-                                { value: '', label: 'Select Designation' },
-                                ...designations.map(d => ({ value: d.name, label: d.name }))
-                             ]}
-                             value={formData.position}
-                             onChange={(value) => handleInputChange('position', value)}
-                        />
-                      
-                      <Select
                              label="Department"
                              options={[
                                 { value: '', label: 'Select Department' },
                                 ...departments.map(d => ({ value: d.name, label: d.name }))
                              ]}
                              value={formData.department}
-                             onChange={(value) => handleInputChange('department', value)}
+                             onChange={(value) => {
+                                 handleInputChange('department', value);
+                                 handleInputChange('position', ''); // Reset designation when department changes
+                             }}
+                        />
+
+                      <Select
+                             label="Designation / Position"
+                             options={[
+                                { value: '', label: 'Select Designation' },
+                                ...designations
+                                    .filter(d => d.department === formData.department)
+                                    .map(d => ({ value: d.name, label: d.name }))
+                             ]}
+                             value={formData.position}
+                             onChange={(value) => handleInputChange('position', value)}
+                             disabled={!formData.department}
                         />
 
                       <Input label="Reporting Manager" value={formData.reportingTo} onChange={(e) => handleInputChange('reportingTo', e.target.value)} />
@@ -461,17 +467,11 @@ export default function UserForm() {
           {activeStep === 3 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Select 
+                         <Select 
                             label="System Role *"
                             options={[{value: 'Employee', label: 'Employee'}, {value: 'Manager', label: 'Manager'}]}
                             value={formData.role}
                             onChange={(value) => handleInputChange('role', value)}
-                        />
-                         <Select 
-                            label="Account Status"
-                            options={[{value: 'Active', label: 'Active'}, {value: 'Inactive', label: 'Inactive'}]}
-                            value={formData.status}
-                            onChange={(value) => handleInputChange('status', value)}
                         />
                    </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router';
 import axios from 'axios';
 import { Card } from '../components/ui/Card';
@@ -6,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Badge } from '../components/ui/Badge';
-import { Plus, Edit, Trash2, Mail, Phone, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, Phone, RefreshCw, ChevronDown } from 'lucide-react';
 
 // Define interfaces based on backend models
 interface User {
@@ -256,9 +257,72 @@ export function UserManagement() {
                         <p className="text-sm text-gray-600">{employee.position || '-'}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={employee.status === 'Active' ? 'success' : 'danger'}>
-                        {employee.status}
-                        </Badge>
+                        <div onClick={(e) => e.stopPropagation()} className="relative w-32">
+                            <select
+                                value={employee.status}
+                                onChange={async (e) => {
+                                    const newStatus = e.target.value;
+                                    const currentStatus = employee.status;
+
+                                    const result = await Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: `Do you want to change status from ${currentStatus} to ${newStatus}?`,
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#3085d6',
+                                        cancelButtonColor: '#d33',
+                                        confirmButtonText: 'Yes, change it!'
+                                    });
+
+                                    if (result.isConfirmed) {
+                                        try {
+                                            await axios.put(`${import.meta.env.VITE_API_URL}/users/${employee._id}`, 
+                                                { status: newStatus },
+                                                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+                                            );
+                                            // Optimistic update or refresh
+                                            setEmployees(prev => prev.map(u => u._id === employee._id ? { ...u, status: newStatus } : u));
+                                            
+                                            Swal.fire(
+                                                'Updated!',
+                                                `User status has been changed to ${newStatus}.`,
+                                                'success'
+                                            );
+                                        } catch (err) {
+                                            console.error("Failed to update status", err);
+                                            Swal.fire(
+                                                'Error!',
+                                                'Failed to update status.',
+                                                'error'
+                                            );
+                                        }
+                                    } else {
+                                        // Revert the change visually if needed (React should handle this on re-render, but forcing an update ensures it)
+                                        // Just triggering a re-render with the same state is enough usually, 
+                                        // or do nothing and React reconciles back to `value={employee.status}`
+                                        e.target.value = currentStatus; 
+                                    }
+                                }}
+                                className={`appearance-none w-full text-xs font-medium pl-3 pr-8 py-1.5 rounded-full cursor-pointer outline-none focus:ring-2 focus:ring-blue-100 transition-all shadow-sm ${
+                                    employee.status === 'Active' 
+                                        ? 'bg-green-100 text-green-800 border border-green-200 hover:border-green-300' 
+                                        : employee.status === 'Inactive'
+                                            ? 'bg-red-100 text-red-800 border border-red-200 hover:border-red-300'
+                                            : 'bg-white text-gray-700 border border-gray-200 hover:border-blue-400'
+                                }`}
+                            >
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Onboarding">Onboarding</option>
+                                <option value="Resigned">Resigned</option>
+                                <option value="Terminated">Terminated</option>
+                                <option value="Absconding">Absconding</option>
+                                <option value="Retired">Retired</option>
+                            </select>
+                            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                <ChevronDown className="w-3 h-3" />
+                            </div>
+                        </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">

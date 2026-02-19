@@ -11,6 +11,7 @@ import departmentRoutes from './routes/Department.Routes.js';
 import designationRoutes from './routes/Designation.Routes.js';
 import locationRoutes from './routes/Location.Routes.js';
 import uploadRoutes from './routes/Upload.Routes.js';
+import userManagementRoutes from './routes/UserManagement.Routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +37,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/designations', designationRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/user-management', userManagementRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

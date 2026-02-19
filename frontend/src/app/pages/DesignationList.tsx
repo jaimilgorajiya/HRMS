@@ -4,7 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
-import { Plus, Edit, Trash2, Tag, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Tag, X, Monitor, Megaphone } from 'lucide-react';
 
 interface Designation {
   _id: string;
@@ -100,12 +100,14 @@ export default function DesignationList() {
   };
 
   const openCreateModal = () => {
+      fetchDepartments(); // Fetch latest departments
       setEditingDesig(null);
       resetForm();
       setIsModalOpen(true);
   };
 
   const openEditModal = (desig: Designation) => {
+      fetchDepartments(); // Fetch latest departments
       setEditingDesig(desig);
       setFormData({
           name: desig.name,
@@ -117,6 +119,17 @@ export default function DesignationList() {
 
   const resetForm = () => {
       setFormData({ name: '', description: '', department: '' });
+  };
+  
+  const getDepartmentIcon = (deptName: string) => {
+    const lower = deptName?.toLowerCase() || '';
+    if (lower.includes('it') || lower.includes('technology') || lower.includes('dev')) {
+        return <Monitor className="w-6 h-6" />;
+    }
+    if (lower.includes('smm') || lower.includes('social') || lower.includes('marketing')) {
+        return <Megaphone className="w-6 h-6" />;
+    }
+    return <Tag className="w-6 h-6" />;
   };
 
   return (
@@ -137,7 +150,7 @@ export default function DesignationList() {
               <Card key={desig._id} className="p-5 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                       <div className="p-3 bg-purple-50 rounded-lg text-purple-600">
-                          <Tag className="w-6 h-6" />
+                          {getDepartmentIcon(desig.department)}
                       </div>
                       <div className="flex gap-2">
                           <button onClick={() => openEditModal(desig)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 hover:text-blue-600">
@@ -169,7 +182,7 @@ export default function DesignationList() {
        {/* Modal */}
        {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden animate-in zoom-in-95">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 animate-in zoom-in-95">
              <div className="flex justify-between items-center p-4 border-b">
               <h3 className="text-lg font-semibold text-gray-900">
                 {editingDesig ? 'Edit Designation' : 'Add New Designation'}
