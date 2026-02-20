@@ -5,12 +5,12 @@ import { generateEmployeeId } from "../utils/employeeId.js";
 
 const generateTokenAndSetCookie = (userId, res) => {
     const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
-        expiresIn: "15d",
+        expiresIn: "24h",
     });
 
     res.cookie("jwt", token, {
 
-        maxAge: 15 * 24 * 60 * 60 * 1000, 
+        maxAge: 24 * 60 * 60 * 1000, 
         httpOnly: true,
         secure: false, // Set to true only in production with HTTPS
         sameSite: "lax",

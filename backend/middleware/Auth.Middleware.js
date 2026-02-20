@@ -32,6 +32,9 @@ const verifyToken = async (req, res, next) => {
         next();
     } catch (error) {
         console.log("Error in verifyToken middleware", error.message);
+        if (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError") {
+            return res.status(401).json({ success: false, message: "Unauthorized - Invalid or Expired Token" });
+        }
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
