@@ -1,9 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 
 const Login = ({ isRegister }) => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+
+    if (token && user) {
+      if (user.role === "Admin") {
+        navigate("/admin", { replace: true });
+      } else if (user.role === "Manager") {
+        navigate("/manager-dashboard", { replace: true });
+      } else {
+        navigate("/employee-dashboard", { replace: true });
+      }
+    }
+  }, [navigate]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -57,7 +73,7 @@ const Login = ({ isRegister }) => {
         // Redirect based on role
         const role = data.user.role;
         if (role === "Admin") {
-          navigate("/admin-dashboard");
+          navigate("/admin");
         } else if (role === "Manager") {
           navigate("/manager-dashboard");
         } else {
