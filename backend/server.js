@@ -24,7 +24,7 @@ verifyEmailConfig();
 
 app.use(express.json());
 app.use(cors({
-    origin: [process.env.CLIENT_URL,"http://localhost:5175",'http://localhost:5174', 'http://192.168.29.90:5175'], // Add your network IP explicitly
+    origin: [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", 'http://192.168.29.90:5175'], // Add common dev ports
     credentials: true,
 }));
 app.use(cookieParser());

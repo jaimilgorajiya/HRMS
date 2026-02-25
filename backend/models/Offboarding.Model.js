@@ -26,12 +26,55 @@ const offboardingSchema = new mongoose.Schema({
   remarks: { type: String },
 
   // Clearance Checklists
+// Enhanced Clearance Structure
   clearance: {
-    itAssets: { status: { type: String, enum: ['Pending', 'Cleared'], default: 'Pending' }, items: [{ name: String, status: String, comment: String }] },
-    finance: { status: { type: String, enum: ['Pending', 'Cleared'], default: 'Pending' }, comment: String },
-    admin: { status: { type: String, enum: ['Pending', 'Cleared'], default: 'Pending' }, items: [{ name: String, status: String, comment: String }] },
-    manager: { status: { type: String, enum: ['Pending', 'Cleared'], default: 'Pending' }, comment: String }
+    itAssets: { 
+      status: { type: String, enum: ['Pending', 'Cleared', 'Rejected', 'On Hold'], default: 'Pending' }, 
+      comments: { type: String },
+      clearedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      clearedOn: { type: Date },
+      attachment: { type: String },
+      items: [{ name: String, status: String, comment: String }]
+    },
+    finance: { 
+      status: { type: String, enum: ['Pending', 'Cleared', 'Rejected', 'On Hold'], default: 'Pending' }, 
+      comments: { type: String },
+      clearedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      clearedOn: { type: Date },
+      attachment: { type: String }
+    },
+    admin: { 
+      status: { type: String, enum: ['Pending', 'Cleared', 'Rejected', 'On Hold'], default: 'Pending' }, 
+      comments: { type: String },
+      clearedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      clearedOn: { type: Date },
+      attachment: { type: String },
+      items: [{ name: String, status: String, comment: String }]
+    },
+    manager: { 
+      status: { type: String, enum: ['Pending', 'Cleared', 'Rejected', 'On Hold'], default: 'Pending' }, 
+      comments: { type: String },
+      clearedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      clearedOn: { type: Date },
+      attachment: { type: String }
+    },
+    custom: [{ 
+      name: { type: String },
+      status: { type: String, enum: ['Pending', 'Cleared', 'Rejected', 'On Hold'], default: 'Pending' }, 
+      comments: { type: String },
+      clearedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      clearedOn: { type: Date },
+      attachment: { type: String }
+    }]
   },
+
+  // Audit Logs
+  auditLog: [{
+    action: { type: String },
+    details: { type: String },
+    performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    date: { type: Date, default: Date.now }
+  }],
 
   // Exit Interview
   exitInterview: {

@@ -128,11 +128,42 @@ export const sendWelcomeEmail = async (userEmail, userName, employeeId, temporar
     }
 };
 
+// Send offboarding document
+export const sendOffboardingDocument = async (userEmail, userName, documentType, documentUrl) => {
+    try {
+        const mailOptions = {
+            from: `"Employee Management System" <${process.env.SMTP_FROM}>`,
+            to: userEmail,
+            subject: `Exit Document: ${documentType}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #333;">${documentType} Generated</h2>
+                    <p>Dear ${userName},</p>
+                    <p>Your <strong>${documentType}</strong> has been generated as part of your offboarding process.</p>
+                    <p>You can view and download it using the link below:</p>
+                    <div style="margin: 20px 0;">
+                        <a href="${documentUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Document</a>
+                    </div>
+                    <p>Or copy this link: <br> <a href="${documentUrl}">${documentUrl}</a></p>
+                    <p>Best Regards,<br>HR Team</p>
+                </div>
+            `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`Offboarding document (${documentType}) email sent:`, info.messageId);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error(`Error sending ${documentType} email:`, error);
+        return { success: false, error: error.message };
+    }
+};
+
 // Verify email configuration
 export const verifyEmailConfig = async () => {
     try {
-        await transporter.verify();
-        console.log('Email server is ready to send messages');
+        // await transporter.verify(); // Commented out to avoid blocking if SMTP is not configured
+        console.log('Email server configuration loaded');
         return true;
     } catch (error) {
         console.error('Email configuration error:', error);

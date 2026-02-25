@@ -14,8 +14,6 @@ const generateTokenAndSetCookie = (userId, res) => {
         httpOnly: true,
         secure: false, // Set to true only in production with HTTPS
         sameSite: "lax",
-
-
     });
     return token;
 }
@@ -24,6 +22,14 @@ const register = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
         
+        // Only Admin can register from the frontend
+        if (role && role !== "Admin") {
+            return res.status(403).json({ 
+                success: false, 
+                message: "Only Admin accounts can be registered through this portal." 
+            });
+        }
+
         const user = await User.findOne({ email });
 
         if (user) {
@@ -39,7 +45,7 @@ const register = async (req, res) => {
             name,
             email,
             password: hashedPassword,
-            role: role || "Employee", // Default to Employee with capital E
+            role: "Admin", // Force role to Admin
             employeeId
         });
 
@@ -49,7 +55,7 @@ const register = async (req, res) => {
 
             res.status(201).json({
                 success: true,
-                message: "User created successfully",
+                message: "Admin account created successfully",
                 user: {
                     _id: newUser._id,
                     name: newUser.name,
