@@ -1,11 +1,40 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import '../styles/admin.css';
 
 const Sidebar = ({ isCollapsed }) => {
   const [expandedMenus, setExpandedMenus] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Automatically expand parent menus based on current path
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const newExpandedMenus = {};
+
+    menuItems.forEach(item => {
+      if (item.subItems) {
+        let isParentActive = false;
+        item.subItems.forEach(sub => {
+          if (sub.children) {
+            const isSubParentActive = sub.children.some(child => child.path === currentPath);
+            if (isSubParentActive) {
+              newExpandedMenus[sub.title] = true;
+              isParentActive = true;
+            }
+          } else if (sub.path === currentPath) {
+            isParentActive = true;
+          }
+        });
+
+        if (isParentActive) {
+          newExpandedMenus[item.title] = true;
+        }
+      }
+    });
+
+    setExpandedMenus(newExpandedMenus);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     Swal.fire({

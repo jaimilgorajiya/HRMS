@@ -13,6 +13,7 @@ import locationRoutes from './routes/Location.Routes.js';
 import uploadRoutes from './routes/Upload.Routes.js';
 import userManagementRoutes from './routes/UserManagement.Routes.js';
 import offboardingRoutes from './routes/Offboarding.Routes.js';
+import dashboardRoutes from './routes/Dashboard.Route.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/user-management', userManagementRoutes);
 app.use('/api/offboarding', offboardingRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

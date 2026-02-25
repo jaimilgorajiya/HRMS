@@ -10,7 +10,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminLayout from "./layout/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ModulePlaceholder from "./pages/ModulePlaceholder";
-import "./App.css";
 
 function App() {
   return (
