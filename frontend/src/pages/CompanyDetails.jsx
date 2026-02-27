@@ -263,6 +263,12 @@ const CompanyDetails = () => {
           icon: 'success',
           confirmButtonColor: '#3A82F6'
         });
+        
+        // Notify other components (like Sidebar) to update without a refresh
+        window.dispatchEvent(new CustomEvent('companyDetailsUpdated', { 
+          detail: { companyName: formData.companyName } 
+        }));
+
         setIsRelocating(false); // Disable relocation edit mode automatically
         fetchCompanyDetails();
       } else {

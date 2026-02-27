@@ -4,8 +4,40 @@ import Swal from 'sweetalert2';
 
 const Sidebar = ({ isCollapsed }) => {
   const [expandedMenus, setExpandedMenus] = useState({});
+  const [companyName, setCompanyName] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+        const response = await fetch(`${apiUrl}/api/company`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.companyName) {
+            setCompanyName(data.companyName);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching company name:", error);
+      }
+    };
+    
+    fetchCompanyData();
+
+    // Listen for cross-component updates from the CompanyDetails page
+    const handleCompanyUpdate = (event) => {
+      if (event.detail && event.detail.companyName) {
+        setCompanyName(event.detail.companyName);
+      }
+    };
+    window.addEventListener('companyDetailsUpdated', handleCompanyUpdate);
+
+    return () => {
+      window.removeEventListener('companyDetailsUpdated', handleCompanyUpdate);
+    };
+  }, []);
 
   // Automatically expand parent menus based on current path
   useEffect(() => {
@@ -271,6 +303,27 @@ const Sidebar = ({ isCollapsed }) => {
           alt="Logo" 
         />
       </div>
+      
+      {!isCollapsed && companyName && (
+        <div className="company-info-sidebar">
+          <div className="company-name-display">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="company-icon">
+              <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+              <path d="M9 22v-4h6v4"/>
+              <path d="M8 6h.01"/>
+              <path d="M16 6h.01"/>
+              <path d="M12 6h.01"/>
+              <path d="M12 10h.01"/>
+              <path d="M12 14h.01"/>
+              <path d="M16 10h.01"/>
+              <path d="M16 14h.01"/>
+              <path d="M8 10h.01"/>
+              <path d="M8 14h.01"/>
+            </svg>
+            <span className="truncate-text">{companyName}</span>
+          </div>
+        </div>
+      )}
       
       <nav className="sidebar-nav">
         {menuItems.map((item, index) => (
