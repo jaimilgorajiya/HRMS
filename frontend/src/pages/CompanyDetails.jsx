@@ -18,9 +18,11 @@ import {
   Map,
   Share2
 } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
+import * as L from 'leaflet';
+import 'leaflet-control-geocoder';
 import Swal from 'sweetalert2';
 import './CompanyDetails.css';
 
@@ -66,6 +68,48 @@ const CompanyDetails = () => {
   const fileInputRef = useRef(null);
 
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+
+  // Component to handle map search functionality
+  const MapSearchControl = () => {
+    const map = useMap();
+
+    useEffect(() => {
+      if (!isRelocating) return;
+
+      // Using ArcGIS as a fallback as it has high-quality commercial street data for India
+      // without requiring an explicit API key in this library wrapper.
+      const geocoder = L.Control.geocoder({
+        defaultMarkGeocode: false,
+        placeholder: "Search for office address...",
+        geocoder: L.Control.Geocoder.arcgis()
+      });
+
+      geocoder.on('markgeocode', function(e) {
+        if (e.geocode.bbox) {
+          map.fitBounds(e.geocode.bbox);
+        } else {
+          map.flyTo(e.geocode.center, 18);
+        }
+        
+        setFormData(prev => ({
+          ...prev,
+          location: {
+            lat: e.geocode.center.lat,
+            lng: e.geocode.center.lng
+          }
+        }));
+      });
+
+      geocoder.addTo(map);
+
+      // Clean up when leaving relocation mode
+      return () => {
+        map.removeControl(geocoder);
+      };
+    }, [map, isRelocating]);
+
+    return null;
+  };
 
   // Component to handle map clicks and marker dragging
   const LocationPicker = () => {
@@ -219,6 +263,7 @@ const CompanyDetails = () => {
           icon: 'success',
           confirmButtonColor: '#3A82F6'
         });
+        setIsRelocating(false); // Disable relocation edit mode automatically
         fetchCompanyDetails();
       } else {
         const result = await response.json();
@@ -425,7 +470,7 @@ const CompanyDetails = () => {
                 className={`btn-relocate ${isRelocating ? 'active' : ''}`}
                 onClick={() => setIsRelocating(!isRelocating)}
               >
-                {isRelocating ? 'Click map or Drag marker' : 'Relocate Office'}
+                {isRelocating ? 'Edit Location' : 'Relocate Office'}
               </button>
             </div>
           </div>
@@ -434,14 +479,17 @@ const CompanyDetails = () => {
               {isRelocating && <div className="map-instruction">Relocation Mode Active</div>}
               <MapContainer 
                 center={[formData.location.lat, formData.location.lng]} 
-                zoom={15} 
+                zoom={20} 
+                maxZoom={20}
                 style={{ height: '100%', width: '100%' }}
               >
                 <TileLayer 
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' 
+                  url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" 
+                  maxZoom={20}
+                  attribution='&copy; Google Maps' 
                 />
                 <LocationPicker />
+                <MapSearchControl />
               </MapContainer>
             </div>
           </div>
