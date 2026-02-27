@@ -99,7 +99,7 @@ const Login = ({ isRegister }) => {
         {/* LOGIN FORM (FRONT) */}
         <div className="login-container">
           <div className="logo-wrapper">
-            <img src="/iipl-logo.png" alt="IIPL Logo" />
+            <img src="/iipl-horizontal-logo.png" alt="IIPL Logo" />
           </div>
 
           <p className="login-subtitle">login to access dashboard</p>
@@ -193,7 +193,7 @@ const Login = ({ isRegister }) => {
         {/* REGISTER FORM (BACK) */}
         <div className="login-container register-container">
           <div className="logo-wrapper">
-            <img src="/iipl-logo.png" alt="IIPL Logo" />
+            <img src="/iipl-horizontal-logo.png" alt="IIPL Logo" />
           </div>
 
           <p className="login-subtitle">Create your account</p>

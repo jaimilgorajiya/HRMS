@@ -1,0 +1,75 @@
+import mongoose from 'mongoose';
+
+const companySchema = new mongoose.Schema({
+  companyName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  website: {
+    type: String,
+    trim: true
+  },
+  logo: {
+    type: String, // URL/Path to logo
+  },
+  timezone: {
+    type: String,
+    required: true,
+    default: 'Asia/Kolkata-Asia'
+  },
+  address: {
+    type: String,
+    required: true
+  },
+  companyEmail: {
+    type: String,
+    required: true,
+    lowercase: true,
+    trim: true
+  },
+  companyContact: {
+    type: String,
+    required: true
+  },
+  hrEmail: {
+    type: String,
+    lowercase: true,
+    trim: true
+  },
+  pincode: {
+    type: String,
+    required: true
+  },
+  gstNumber: {
+    type: String,
+    trim: true
+  },
+  pan: {
+    type: String,
+    trim: true
+  },
+  tan: {
+    type: String,
+    trim: true
+  },
+  currency: {
+    type: String,
+    required: true,
+    default: '₹'
+  },
+  socials: {
+    instagram: String,
+    facebook: String,
+    linkedin: String,
+    youtube: String
+  },
+  location: {
+    lat: Number,
+    lng: Number
+  }
+}, { timestamps: true });
+
+const Company = mongoose.model('Company', companySchema);
+
+export default Company;

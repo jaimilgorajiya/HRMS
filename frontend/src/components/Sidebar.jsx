@@ -266,7 +266,10 @@ const Sidebar = ({ isCollapsed }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <img src="/iipl-logo.png" alt="Logo" />
+        <img 
+          src={isCollapsed ? "/iipl-logo.png" : "/iipl-horizontal-logo.png"} 
+          alt="Logo" 
+        />
       </div>
       
       <nav className="sidebar-nav">

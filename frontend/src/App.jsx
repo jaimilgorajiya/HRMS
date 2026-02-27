@@ -10,6 +10,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminLayout from "./layout/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ModulePlaceholder from "./pages/ModulePlaceholder";
+import CompanyDetails from "./pages/CompanyDetails";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               
               {/* Setup & Configuration placeholders */}
+              <Route path="company/details" element={<CompanyDetails />} />
               <Route path="company-settings" element={<ModulePlaceholder title="Company Settings" />} />
               <Route path="company/*" element={<ModulePlaceholder title="Company Management" />} />
               <Route path="attendance-settings" element={<ModulePlaceholder title="Attendance Settings" />} />
