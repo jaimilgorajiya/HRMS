@@ -141,7 +141,7 @@ const MyProfile = () => {
     }
   };
 
-  const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       Swal.fire({
@@ -151,6 +151,76 @@ const MyProfile = () => {
         showCancelButton: true,
         confirmButtonColor: '#111827',
         confirmButtonText: 'Yes'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Uploading...',
+                text: 'Please wait while we update your profile photo.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                   Swal.showLoading();
+                }
+            });
+
+            try {
+              const uploadDataForm = new FormData();
+              uploadDataForm.append('file', file);
+              
+              const token = localStorage.getItem('token');
+              const uploadRes = await fetch(`${apiUrl}/api/upload`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                },
+                body: uploadDataForm
+              });
+              
+              const uploadData = await uploadRes.json();
+              if (uploadData.success) {
+                  const newLogoUrl = uploadData.fileUrl;
+                  
+                  const response = await fetch(`${apiUrl}/api/company`, {
+                    method: 'PUT',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ...companyData, logo: newLogoUrl })
+                  });
+
+                  if (response.ok) {
+                     setCompanyData({ ...companyData, logo: newLogoUrl });
+                     window.dispatchEvent(new CustomEvent('companyDetailsUpdated', { 
+                       detail: { 
+                         companyName: companyData.companyName,
+                         logo: newLogoUrl 
+                       } 
+                     }));
+                     
+                     Swal.fire({
+                       title: 'Success!',
+                       text: 'Profile photo updated successfully.',
+                       icon: 'success',
+                       confirmButtonColor: '#111827',
+                       timer: 2000,
+                       showConfirmButton: false
+                     });
+                  } else {
+                     throw new Error('Failed to save company logo');
+                  }
+              } else {
+                  throw new Error('Failed to upload image');
+              }
+            } catch (error) {
+                console.error("Upload Error:", error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to update profile photo.',
+                    icon: 'error',
+                    confirmButtonColor: '#111827'
+                });
+            }
+        }
       });
     }
   };
