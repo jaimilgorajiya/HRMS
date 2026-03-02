@@ -16,6 +16,7 @@ import userManagementRoutes from './routes/UserManagement.Routes.js';
 import offboardingRoutes from './routes/Offboarding.Routes.js';
 import dashboardRoutes from './routes/Dashboard.Route.js';
 import companyRoutes from './routes/Company.Routes.js';
+import breakTypeRoutes from './routes/BreakType.Routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -46,6 +47,7 @@ app.use('/api/user-management', userManagementRoutes);
 app.use('/api/offboarding', offboardingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/company', companyRoutes);
+app.use('/api/break-types', breakTypeRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

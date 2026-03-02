@@ -15,6 +15,7 @@ import MyProfile from "./pages/MyProfile";
 import Designation from "./pages/Designation";
 import Branch from './pages/Branch';
 import Department from './pages/Department';
+import BreakType from './pages/BreakType';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
               <Route path="company/profile" element={<MyProfile />} />
               <Route path="company-settings" element={<ModulePlaceholder title="Company Settings" />} />
               <Route path="company/*" element={<ModulePlaceholder title="Company Management" />} />
+              <Route path="attendance/break-type" element={<BreakType />} />
               <Route path="attendance-settings" element={<ModulePlaceholder title="Attendance Settings" />} />
               <Route path="attendance/*" element={<ModulePlaceholder title="Attendance Management" />} />
               <Route path="shift-settings" element={<ModulePlaceholder title="Shift Settings" />} />
