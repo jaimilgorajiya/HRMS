@@ -1412,6 +1412,107 @@ body {
 .modal-theme-body { padding: 24px; }
 .modal-theme-footer { padding: 20px 24px; border-top: 1px solid #F1F5F9; display: flex; justify-content: flex-end; gap: 12px; }
 
+/* Branch Page Styles */
+.branch-container { padding: 32px; background: var(--bg-main); min-height: 100vh; }
+.branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.branch-card {
+  background: white;
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.branch-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+
+.branch-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-align: center;
+}
+
+.branch-card-type {
+  font-size: 13px;
+  color: var(--text-light);
+  background: #F1F5F9;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.branch-card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.icon-btn {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.icon-btn:hover { background: #F8FAFC; border-color: #CBD5E1; color: var(--primary-blue); }
+.icon-btn.btn-delete:hover { border-color: #FEE2E2; color: var(--danger); }
+
+.branch-card.draggable {
+  cursor: grab;
+  user-select: none;
+}
+
+.branch-card.draggable * {
+  pointer-events: none;
+}
+
+.branch-card.draggable:active {
+  cursor: grabbing;
+}
+
+.branch-card.dragging {
+  opacity: 0.5;
+  border: 2px dashed var(--primary-blue);
+  transform: scale(0.98);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--text-light);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.drag-handle:hover {
+  background: #F1F5F9;
+  color: var(--primary-blue);
+}
+
 /* Designation Footer & Pagination */
 .designation-footer {
   padding: 16px 24px;
