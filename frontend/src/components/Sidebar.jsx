@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import Swal from 'sweetalert2';
 
 const Sidebar = ({ isCollapsed }) => {
   const [expandedMenus, setExpandedMenus] = useState({});
@@ -12,7 +11,12 @@ const Sidebar = ({ isCollapsed }) => {
     const fetchCompanyData = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
-        const response = await fetch(`${apiUrl}/api/company`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${apiUrl}/api/company`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           if (data && data.companyName) {
@@ -67,33 +71,6 @@ const Sidebar = ({ isCollapsed }) => {
 
     setExpandedMenus(newExpandedMenus);
   }, [location.pathname]);
-
-  const handleLogout = () => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You will be logged out of your session!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3A82F6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, logout!',
-      cancelButtonText: 'No, stay logged in'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/login');
-        
-        Swal.fire({
-          title: 'Logged Out!',
-          text: 'You have been successfully logged out.',
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false
-        });
-      }
-    });
-  };
 
   const toggleMenu = (key, siblings = []) => {
     setExpandedMenus(prev => {
@@ -323,7 +300,7 @@ const Sidebar = ({ isCollapsed }) => {
             <span className="truncate-text">{companyName}</span>
           </div>
         </div>
-      )}
+      )} 
       
       <nav className="sidebar-nav">
         {menuItems.map((item, index) => (
@@ -417,18 +394,6 @@ const Sidebar = ({ isCollapsed }) => {
           </div>
         ))}
       </nav>
-
-      <div className="sidebar-footer">
-       
-        <button className="menu-item logout" onClick={handleLogout}>
-          <span className="icon-wrapper">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-               <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </span>
-          {!isCollapsed && <span className="menu-text">Logout</span>}
-        </button>
-      </div>
     </aside>
   );
 };

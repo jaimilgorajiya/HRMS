@@ -2,7 +2,8 @@ import Company from '../models/Company.Model.js';
 
 export const getCompanyDetails = async (req, res) => {
   try {
-    const company = await Company.findOne();
+    const adminId = req.user._id;
+    const company = await Company.findOne({ adminId });
     if (!company) {
       return res.status(200).json({ message: "No company details found", data: null });
     }
@@ -14,12 +15,13 @@ export const getCompanyDetails = async (req, res) => {
 
 export const updateCompanyDetails = async (req, res) => {
   try {
-    let company = await Company.findOne();
+    const adminId = req.user._id;
+    let company = await Company.findOne({ adminId });
     
     if (company) {
       company = await Company.findByIdAndUpdate(company._id, req.body, { new: true });
     } else {
-      company = new Company(req.body);
+      company = new Company({ ...req.body, adminId });
       await company.save();
     }
     

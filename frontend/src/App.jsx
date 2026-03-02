@@ -11,6 +11,7 @@ import AdminLayout from "./layout/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ModulePlaceholder from "./pages/ModulePlaceholder";
 import CompanyDetails from "./pages/CompanyDetails";
+import MyProfile from "./pages/MyProfile";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="profile" element={<MyProfile />} />
               
               {/* Setup & Configuration placeholders */}
               <Route path="company/details" element={<CompanyDetails />} />

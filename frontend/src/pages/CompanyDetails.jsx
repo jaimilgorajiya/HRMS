@@ -65,6 +65,7 @@ const CompanyDetails = () => {
   const [logo, setLogo] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [isRelocating, setIsRelocating] = useState(false);
+  const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
 
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
@@ -166,7 +167,11 @@ const CompanyDetails = () => {
 
   const fetchCompanyDetails = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/company`);
+      const response = await fetch(`${apiUrl}/api/company`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       const data = await response.json();
       if (data && data._id) {
         setFormData(data);
@@ -182,7 +187,31 @@ const CompanyDetails = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+
+    // Filter to only allow max 10 digits for contact
+    if (name === 'companyContact') {
+      value = value.replace(/\D/g, '').slice(0, 10);
+    }
+
+    // Real-time validation
+    let errorMsg = '';
+    if (name === 'companyEmail' || name === 'hrEmail') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value && !emailRegex.test(value)) {
+        errorMsg = 'Please enter a valid email address';
+      }
+    } else if (name === 'companyContact') {
+      if (value && value.length !== 10) {
+        errorMsg = 'Contact number must be exactly 10 digits';
+      }
+    }
+    
+    setErrors(prev => ({
+      ...prev,
+      [name]: errorMsg
+    }));
+
     if (name.startsWith('social_')) {
       const socialName = name.split('_')[1];
       setFormData(prev => ({
@@ -214,6 +243,18 @@ const CompanyDetails = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    const hasErrors = Object.values(errors).some(err => err !== '');
+    if (hasErrors) {
+      Swal.fire({
+        title: 'Validation Error',
+        text: 'Please fix the form errors before saving.',
+        icon: 'warning',
+        confirmButtonColor: '#3A82F6'
+      });
+      return;
+    }
+
     setUpdating(true);
     
     Swal.fire({
@@ -264,9 +305,12 @@ const CompanyDetails = () => {
           confirmButtonColor: '#3A82F6'
         });
         
-        // Notify other components (like Sidebar) to update without a refresh
+        // Notify other components (like Sidebar, Header) to update without a refresh
         window.dispatchEvent(new CustomEvent('companyDetailsUpdated', { 
-          detail: { companyName: formData.companyName } 
+          detail: { 
+            companyName: formData.companyName,
+            logo: logoPath 
+          } 
         }));
 
         setIsRelocating(false); // Disable relocation edit mode automatically
@@ -380,16 +424,19 @@ const CompanyDetails = () => {
             <div className="form-row">
               <div className="form-group-hrm">
                 <label>Company Email <span>*</span></label>
-                <input type="email" name="companyEmail" value={formData.companyEmail} onChange={handleInputChange} className="form-control-hrm" required />
+                <input type="email" name="companyEmail" value={formData.companyEmail} onChange={handleInputChange} className={`form-control-hrm ${errors.companyEmail ? 'error-border' : ''}`} required />
+                {errors.companyEmail && <span className="error-text-hrm">{errors.companyEmail}</span>}
               </div>
               <div className="form-group-hrm">
                 <label>Company Contact <span>*</span></label>
-                <input type="tel" name="companyContact" value={formData.companyContact} onChange={handleInputChange} className="form-control-hrm" required />
+                <input type="tel" name="companyContact" value={formData.companyContact} maxLength={10} onChange={handleInputChange} className={`form-control-hrm ${errors.companyContact ? 'error-border' : ''}`} required />
+                {errors.companyContact && <span className="error-text-hrm">{errors.companyContact}</span>}
               </div>
             </div>
             <div className="form-group-hrm">
               <label>HR / Management Email</label>
-              <input type="email" name="hrEmail" value={formData.hrEmail || ''} onChange={handleInputChange} className="form-control-hrm" placeholder="hr@company.com" />
+              <input type="email" name="hrEmail" value={formData.hrEmail || ''} onChange={handleInputChange} className={`form-control-hrm ${errors.hrEmail ? 'error-border' : ''}`} placeholder="hr@company.com" />
+              {errors.hrEmail && <span className="error-text-hrm">{errors.hrEmail}</span>}
             </div>
           </div>
         </section>

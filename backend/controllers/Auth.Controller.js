@@ -46,6 +46,7 @@ const register = async (req, res) => {
             email,
             password: hashedPassword,
             role: "Admin", // Force role to Admin
+            status: "Active", // Explicitly set status to Active
             employeeId
         });
 
@@ -61,6 +62,7 @@ const register = async (req, res) => {
                     name: newUser.name,
                     email: newUser.email,
                     role: newUser.role,
+                    status: newUser.status,
                     token
                 }
             });
@@ -98,8 +100,8 @@ const login = async (req, res) => {
       });
     }
 
-    // Check status
-    if (user.status !== "Active") {
+    // Check status - allow if undefined/missing for backwards compatibility
+    if (user.status && user.status !== "Active") {
       return res.status(403).json({
         success: false,
         message: "Account is blocked. Contact admin.",
@@ -163,4 +165,45 @@ const verifyUser = async (req, res) => {
     }
 };
 
-export { register, login, logout, verifyUser };
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user._id;
+
+        // Validation
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: "Current and new passwords are required" });
+        }
+
+        if (currentPassword === newPassword) {
+            return res.status(400).json({ success: false, message: "New password cannot be the same as the current password" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // Compare current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Invalid current password" });
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update password
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Password updated successfully" });
+
+    } catch (error) {
+        console.error("Change Password Error:", error.message);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+export { register, login, logout, verifyUser, changePassword };

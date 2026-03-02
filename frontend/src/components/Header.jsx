@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Header = ({ title, toggleSidebar, isCollapsed }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -8,7 +9,47 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
+  const profileRef = useRef(null);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [companyLogo, setCompanyLogo] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${apiUrl}/api/company`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.logo) {
+            setCompanyLogo(data.logo.startsWith('http') ? data.logo : `${apiUrl}${data.logo}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching company logo:", error);
+      }
+    };
+    
+    fetchCompanyData();
+
+    // Listen for cross-component updates
+    const handleCompanyUpdate = (event) => {
+      if (event.detail && event.detail.logo) {
+        setCompanyLogo(event.detail.logo.startsWith('http') ? event.detail.logo : `${apiUrl}${event.detail.logo}`);
+      }
+    };
+    window.addEventListener('companyDetailsUpdated', handleCompanyUpdate);
+
+    return () => {
+      window.removeEventListener('companyDetailsUpdated', handleCompanyUpdate);
+    };
+  }, []);
 
   const placeholders = [
     "Search for modules...",
@@ -119,6 +160,9 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowResults(false);
       }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -128,6 +172,34 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
     navigate(path);
     setSearchQuery('');
     setShowResults(false);
+  };
+
+  const handleLogout = () => {
+    setShowProfileMenu(false);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You will be logged out of your session!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3A82F6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, logout!',
+      cancelButtonText: 'No, stay logged in'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+        
+        Swal.fire({
+          title: 'Logged Out!',
+          text: 'You have been successfully logged out.',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
+    });
   };
 
   return (
@@ -189,13 +261,45 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
           </svg>
           <span className="badge"></span>
         </button>
-        <div className="user-profile">
-          <div className="user-info">
-            <span className="user-name">{user.name || "Admin"}</span>
+        
+        <div className="user-profile-container" ref={profileRef} style={{ position: 'relative' }}>
+          <div className="user-profile" onClick={() => setShowProfileMenu(!showProfileMenu)} style={{ cursor: 'pointer' }}>
+            <div className="avatar" style={{ overflow: 'hidden', padding: companyLogo ? '0' : '2px', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {companyLogo ? (
+                <img src={companyLogo} alt="Company Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              ) : (
+                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Admin')}&background=0D8ABC&color=fff`} alt="Avatar" />
+              )}
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#fff', transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
           </div>
-          <div className="avatar">
-            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Admin')}&background=0D8ABC&color=fff`} alt="Avatar" />
-          </div>
+
+          {showProfileMenu && (
+            <div className="profile-dropdown-menu">
+              <div className="profile-dropdown-header">
+                <strong>{user.name || "Admin"}</strong>
+                <span>{user.email || "admin@example.com"}</span>
+              </div>
+              <div className="profile-dropdown-divider"></div>
+              <button className="profile-dropdown-item" onClick={() => { setShowProfileMenu(false); navigate('/admin/profile'); }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Profile
+              </button>
+              <button className="profile-dropdown-item logout-item" onClick={handleLogout}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
