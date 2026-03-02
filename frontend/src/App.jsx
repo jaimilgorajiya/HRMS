@@ -14,6 +14,7 @@ import CompanyDetails from "./pages/CompanyDetails";
 import MyProfile from "./pages/MyProfile";
 import Designation from "./pages/Designation";
 import Branch from './pages/Branch';
+import Department from './pages/Department';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               {/* Setup & Configuration placeholders */}
               <Route path="company/details" element={<CompanyDetails />} />
               <Route path="company/designation" element={<Designation />} />
+              <Route path="company/departments" element={<Department />} />
               <Route path="company/branches" element={<Branch />} />
               <Route path="company/profile" element={<MyProfile />} />
               <Route path="company-settings" element={<ModulePlaceholder title="Company Settings" />} />
