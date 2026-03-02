@@ -18,11 +18,6 @@ const companySchema = new mongoose.Schema({
   logo: {
     type: String, // URL/Path to logo
   },
-  timezone: {
-    type: String,
-    required: true,
-    default: 'Asia/Kolkata-Asia'
-  },
   address: {
     type: String,
     required: true

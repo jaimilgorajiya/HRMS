@@ -2,26 +2,35 @@ import mongoose from "mongoose";
 
 const designationSchema = new mongoose.Schema(
     {
-        name: {
+        designationCode: {
             type: String,
-            required: true,
-            unique: true
+            required: true
         },
-        description: {
+        designationName: {
+            type: String,
+            required: true
+        },
+        designationAlias: {
             type: String
         },
-        department: { // Optional: Link to a department
-            type: String, 
+        jobDescription: {
+            type: String
         },
-        addedBy: {
-            type: String,
-            required: true // We'll store user name/email here
+        adminId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
         }
     },
     {
         timestamps: true
     }
 );
+
+// Unique designation name per admin
+designationSchema.index({ adminId: 1, designationName: 1 }, { unique: true });
+// Unique designation code per admin
+designationSchema.index({ adminId: 1, designationCode: 1 }, { unique: true });
 
 const Designation = mongoose.model("Designation", designationSchema);
 

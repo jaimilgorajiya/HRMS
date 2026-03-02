@@ -24,7 +24,6 @@ import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import * as L from 'leaflet';
 import 'leaflet-control-geocoder';
 import Swal from 'sweetalert2';
-import './CompanyDetails.css';
 
 // Fix Leaflet icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -38,7 +37,6 @@ const CompanyDetails = () => {
   const [formData, setFormData] = useState({
     companyName: '',
     website: '',
-    timezone: 'Asia/Kolkata-Asia',
     address: '',
     companyEmail: '',
     companyContact: '',
@@ -399,18 +397,9 @@ const CompanyDetails = () => {
                 <input type="url" name="website" value={formData.website} onChange={handleInputChange} className="form-control-hrm" placeholder="https://www.company.com" />
               </div>
             </div>
-            <div className="form-row">
-              <div className="form-group-hrm">
-                <label>Timezone <span>*</span></label>
-                <select name="timezone" value={formData.timezone} onChange={handleInputChange} className="form-control-hrm" required>
-                  <option value="Asia/Kolkata-Asia">Asia/Kolkata (GMT+5:30)</option>
-                  <option value="UTC">UTC (00:00)</option>
-                </select>
-              </div>
-              <div className="form-group-hrm">
-                <label>Address <span>*</span></label>
-                <textarea name="address" value={formData.address} onChange={handleInputChange} className="form-control-hrm textarea-hrm" required placeholder="Full street address..."></textarea>
-              </div>
+            <div className="form-group-hrm">
+              <label>Address <span>*</span></label>
+              <textarea name="address" value={formData.address} onChange={handleInputChange} className="form-control-hrm textarea-hrm" required placeholder="Full street address..."></textarea>
             </div>
           </div>
         </section>

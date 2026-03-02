@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import { Camera, Mail, Phone, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import './MyProfile.css';
+// CSS moved to index.css
 
 const MyProfile = () => {
   const [loading, setLoading] = useState(true);
