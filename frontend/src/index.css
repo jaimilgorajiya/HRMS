@@ -1378,14 +1378,15 @@ body {
 .company-details-container { padding: 32px; max-width: 1000px; margin: 0 auto; }
 .hrm-card { background: white; border: var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px; overflow: hidden; }
 .card-header-hrm { padding: 20px 24px; border-bottom: 1px solid #F1F5F9; background: #fafafa; }
-.card-header-hrm h2 { font-size: 16px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 12px; margin: 0; }
+.card-header-hrm h2 { font-size: 18px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 12px; margin: 0; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
 .form-group-hrm { display: flex; flex-direction: column; gap: 8px; }
+.form-group-hrm label { font-size: 15px; font-weight: 600; color: var(--text-dark); }
 .form-control-hrm { 
     padding: 12px 16px; 
     border: 1px solid #E2E8F0; 
     border-radius: 8px; 
-    font-size: 14px; 
+    font-size: 15px; 
     background-color: white;
     color: var(--text-dark);
 }
@@ -1420,14 +1421,137 @@ select:hover {
 .btn-theme-danger { background: #fee2e2; color: var(--danger); }
 
 .designation-card { background: white; border: var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-.table-controls { padding: 16px 24px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center; }
+.table-controls { padding: 16px 20px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center; background: #FAFBFC; }
 .designation-table { width: 100%; border-collapse: collapse; }
-.designation-table th { padding: 16px 24px; text-align: left; background: #F8FAFC; color: var(--text-light); font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #F1F5F9; }
-.designation-table td { padding: 16px 24px; border-bottom: 1px solid #F1F5F9; font-size: 14px; color: var(--text-main); }
+.designation-table th { 
+    padding: 16px 20px; 
+    text-align: left; 
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); 
+    color: var(--text-dark); 
+    font-size: 16px; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+    border-bottom: 2px solid #E2E8F0; 
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+}
+.designation-table td { 
+    padding: 16px 18px; 
+    border-bottom: 1px solid #F1F5F9; 
+    font-size: 17px; 
+    color: var(--text-main); 
+    transition: background-color 0.2s ease;
+    vertical-align: middle;
+}
+.designation-table td:first-child {
+    text-align: center;
+}
+.designation-table td:nth-child(2) {
+    text-align: center;
+}
+.designation-table td:last-child {
+    text-align: center;
+    padding: 16px 20px;
+}
+.designation-table tr:hover td {
+    background-color: #F8FAFC;
+}
+.designation-table tr:last-child td {
+    border-bottom: none;
+}
 
-.btn-action { padding: 8px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.1s; display: inline-flex; }
-.btn-edit-theme { background: var(--primary-light); color: var(--primary-blue); }
-.btn-delete-theme { background: #fee2e2; color: var(--danger); margin-left: 8px; }
+/* Column width optimizations */
+.designation-table th:nth-child(1) { width: 60px; } /* S.No */
+.designation-table th:nth-child(2) { width: 50px; } /* Checkbox */
+.designation-table th:nth-child(3) { width: 120px; } /* Code */
+.designation-table th:nth-child(4) { width: auto; min-width: 200px; } /* Designation */
+.designation-table th:nth-child(5) { width: auto; min-width: 150px; } /* Alias */
+.designation-table th:nth-child(6) { width: 80px; } /* Action */
+
+.btn-action { 
+    padding: 8px; 
+    border-radius: 6px; 
+    border: none; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+.btn-edit-theme { 
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); 
+    color: var(--primary-blue); 
+    border: 1px solid #93C5FD;
+}
+.btn-edit-theme:hover {
+    background: linear-gradient(135deg, #BFDBFE 0%, #93C5FD 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+.btn-delete-theme { 
+    background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); 
+    color: var(--danger); 
+    border: 1px solid #FCA5A5;
+    margin-left: 8px;
+}
+.btn-delete-theme:hover {
+    background: linear-gradient(135deg, #FECACA 0%, #FCA5A5 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.action-buttons-cell {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+}
+
+.search-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-wrapper {
+    background: #F8FAFC;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+    transition: all 0.2s ease;
+}
+
+.search-wrapper:focus-within {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-wrapper input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    color: var(--text-dark);
+}
+
+.search-wrapper input::placeholder {
+    color: var(--text-light);
+}
 
 .modal-theme-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .modal-theme-content { background: white; width: 600px; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -2002,7 +2126,7 @@ select:hover {
 }
 
 .upload-hint {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-light);
   max-width: 250px;
 }
@@ -2010,6 +2134,7 @@ select:hover {
 .textarea-hrm {
   min-height: 100px;
   resize: vertical;
+  font-size: 15px;
 }
 
 .social-links-hrm {

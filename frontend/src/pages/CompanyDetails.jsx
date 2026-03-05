@@ -338,7 +338,7 @@ const CompanyDetails = () => {
   if (loading) {
     return <div className="loading-container">Loading company details...</div>;
   }
-
+                 
   return (
     <div className="designation-container">
       <header className="designation-header">

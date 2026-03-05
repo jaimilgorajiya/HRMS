@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Users, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../styles/ManageShift.css';
@@ -42,7 +42,7 @@ const Shift = () => {
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#64748b',
-            confirmButtonText: 'Yes, delete'
+            confirmButtonText: 'Yes, delete it'
         });
 
         if (result.isConfirmed) {
@@ -54,7 +54,13 @@ const Shift = () => {
                 });
                 const data = await response.json();
                 if (data.success) {
-                    Swal.fire('Deleted!', 'Shift has been removed.', 'success');
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: 'Shift has been removed.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                     fetchShifts();
                 }
             } catch (error) {
@@ -65,7 +71,12 @@ const Shift = () => {
 
     const handleBulkDelete = async () => {
         if (selectedShifts.length === 0) {
-            Swal.fire('Warning', 'Please select shifts to delete', 'warning');
+            Swal.fire({
+                title: 'No Selection',
+                text: 'Please select at least one shift to delete.',
+                icon: 'info',
+                confirmButtonColor: '#2563EB'
+            });
             return;
         }
 
@@ -90,7 +101,13 @@ const Shift = () => {
                         })
                     )
                 );
-                Swal.fire('Deleted!', 'Selected shifts have been removed.', 'success');
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'Selected shifts removed.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 setSelectedShifts([]);
                 fetchShifts();
             } catch (error) {
@@ -119,98 +136,128 @@ const Shift = () => {
         shift.shiftCode?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (loading) return <div className="loading-container">Loading...</div>;
+    if (loading) return <div className="loading-container">Loading shift records...</div>;
 
     return (
-        <div className="manage-shift-container">
-            <div className="shift-header-bar">
-                <h1 className="shift-title">Manage Shift</h1>
+        <div className="designation-container">
+            <div className="designation-header">
+                <h1 className="profile-title">Manage Shift</h1>
                 <div className="header-actions">
-                    <button className="btn-add" onClick={() => navigate('/admin/shift/add')}>
+                    <button className="btn-theme btn-theme-primary" onClick={() => navigate('/admin/shift/add')}>
                         <Plus size={16} /> ADD
                     </button>
-                    <button className="btn-delete" onClick={handleBulkDelete} disabled={selectedShifts.length === 0}>
+                    <button
+                        className="btn-theme btn-theme-danger"
+                        onClick={handleBulkDelete}
+                        disabled={selectedShifts.length === 0}
+                        style={{ opacity: selectedShifts.length === 0 ? 0.6 : 1 }}
+                    >
                         <Trash2 size={16} /> DELETE
                     </button>
                 </div>
             </div>
 
-            <div className="table-controls">
-                <div className="search-control">
-                    <label>Search:</label>
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder=""
-                    />
+            <div className="designation-card">
+                <div className="table-controls">
+                    <div className="search-control">
+                        <div className="search-wrapper">
+                            <Search size={18} color="var(--text-light)" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search by name or code..."
+                                style={{ fontSize: '15px' }}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div className="table-wrapper">
-                <table className="shift-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                <input
-                                    type="checkbox"
-                                    checked={selectedShifts.length === filteredShifts.length && filteredShifts.length > 0}
-                                    onChange={handleSelectAll}
-                                />
-                            </th>
-                            <th>Sr. No</th>
-                            <th>Action</th>
-                            <th>Shift Code</th>
-                            <th>Shift Name</th>
-                            <th>Employees</th>
-                            <th>Week Off</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredShifts.length === 0 ? (
+                <div className="table-wrapper">
+                    <table className="designation-table">
+                        <thead>
                             <tr>
-                                <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>
-                                    No shifts found
-                                </td>
+                                <th style={{ textAlign: 'center', width: '60px' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedShifts.length === filteredShifts.length && filteredShifts.length > 0}
+                                        onChange={handleSelectAll}
+                                        style={{ width: '18px', height: '18px' }}
+                                    />
+                                </th>
+                                <th style={{ textAlign: 'center', width: '80px' }}>Sr. No</th>
+                                <th style={{ textAlign: 'center', width: '100px' }}>Action</th>
+                                <th style={{ width: '150px' }}>Shift Code</th>
+                                <th>Shift Name</th>
+                                <th style={{ textAlign: 'center', width: '120px' }}>Employees</th>
+                                <th>Week Off</th>
                             </tr>
-                        ) : (
-                            filteredShifts.map((shift, index) => (
-                                <tr key={shift._id}>
-                                    <td>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedShifts.includes(shift._id)}
-                                            onChange={() => handleSelectShift(shift._id)}
-                                        />
+                        </thead>
+                        <tbody>
+                            {filteredShifts.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" style={{ textAlign: 'center', padding: '60px', color: 'var(--text-light)', fontSize: '16px' }}>
+                                        No shift configurations found.
                                     </td>
-                                    <td>{index + 1}</td>
-                                    <td>
-                                        <div className="action-buttons">
-                                            <button
-                                                className="action-btn edit-btn"
-                                                onClick={() => navigate(`/admin/shift/edit/${shift._id}`)}
-                                                title="Edit"
-                                            >
-                                                <Edit2 size={14} />
-                                            </button>
-                                            <button
-                                                className="action-btn delete-btn"
-                                                onClick={() => handleDelete(shift._id)}
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>{shift.shiftCode || `S${index + 1}`}</td>
-                                    <td>{shift.shiftName}</td>
-                                    <td>{shift.employeeCount || 0}</td>
-                                    <td>{shift.weekOffDays?.join(', ') || shift.weekOffType}</td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                filteredShifts.map((shift, index) => (
+                                    <tr key={shift._id}>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedShifts.includes(shift._id)}
+                                                onChange={() => handleSelectShift(shift._id)}
+                                                style={{ width: '18px', height: '18px' }}
+                                            />
+                                        </td>
+                                        <td style={{ textAlign: 'center', fontWeight: '500', color: 'var(--text-light)' }}>
+                                            {index + 1}
+                                        </td>
+                                        <td>
+                                            <div className="action-buttons-cell">
+                                                <button
+                                                    className="btn-action btn-edit-theme"
+                                                    onClick={() => navigate(`/admin/shift/edit/${shift._id}`)}
+                                                    title="Edit Shift"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-action btn-delete-theme"
+                                                    onClick={() => handleDelete(shift._id)}
+                                                    title="Delete Shift"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className="percentage" style={{ background: '#F1F5F9', color: '#475569', padding: '4px 10px', borderRadius: '6px', fontSize: '14px', fontWeight: '700', border: '1px solid #E2E8F0' }}>
+                                                {shift.shiftCode || `S${index + 1}`}
+                                            </span>
+                                        </td>
+                                        <td style={{ fontWeight: '700', color: 'var(--text-dark)', fontSize: '18px' }}>
+                                            {shift.shiftName}
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#2563EB', fontWeight: '600' }}>
+                                                <Users size={16} />
+                                                {shift.employeeCount || 0}
+                                            </div>
+                                        </td>
+                                        <td style={{ color: 'var(--text-main)', fontSize: '15px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Calendar size={15} color="#64748B" />
+                                                {shift.weekOffDays?.length > 0 ? shift.weekOffDays.join(', ') : shift.weekOffType}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
