@@ -4,19 +4,36 @@ import { useNavigate } from "react-router-dom";
 const Login = ({ isRegister }) => {
   const navigate = useNavigate();
 
+  // Clear error message when switching between Login and Register
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    setError("");
+  }, [isRegister]);
+
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
-    if (token && user) {
-      if (user.role === "Admin") {
-        navigate("/admin", { replace: true });
-      } else if (user.role === "Manager") {
-        navigate("/manager-dashboard", { replace: true });
-      } else {
-        navigate("/employee-dashboard", { replace: true });
+    if (token && userString) {
+      try {
+        const user = JSON.parse(userString);
+        if (user && user.role) {
+          if (user.role === "Admin") {
+            navigate("/admin", { replace: true });
+          } else if (user.role === "Manager") {
+            navigate("/manager-dashboard", { replace: true });
+          } else {
+            navigate("/employee-dashboard", { replace: true });
+          }
+          return;
+        }
+      } catch (e) {
+        console.error("Error parsing user data:", e);
       }
     }
+    
+    // If we're on the login page and session is incomplete/invalid, clear it
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   }, [navigate]);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -50,15 +67,19 @@ const Login = ({ isRegister }) => {
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
     const url = `${apiUrl}${endpoint}`;
 
+    const trimmedEmail = formData.email.trim().toLowerCase();
+    const trimmedPassword = formData.password;
+    const trimmedName = formData.name.trim();
+
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(isRegister ? { ...formData, role: "Admin" } : {
-          email: formData.email,
-          password: formData.password
+        body: JSON.stringify(isRegister ? { ...formData, name: trimmedName, email: trimmedEmail, role: "Admin" } : {
+          email: trimmedEmail,
+          password: trimmedPassword
         }),
       });
 

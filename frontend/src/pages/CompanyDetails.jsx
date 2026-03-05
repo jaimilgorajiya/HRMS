@@ -13,7 +13,6 @@ import {
   Youtube,
   Upload,
   Save,
-  CheckCircle2,
   Settings2,
   Map,
   Share2
@@ -176,6 +175,13 @@ const CompanyDetails = () => {
         if (data.logo) {
           setLogoPreview(data.logo.startsWith('http') ? data.logo : `${apiUrl}${data.logo}`);
         }
+        // Sync with Header/Sidebar
+        window.dispatchEvent(new CustomEvent('companyDetailsUpdated', { 
+          detail: { 
+            companyName: data.companyName,
+            logo: data.logo 
+          } 
+        }));
       }
     } catch (error) {
       console.error("Error fetching company details:", error);
@@ -336,7 +342,12 @@ const CompanyDetails = () => {
   return (
     <div className="company-details-container">
       <header className="company-details-header">
-        <h1>Company Details</h1>
+        <div>
+          <h1>Company Details</h1>
+          <p className="text-light" style={{ fontSize: '14px', marginTop: '4px', color: '#64748B' }}>
+            Manage your organization's core information and online presence.
+          </p>
+        </div>
         {formData.updatedAt && (
           <div className="last-updated">
             Last Modified: {new Date(formData.updatedAt).toLocaleString()}
@@ -349,96 +360,105 @@ const CompanyDetails = () => {
         {/* Company Logo Section */}
         <section className="hrm-card">
           <div className="card-header-hrm">
-            <h2><Upload size={18} /> Company Logo</h2>
+            <h2><Upload size={18} /> Company Identity</h2>
           </div>
-          <div className="card-body-hrm">
+          <div className="card-body-hrm" style={{ padding: '24px' }}>
             <div className="logo-section-wrapper">
               <div className="logo-display">
                 {logoPreview ? (
                   <img src={logoPreview} alt="Company Logo" />
                 ) : (
                   <div className="logo-empty">
-                    <Building2 size={40} />
-                    <span>No Logo</span>
+                    <Building2 size={32} />
+                    <span>NO LOGO</span>
                   </div>
                 )}
               </div>
               <div className="upload-button-wrapper">
-                <label className="btn-secondary">
-                  <Upload size={16} />
-                  Change Logo
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleLogoChange} 
-                    style={{ display: 'none' }}
-                    accept="image/*"
-                  />
-                </label>
-                <span className="upload-hint">Recommended: JPG, PNG or SVG. Max size: 2MB.</span>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <label className="btn-primary-hrm" style={{ padding: '8px 16px', fontSize: '13px', borderRadius: '8px', cursor: 'pointer' }}>
+                    <Upload size={14} />
+                    Upload Logo
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleLogoChange} 
+                      style={{ display: 'none' }}
+                      accept="image/*"
+                    />
+                  </label>
+               
+                </div>
+                <span className="upload-hint">Recommended: Square image (512x512px). JPG, PNG or SVG. Max size: 2MB.</span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Basic Information */}
-        <section className="hrm-card">
-          <div className="card-header-hrm">
-            <h2><CheckCircle2 size={18} /> Basic Information</h2>
-          </div>
-          <div className="card-body-hrm">
-            <div className="form-row">
-              <div className="form-group-hrm">
-                <label>Company Name <span>*</span></label>
+        {/* Basic & Contact Information */}
+        <div className="form-row">
+          <section className="hrm-card" style={{ marginBottom: 0 }}>
+            <div className="card-header-hrm">
+              <h2><Building2 size={18} /> Business Profile</h2>
+            </div>
+            <div className="card-body-hrm" style={{ padding: '24px' }}>
+              <div className="form-group-hrm" style={{ marginBottom: '20px' }}>
+                <label>Legal Company Name <span>*</span></label>
                 <input type="text" name="companyName" value={formData.companyName} onChange={handleInputChange} className="form-control-hrm" required />
               </div>
+              <div className="form-group-hrm" style={{ marginBottom: '20px' }}>
+                <label>Official Website</label>
+                <div className="social-input-group">
+                  <div className="social-icon"><Globe size={16} /></div>
+                  <input type="url" name="website" value={formData.website} onChange={handleInputChange} className="form-control-hrm social-input" placeholder="https://www.company.com" />
+                </div>
+              </div>
               <div className="form-group-hrm">
-                <label>Website</label>
-                <input type="url" name="website" value={formData.website} onChange={handleInputChange} className="form-control-hrm" placeholder="https://www.company.com" />
+                <label>Primary Address <span>*</span></label>
+                <textarea name="address" value={formData.address} onChange={handleInputChange} className="form-control-hrm textarea-hrm" required placeholder="Full street address..."></textarea>
               </div>
             </div>
-            <div className="form-group-hrm">
-              <label>Address <span>*</span></label>
-              <textarea name="address" value={formData.address} onChange={handleInputChange} className="form-control-hrm textarea-hrm" required placeholder="Full street address..."></textarea>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Contact Information */}
-        <section className="hrm-card">
-          <div className="card-header-hrm">
-            <h2><Mail size={18} /> Contact Information</h2>
-          </div>
-          <div className="card-body-hrm">
-            <div className="form-row">
-              <div className="form-group-hrm">
+          <section className="hrm-card" style={{ marginBottom: 0 }}>
+            <div className="card-header-hrm">
+              <h2><Mail size={18} /> Communication</h2>
+            </div>
+            <div className="card-body-hrm" style={{ padding: '24px' }}>
+              <div className="form-group-hrm" style={{ marginBottom: '20px' }}>
                 <label>Company Email <span>*</span></label>
-                <input type="email" name="companyEmail" value={formData.companyEmail} onChange={handleInputChange} className={`form-control-hrm ${errors.companyEmail ? 'error-border' : ''}`} required />
+                <div className="social-input-group">
+                  <div className="social-icon"><Mail size={16} /></div>
+                  <input type="email" name="companyEmail" value={formData.companyEmail} onChange={handleInputChange} className={`form-control-hrm social-input ${errors.companyEmail ? 'error-border' : ''}`} required />
+                </div>
                 {errors.companyEmail && <span className="error-text-hrm">{errors.companyEmail}</span>}
               </div>
-              <div className="form-group-hrm">
-                <label>Company Contact <span>*</span></label>
-                <input type="tel" name="companyContact" value={formData.companyContact} maxLength={10} onChange={handleInputChange} className={`form-control-hrm ${errors.companyContact ? 'error-border' : ''}`} required />
+              <div className="form-group-hrm" style={{ marginBottom: '20px' }}>
+                <label>Phone Number <span>*</span></label>
+                <div className="social-input-group">
+                  <div className="social-icon"><Phone size={16} /></div>
+                  <input type="tel" name="companyContact" value={formData.companyContact} maxLength={10} onChange={handleInputChange} className={`form-control-hrm social-input ${errors.companyContact ? 'error-border' : ''}`} required />
+                </div>
                 {errors.companyContact && <span className="error-text-hrm">{errors.companyContact}</span>}
               </div>
+              <div className="form-group-hrm">
+                <label>HR / Admin Email</label>
+                <input type="email" name="hrEmail" value={formData.hrEmail || ''} onChange={handleInputChange} className={`form-control-hrm ${errors.hrEmail ? 'error-border' : ''}`} placeholder="hr@company.com" />
+                {errors.hrEmail && <span className="error-text-hrm">{errors.hrEmail}</span>}
+              </div>
             </div>
-            <div className="form-group-hrm">
-              <label>HR / Management Email</label>
-              <input type="email" name="hrEmail" value={formData.hrEmail || ''} onChange={handleInputChange} className={`form-control-hrm ${errors.hrEmail ? 'error-border' : ''}`} placeholder="hr@company.com" />
-              {errors.hrEmail && <span className="error-text-hrm">{errors.hrEmail}</span>}
-            </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
-        {/* Tax Information */}
+        {/* Tax & Financials */}
         <section className="hrm-card">
           <div className="card-header-hrm">
-            <h2><Settings2 size={18} /> Configurations & Tax</h2>
+            <h2><Coins size={18} /> Tax & Financial Configuration</h2>
           </div>
-          <div className="card-body-hrm">
+          <div className="card-body-hrm" style={{ padding: '24px' }}>
             <div className="form-row">
               <div className="form-group-hrm">
-                <label>Pincode <span>*</span></label>
+                <label>Local Pincode <span>*</span></label>
                 <input type="text" name="pincode" value={formData.pincode} onChange={handleInputChange} className="form-control-hrm" required />
               </div>
               <div className="form-group-hrm">
@@ -446,29 +466,29 @@ const CompanyDetails = () => {
                 <input type="text" name="currency" value={formData.currency} onChange={handleInputChange} className="form-control-hrm" required placeholder="₹" />
               </div>
             </div>
-            <div className="form-row">
+            <div className="form-row" style={{ marginTop: '20px' }}>
               <div className="form-group-hrm">
-                <label>GST Number</label>
-                <input type="text" name="gstNumber" value={formData.gstNumber || ''} onChange={handleInputChange} className="form-control-hrm" />
+                <label>GST Number (Optional)</label>
+                <input type="text" name="gstNumber" value={formData.gstNumber || ''} onChange={handleInputChange} className="form-control-hrm" placeholder="22AAAAA0000A1Z5" />
               </div>
               <div className="form-group-hrm">
-                <label>PAN Number</label>
-                <input type="text" name="pan" value={formData.pan || ''} onChange={handleInputChange} className="form-control-hrm" />
+                <label>PAN Number (Optional)</label>
+                <input type="text" name="pan" value={formData.pan || ''} onChange={handleInputChange} className="form-control-hrm" placeholder="ABCDE1234F" />
               </div>
             </div>
-            <div className="form-group-hrm">
-              <label>TAN Number</label>
-              <input type="text" name="tan" value={formData.tan || ''} onChange={handleInputChange} className="form-control-hrm" />
+            <div className="form-group-hrm" style={{ marginTop: '20px' }}>
+              <label>TAN Number (Optional)</label>
+              <input type="text" name="tan" value={formData.tan || ''} onChange={handleInputChange} className="form-control-hrm" placeholder="ABCD12345E" />
             </div>
           </div>
         </section>
 
-        {/* Social Media */}
+        {/* Social Presence */}
         <section className="hrm-card">
           <div className="card-header-hrm">
-            <h2><Share2 size={18} /> Social Links</h2>
+            <h2><Share2 size={18} /> Social Connectivity</h2>
           </div>
-          <div className="card-body-hrm">
+          <div className="card-body-hrm" style={{ padding: '24px' }}>
             <div className="social-links-hrm">
               <div className="form-group-hrm">
                 <label>Instagram</label>
@@ -506,19 +526,19 @@ const CompanyDetails = () => {
         <section className="hrm-card">
           <div className="card-header-hrm">
             <div className="header-with-action">
-              <h2><Map size={18} /> Office Location</h2>
+              <h2><Map size={18} /> Registered Office Location</h2>
               <button 
                 type="button"
                 className={`btn-relocate ${isRelocating ? 'active' : ''}`}
                 onClick={() => setIsRelocating(!isRelocating)}
               >
-                {isRelocating ? 'Edit Location' : 'Relocate Office'}
+                {isRelocating ? 'Cancel Relocation' : 'Relocate Office'}
               </button>
             </div>
           </div>
-          <div className="card-body-hrm">
+          <div className="card-body-hrm" style={{ padding: '24px' }}>
             <div className={`map-container-hrm ${isRelocating ? 'editing' : ''}`}>
-              {isRelocating && <div className="map-instruction">Relocation Mode Active</div>}
+              {isRelocating && <div className="map-instruction">Tap on map to set new office location</div>}
               <MapContainer 
                 center={[formData.location.lat, formData.location.lng]} 
                 zoom={20} 
@@ -538,9 +558,9 @@ const CompanyDetails = () => {
         </section>
 
         <footer className="form-footer-hrm">
-          <button type="submit" className="btn-primary-hrm" disabled={updating}>
+          <button type="submit" className="btn-primary-hrm" style={{ padding: '14px 40px' }} disabled={updating}>
             <Save size={18} />
-            {updating ? 'Saving Changes...' : 'Save Configuration'}
+            {updating ? 'Processing...' : 'Save All Changes'}
           </button>
         </footer>
 

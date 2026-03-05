@@ -2,6 +2,11 @@ import User from "../models/User.Model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateEmployeeId } from "../utils/employeeId.js";
+import fs from 'fs';
+
+const logToFile = (msg) => {
+    fs.appendFileSync('login_debug.log', `${new Date().toISOString()} - ${msg}\n`);
+};
 
 const generateTokenAndSetCookie = (userId, res) => {
     const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -9,18 +14,22 @@ const generateTokenAndSetCookie = (userId, res) => {
     });
 
     res.cookie("jwt", token, {
-
         maxAge: 24 * 60 * 60 * 1000, 
         httpOnly: true,
         secure: false, // Set to true only in production with HTTPS
         sameSite: "lax",
+        path: "/",
     });
     return token;
 }
     
 const register = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        let { name, email, password, role } = req.body;
+        
+        // Trim inputs
+        email = email.trim().toLowerCase();
+        name = name.trim();
         
         // Only Admin can register from the frontend
         if (role && role !== "Admin") {
@@ -30,7 +39,7 @@ const register = async (req, res) => {
             });
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
 
         if (user) {
             return res.status(400).json({ success: false, message: "User already exists" });
@@ -58,6 +67,7 @@ const register = async (req, res) => {
                 success: true,
                 message: "Admin account created successfully",
                 user: {
+                    id: newUser._id,
                     _id: newUser._id,
                     name: newUser.name,
                     email: newUser.email,
@@ -80,7 +90,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     // Validation
     if (!email || !password) {
@@ -90,10 +100,15 @@ const login = async (req, res) => {
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email });
+    email = email.trim().toLowerCase();
+
+    logToFile(`Login attempt for: ${email}`);
+
+    // Find user - using case-insensitive search to be safe for existing data
+    const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
 
     if (!user) {
+      logToFile(`User not found: ${email}`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -102,6 +117,7 @@ const login = async (req, res) => {
 
     // Check status - allow if undefined/missing for backwards compatibility
     if (user.status && user.status !== "Active") {
+      logToFile(`User account blocked: ${email}`);
       return res.status(403).json({
         success: false,
         message: "Account is blocked. Contact admin.",
@@ -112,11 +128,14 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      logToFile(`Invalid password for: ${email} (Password length: ${password.length})`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
       });
     }
+
+    logToFile(`Login success for: ${email}`);
 
     // Generate JWT Cookie
     const token = generateTokenAndSetCookie(user._id, res);
@@ -127,6 +146,7 @@ const login = async (req, res) => {
       user: {
         token: token,
         id: user._id,
+        _id: user._id, // Keep for compatibility
         name: user.name,
         email: user.email,
         role: user.role,
@@ -147,7 +167,11 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
     try {
         res.cookie("jwt", "", {
-            maxAge: 0,
+            httpOnly: true,
+            secure: false, // Match the setting in generateToken
+            sameSite: "lax",
+            expires: new Date(0),
+            path: "/",
         });
         res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {

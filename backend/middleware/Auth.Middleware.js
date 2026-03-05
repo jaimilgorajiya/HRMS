@@ -4,11 +4,8 @@ import User from "../models/User.Model.js";
 
 const verifyToken = async (req, res, next) => {
     try {
-        const token = req.cookies.jwt || req.headers.authorization?.split(" ")[1];
+        const token = req.headers.authorization?.split(" ")[1] || req.cookies.jwt;
         
-        console.log("VerifyToken - Cookies:", req.cookies);
-        console.log("VerifyToken - Token:", token ? "Found" : "Missing");
-
         if (!token) {
             return res.status(401).json({ success: false, message: "Unauthorized - No Token Provided" });
         }
