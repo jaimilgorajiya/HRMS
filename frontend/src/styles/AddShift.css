@@ -108,8 +108,7 @@
     width: 100%;
 }
 
-.form-group-shift input:focus,
-.form-group-shift select:focus {
+.form-group-shift input:focus {
     outline: none;
     border-color: #2563EB;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);

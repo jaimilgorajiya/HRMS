@@ -340,10 +340,10 @@ const CompanyDetails = () => {
   }
 
   return (
-    <div className="company-details-container">
-      <header className="company-details-header">
+    <div className="designation-container">
+      <header className="designation-header">
         <div>
-          <h1>Company Details</h1>
+          <h1 className="profile-title">Company Details</h1>
           <p className="text-light" style={{ fontSize: '14px', marginTop: '4px', color: '#64748B' }}>
             Manage your organization's core information and online presence.
           </p>

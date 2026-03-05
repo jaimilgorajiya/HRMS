@@ -24,14 +24,14 @@ const AdminLayout = ({ children, title: manualTitle }) => {
     if (manualTitle) return manualTitle;
     const path = location.pathname;
     
-    if (path.includes('/admin/company/details')) return 'Company Details';
-    if (path.includes('/admin/company/designation')) return 'Designation';
-    if (path.includes('/admin/company/departments')) return 'Departments';
-    if (path.includes('/admin/company/branches')) return 'Branches';
-    if (path.includes('/admin/attendance/break-type')) return 'Break Type';
-    if (path.includes('/admin/shift/manage')) return 'Manage Shift';
-    if (path.includes('/admin/shift/add')) return 'Add Shift';
-    if (path.includes('/admin/shift/edit')) return 'Edit Shift';
+    if (path.includes('/admin/company/details')) return '';
+    if (path.includes('/admin/company/designation')) return '';
+    if (path.includes('/admin/company/departments')) return '';
+    if (path.includes('/admin/company/branches')) return '';
+    if (path.includes('/admin/attendance/break-type')) return '';
+    if (path.includes('/admin/shift/manage')) return '';
+    if (path.includes('/admin/shift/add')) return '';
+    if (path.includes('/admin/shift/edit')) return '';
     if (path.includes('/admin/dashboard')) return 'Admin Dashboard';
     if (path === '/admin') return 'Admin Dashboard';
     

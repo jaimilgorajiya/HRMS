@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, RotateCcw } from 'lucide-react';
 import ShiftTimePicker from '../components/ShiftTimePicker';
+import HourMinutePicker from '../components/HourMinutePicker';
+import HourDurationSelect from '../components/HourDurationSelect';
 import Swal from 'sweetalert2';
 import '../styles/AddShift.css';
 
@@ -1024,12 +1026,9 @@ const AddShift = () => {
                                     <td className="row-label">Minimum Quarter Day Hours</td>
                                     {days.map(day => (
                                         <td key={day}>
-                                            <input
-                                                type="number"
+                                            <HourMinutePicker
                                                 value={formData.schedule[day]?.minQuarterHours || ''}
-                                                onChange={(e) => handleScheduleChange(day, 'minQuarterHours', e.target.value)}
-                                                min="0"
-                                                step="0.5"
+                                                onChange={(val) => handleScheduleChange(day, 'minQuarterHours', val)}
                                             />
                                         </td>
                                     ))}
@@ -1038,12 +1037,9 @@ const AddShift = () => {
                                     <td className="row-label">Minimum Half Day Hours</td>
                                     {days.map(day => (
                                         <td key={day}>
-                                            <input
-                                                type="number"
+                                            <HourMinutePicker
                                                 value={formData.schedule[day]?.minHalfHours || ''}
-                                                onChange={(e) => handleScheduleChange(day, 'minHalfHours', e.target.value)}
-                                                min="0"
-                                                step="0.5"
+                                                onChange={(val) => handleScheduleChange(day, 'minHalfHours', val)}
                                             />
                                         </td>
                                     ))}
@@ -1052,12 +1048,9 @@ const AddShift = () => {
                                     <td className="row-label">Minimum Three Quarter Day Hours</td>
                                     {days.map(day => (
                                         <td key={day}>
-                                            <input
-                                                type="number"
+                                            <HourMinutePicker
                                                 value={formData.schedule[day]?.minThreeQuarterHours || ''}
-                                                onChange={(e) => handleScheduleChange(day, 'minThreeQuarterHours', e.target.value)}
-                                                min="0"
-                                                step="0.5"
+                                                onChange={(val) => handleScheduleChange(day, 'minThreeQuarterHours', val)}
                                             />
                                         </td>
                                     ))}
@@ -1066,12 +1059,9 @@ const AddShift = () => {
                                     <td className="row-label">Minimum Full Day Hours</td>
                                     {days.map(day => (
                                         <td key={day}>
-                                            <input
-                                                type="number"
+                                            <HourMinutePicker
                                                 value={formData.schedule[day]?.minFullDayHours || ''}
-                                                onChange={(e) => handleScheduleChange(day, 'minFullDayHours', e.target.value)}
-                                                min="0"
-                                                step="0.5"
+                                                onChange={(val) => handleScheduleChange(day, 'minFullDayHours', val)}
                                             />
                                         </td>
                                     ))}
@@ -1093,10 +1083,9 @@ const AddShift = () => {
                                     <td className="row-label">Maximum Punch Out Time</td>
                                     {days.map(day => (
                                         <td key={day}>
-                                            <input
-                                                type="time"
+                                            <ShiftTimePicker
                                                 value={formData.schedule[day]?.maxPunchOutTime || ''}
-                                                onChange={(e) => handleScheduleChange(day, 'maxPunchOutTime', e.target.value)}
+                                                onChange={(val) => handleScheduleChange(day, 'maxPunchOutTime', val)}
                                             />
                                         </td>
                                     ))}
@@ -1105,11 +1094,9 @@ const AddShift = () => {
                                     <td className="row-label">Maximum Punch Out Hour</td>
                                     {days.map(day => (
                                         <td key={day}>
-                                            <input
-                                                type="number"
+                                            <HourDurationSelect
                                                 value={formData.schedule[day]?.maxPunchOutHour || ''}
-                                                onChange={(e) => handleScheduleChange(day, 'maxPunchOutHour', e.target.value)}
-                                                min="0"
+                                                onChange={(val) => handleScheduleChange(day, 'maxPunchOutHour', val)}
                                             />
                                         </td>
                                     ))}

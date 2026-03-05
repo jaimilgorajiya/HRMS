@@ -21,7 +21,7 @@ const scheduleSchema = new mongoose.Schema({
     minFullDayHours: { type: Number, default: 0 },
     maxPersonalBreak: { type: Number, default: 0 },
     maxPunchOutTime: { type: String, default: '' },
-    maxPunchOutHour: { type: Number, default: 0 }
+    maxPunchOutHour: { type: String, default: '' }
 }, { _id: false });
 
 const shiftSchema = new mongoose.Schema({
