@@ -86,7 +86,10 @@ const userSchema = new mongoose.Schema(
                 enum: ["Office", "Hybrid", "Remote"],
                 default: "Office"
             },
-            shift: String
+            shift: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Shift'
+            }
         },
         salaryDetails: {
             salaryType: {

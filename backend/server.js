@@ -17,6 +17,7 @@ import offboardingRoutes from './routes/Offboarding.Routes.js';
 import dashboardRoutes from './routes/Dashboard.Route.js';
 import companyRoutes from './routes/Company.Routes.js';
 import breakTypeRoutes from './routes/BreakType.Routes.js';
+import shiftRoutes from './routes/Shift.Routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,6 +49,7 @@ app.use('/api/offboarding', offboardingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/break-types', breakTypeRoutes);
+app.use('/api/shifts', shiftRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
