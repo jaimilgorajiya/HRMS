@@ -19,6 +19,7 @@ import BreakType from './pages/BreakType';
 import Shift from './pages/Shift';
 import AddShift from './pages/AddShift';
 import EditShift from './pages/EditShift';
+import PenaltyRules from './pages/PenaltyRules';
 
 function App() {
   return (
@@ -50,7 +51,7 @@ function App() {
               <Route path="shift/add" element={<AddShift />} />
               <Route path="shift/edit/:id" element={<EditShift />} />
               <Route path="shift/manage" element={<Shift />} />
-              <Route path="shift/penalty" element={<ModulePlaceholder title="Penalty Rules" />} />
+              <Route path="shift/penalty" element={<PenaltyRules />} />
               <Route path="shift/grace-time" element={<ModulePlaceholder title="Add Next Day Grace Time" />} />
               <Route path="shift-settings" element={<ModulePlaceholder title="Shift Settings" />} />
               <Route path="leave-settings" element={<ModulePlaceholder title="Leave Settings" />} />

@@ -4,6 +4,7 @@ import { Check, RotateCcw } from 'lucide-react';
 import ShiftTimePicker from '../components/ShiftTimePicker';
 import HourMinutePicker from '../components/HourMinutePicker';
 import HourDurationSelect from '../components/HourDurationSelect';
+import SearchableSelect from '../components/SearchableSelect';
 import Swal from 'sweetalert2';
 import '../styles/AddShift.css';
 
@@ -224,78 +225,87 @@ const AddShift = () => {
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Multiple Punch In/Out Allow</label>
-                            <select name="multiplePunchAllowed" value={formData.multiplePunchAllowed} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Multiple Punch In/Out Allow"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.multiplePunchAllowed}
+                                onChange={(val) => handleInputChange({ target: { name: 'multiplePunchAllowed', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Required Out Of Range Reason</label>
-                            <select name="requireOutOfRangeReason" value={formData.requireOutOfRangeReason} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Required Out Of Range Reason"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.requireOutOfRangeReason}
+                                onChange={(val) => handleInputChange({ target: { name: 'requireOutOfRangeReason', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Hours Type In Shift Clock <span className="required">*</span></label>
-                            <select name="hoursType" value={formData.hoursType} onChange={handleInputChange}>
-                                <option value="Full Shift Hours">Full Shift Hours</option>
-                                <option value="Flexible Hours">Minimum Full Day Hours</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Hours Type In Shift Clock"
+                                options={[
+                                    { label: 'Full Shift Hours', value: 'Full Shift Hours' },
+                                    { label: 'Minimum Full Day Hours', value: 'Flexible Hours' }
+                                ]}
+                                value={formData.hoursType}
+                                onChange={(val) => handleInputChange({ target: { name: 'hoursType', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Attendance Calculation On Productive Hours</label>
-                            <select name="attendanceOnProductiveHours" value={formData.attendanceOnProductiveHours} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Attendance Calculation On Productive Hours"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.attendanceOnProductiveHours}
+                                onChange={(val) => handleInputChange({ target: { name: 'attendanceOnProductiveHours', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Deduct Break Time From Total Working Hours If Break Not Taken</label>
-                            <select name="deductBreakIfNotTaken" value={formData.deductBreakIfNotTaken} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Deduct Break Time From Total Working Hours If Break Not Taken"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.deductBreakIfNotTaken}
+                                onChange={(val) => handleInputChange({ target: { name: 'deductBreakIfNotTaken', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Deduct Full Break Time If Taken Break Time Is Less Than Assigned Time</label>
-                            <select name="deductFullBreakIfLessTaken" value={formData.deductFullBreakIfLessTaken} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Deduct Full Break Time If Taken Break Time Is Less Than Assigned Time"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.deductFullBreakIfLessTaken}
+                                onChange={(val) => handleInputChange({ target: { name: 'deductFullBreakIfLessTaken', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Attendance Request Approve With Remark</label>
-                            <select name="attendanceRequestRemarkPolicy" value={formData.attendanceRequestRemarkPolicy} onChange={handleInputChange}>
-                                <option value="None">None</option>
-                                <option value="Optional">Optional</option>
-                                <option value="Mandatory">Mandatory</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Attendance Request Approve With Remark"
+                                options={[{ label: 'None', value: 'None' }, { label: 'Optional', value: 'Optional' }, { label: 'Mandatory', value: 'Mandatory' }]}
+                                value={formData.attendanceRequestRemarkPolicy}
+                                onChange={(val) => handleInputChange({ target: { name: 'attendanceRequestRemarkPolicy', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Punch Out Missing Request Approve With Remark</label>
-                            <select name="missingPunchRemarkPolicy" value={formData.missingPunchRemarkPolicy} onChange={handleInputChange}>
-                                <option value="None">None</option>
-                                <option value="Optional">Optional</option>
-                                <option value="Mandatory">Mandatory</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Punch Out Missing Request Approve With Remark"
+                                options={[{ label: 'None', value: 'None' }, { label: 'Optional', value: 'Optional' }, { label: 'Mandatory', value: 'Mandatory' }]}
+                                value={formData.missingPunchRemarkPolicy}
+                                onChange={(val) => handleInputChange({ target: { name: 'missingPunchRemarkPolicy', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Pending Attendance (Out Of Range) Approve With Remark</label>
-                            <select name="outOfRangeRemarkPolicy" value={formData.outOfRangeRemarkPolicy} onChange={handleInputChange}>
-                                <option value="None">None</option>
-                                <option value="Optional">Optional</option>
-                                <option value="Mandatory">Mandatory</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Pending Attendance (Out Of Range) Approve With Remark"
+                                options={[{ label: 'None', value: 'None' }, { label: 'Optional', value: 'Optional' }, { label: 'Mandatory', value: 'Mandatory' }]}
+                                value={formData.outOfRangeRemarkPolicy}
+                                onChange={(val) => handleInputChange({ target: { name: 'outOfRangeRemarkPolicy', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
@@ -321,19 +331,21 @@ const AddShift = () => {
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Auto Select Alternate Shift (Max 2)</label>
-                            <select name="autoSelectAlternateShift" value={formData.autoSelectAlternateShift} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Auto Select Alternate Shift (Max 2)"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.autoSelectAlternateShift}
+                                onChange={(val) => handleInputChange({ target: { name: 'autoSelectAlternateShift', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Allow Attendance Modification</label>
-                            <select name="allowAttendanceModification" value={formData.allowAttendanceModification} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Allow Attendance Modification"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.allowAttendanceModification}
+                                onChange={(val) => handleInputChange({ target: { name: 'allowAttendanceModification', value: val, type: 'select' }})}
+                            />
                         </div>
                     </div>
                 </div>
@@ -343,13 +355,16 @@ const AddShift = () => {
                     <h2 className="card-title">Week Off Settings</h2>
                     <div className="form-grid">
                         <div className="form-group-shift">
-                            <label>Week Off Type <span className="required">*</span></label>
-                            <select name="weekOffType" value={formData.weekOffType} onChange={handleInputChange}>
-                                <option value="Selected Weekdays">Selected Weekdays</option>
-                              
-                                <option value="Manual Week Off">Manual Week Off</option>
-                                <option value="Auto Week off">Auto Week off</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Week Off Type"
+                                options={[
+                                    { label: 'Selected Weekdays', value: 'Selected Weekdays' },
+                                    { label: 'Manual Week Off', value: 'Manual Week Off' },
+                                    { label: 'Auto Week off', value: 'Auto Week off' }
+                                ]}
+                                value={formData.weekOffType}
+                                onChange={(val) => handleInputChange({ target: { name: 'weekOffType', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         {/* Show different fields based on Week Off Type */}
@@ -420,11 +435,12 @@ const AddShift = () => {
                     <h2 className="card-title">Late In / Early Out Settings</h2>
                     <div className="form-grid">
                         <div className="form-group-shift">
-                            <label>Late In Early Out Type</label>
-                            <select name="lateEarlyType" value={formData.lateEarlyType} onChange={handleInputChange}>
-                                <option value="Combined">Combined</option>
-                                <option value="Separate">Separate</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Late In Early Out Type"
+                                options={[{ label: 'Combined', value: 'Combined' }, { label: 'Separate', value: 'Separate' }]}
+                                value={formData.lateEarlyType}
+                                onChange={(val) => handleInputChange({ target: { name: 'lateEarlyType', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
@@ -450,61 +466,71 @@ const AddShift = () => {
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Apply Leave If Late/Early Limit Exceeded</label>
-                            <select name="applyLeaveIfLimitExceeded" value={formData.applyLeaveIfLimitExceeded} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Apply Leave If Late/Early Limit Exceeded"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.applyLeaveIfLimitExceeded}
+                                onChange={(val) => handleInputChange({ target: { name: 'applyLeaveIfLimitExceeded', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Leave Type When Limit Exceeded</label>
-                            <select name="leaveTypeIfExceeded" value={formData.leaveTypeIfExceeded} onChange={handleInputChange}>
-                                <option value="Half Day">Half Day</option>
-                                <option value="Full Day">Full Day</option>
-                                <option value="Short Leave">Quarter Day</option>
-                                <option value="Short Leave">Three-Quarters Day</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Leave Type When Limit Exceeded"
+                                options={[
+                                    { label: 'Half Day', value: 'Half Day' },
+                                    { label: 'Full Day', value: 'Full Day' },
+                                    { label: 'Quarter Day', value: 'Short Leave' },
+                                    { label: 'Three-Quarters Day', value: 'Short Leave' }
+                                ]}
+                                value={formData.leaveTypeIfExceeded}
+                                onChange={(val) => handleInputChange({ target: { name: 'leaveTypeIfExceeded', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Required Reason Of Late In</label>
-                            <select name="requireLateReason" value={formData.requireLateReason} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Required Reason Of Late In"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.requireLateReason}
+                                onChange={(val) => handleInputChange({ target: { name: 'requireLateReason', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Required Reason Of Early Out</label>
-                            <select name="requireEarlyOutReason" value={formData.requireEarlyOutReason} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Required Reason Of Early Out"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.requireEarlyOutReason}
+                                onChange={(val) => handleInputChange({ target: { name: 'requireEarlyOutReason', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Late In Early Out Apply On Extra Day</label>
-                            <select name="lateEarlyApplyOnExtraDay" value={formData.lateEarlyApplyOnExtraDay} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Late In Early Out Apply On Extra Day"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.lateEarlyApplyOnExtraDay}
+                                onChange={(val) => handleInputChange({ target: { name: 'lateEarlyApplyOnExtraDay', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Late In Penalty Minutes Deduct From Working Hours</label>
-                            <select name="deductLatePenaltyFromWorkHours" value={formData.deductLatePenaltyFromWorkHours} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Late In Penalty Minutes Deduct From Working Hours"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.deductLatePenaltyFromWorkHours}
+                                onChange={(val) => handleInputChange({ target: { name: 'deductLatePenaltyFromWorkHours', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Remove Late/Early When Completed Shift Hours</label>
-                            <select name="removeLateEarlyAfterFullHours" value={formData.removeLateEarlyAfterFullHours} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Remove Late/Early When Completed Shift Hours"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.removeLateEarlyAfterFullHours}
+                                onChange={(val) => handleInputChange({ target: { name: 'removeLateEarlyAfterFullHours', value: val, type: 'select' }})}
+                            />
                         </div>
                     </div>
                 </div>
@@ -514,16 +540,12 @@ const AddShift = () => {
                     <h2 className="card-title">Leave Settings</h2>
                     <div className="form-grid">
                         <div className="form-group-shift">
-                            <label>
-                                Allow Short Leave 
-                                <span className="info-icon-wrapper" title="Policy for allowing short duration leaves">
-                                    <i className="fas fa-info-circle"></i>
-                                </span>
-                            </label>
-                            <select name="allowShortLeave" value={formData.allowShortLeave} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Allow Short Leave"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.allowShortLeave}
+                                onChange={(val) => handleInputChange({ target: { name: 'allowShortLeave', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         {/* Show additional fields when Allow Short Leave is Yes */}
@@ -554,13 +576,17 @@ const AddShift = () => {
                                 </div>
 
                                 <div className="form-group-shift">
-                                    <label>Short Leave Type</label>
-                                    <select name="shortLeaveType" value={formData.shortLeaveType || 'Default'} onChange={handleInputChange}>
-                                        <option value="Default">Default</option>
-                                        <option value="Before Shift">Before Shift</option>
-                                        <option value="After Shift">After Shift</option>
-                                        <option value="Both">Both</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="Short Leave Type"
+                                        options={[
+                                            { label: 'Default', value: 'Default' },
+                                            { label: 'Before Shift', value: 'Before Shift' },
+                                            { label: 'After Shift', value: 'After Shift' },
+                                            { label: 'Both', value: 'Both' }
+                                        ]}
+                                        value={formData.shortLeaveType || 'Default'}
+                                        onChange={(val) => handleInputChange({ target: { name: 'shortLeaveType', value: val, type: 'select' }})}
+                                    />
                                 </div>
 
                                 <div className="form-group-shift">
@@ -589,35 +615,39 @@ const AddShift = () => {
                         )}
 
                         <div className="form-group-shift">
-                            <label>Apply Sandwich Leave</label>
-                            <select name="applySandwichLeave" value={formData.applySandwichLeave} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Apply Sandwich Leave"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.applySandwichLeave}
+                                onChange={(val) => handleInputChange({ target: { name: 'applySandwichLeave', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Apply Half Day Before Fix Time Out</label>
-                            <select name="applyHalfDayBeforeFixedTimeout" value={formData.applyHalfDayBeforeFixedTimeout} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Apply Half Day Before Fix Time Out"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.applyHalfDayBeforeFixedTimeout}
+                                onChange={(val) => handleInputChange({ target: { name: 'applyHalfDayBeforeFixedTimeout', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Apply Leave On Holiday</label>
-                            <select name="applyLeaveOnHoliday" value={formData.applyLeaveOnHoliday} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Apply Leave On Holiday"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.applyLeaveOnHoliday}
+                                onChange={(val) => handleInputChange({ target: { name: 'applyLeaveOnHoliday', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Apply leave on weekoff</label>
-                            <select name="applyLeaveOnWeekOff" value={formData.applyLeaveOnWeekOff} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Apply leave on weekoff"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.applyLeaveOnWeekOff}
+                                onChange={(val) => handleInputChange({ target: { name: 'applyLeaveOnWeekOff', value: val, type: 'select' }})}
+                            />
                         </div>
                     </div>
                 </div>
@@ -627,22 +657,27 @@ const AddShift = () => {
                     <h2 className="card-title">Penalty Settings</h2>
                     <div className="form-grid">
                         <div className="form-group-shift">
-                            <label>Generate Penalty On Absent</label>
-                            <select name="generatePenaltyOnAbsent" value={formData.generatePenaltyOnAbsent} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Generate Penalty On Absent"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.generatePenaltyOnAbsent}
+                                onChange={(val) => handleInputChange({ target: { name: 'generatePenaltyOnAbsent', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         {/* Show additional fields when Generate Penalty on Absent is Yes */}
                         {(formData.generatePenaltyOnAbsent === true || formData.generatePenaltyOnAbsent === 'true') && (
                             <>
                                 <div className="form-group-shift">
-                                    <label>Penalty Type</label>
-                                    <select name="penaltyType" value={formData.penaltyType || 'Flat'} onChange={handleInputChange}>
-                                        <option value="Flat">Flat</option>
-                                        <option value="Percentage">Percentage</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="Penalty Type"
+                                        options={[
+                                            { label: 'Flat', value: 'Flat' },
+                                            { label: 'Percentage', value: 'Percentage' }
+                                        ]}
+                                        value={formData.penaltyType || 'Flat'}
+                                        onChange={(val) => handleInputChange({ target: { name: 'penaltyType', value: val, type: 'select' }})}
+                                    />
                                 </div>
 
                                 <div className="form-group-shift">
@@ -667,51 +702,64 @@ const AddShift = () => {
                     <h2 className="card-title">OT Settings</h2>
                     <div className="form-grid">
                         <div className="form-group-shift">
-                            <label>Need Approval For Extra Day <span className="required">*</span></label>
-                            <select name="extraDayApprovalPolicy" value={formData.extraDayApprovalPolicy} onChange={handleInputChange}>
-                                <option value="None">None</option>
-                                <option value="Week Off">Week Off</option>
-                                <option value="Holiday">Holiday</option>
-                                <option value="Week off and holiday">Week off and holiday</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Need Approval For Extra Day"
+                                options={[
+                                    { label: 'Week Off', value: 'Week Off' },
+                                    { label: 'Holiday', value: 'Holiday' },
+                                    { label: 'Week off and holiday', value: 'Week off and holiday' },
+                                    { label: 'None', value: 'None' }
+                                ]}
+                                value={formData.extraDayApprovalPolicy}
+                                onChange={(val) => handleInputChange({ target: { name: 'extraDayApprovalPolicy', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         {formData.extraDayApprovalPolicy !== 'None' && (
                             <>
                                 <div className="form-group-shift">
-                                    <label>Need approval for extra hours on weekdays <span className="required">*</span></label>
-                                    <select name="needApprovalExtraHoursWeekdays" value={formData.needApprovalExtraHoursWeekdays} onChange={handleInputChange}>
-                                        <option value={false}>No</option>
-                                        <option value={true}>Yes</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="Need approval for extra hours on weekdays"
+                                        options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                        value={formData.needApprovalExtraHoursWeekdays}
+                                        onChange={(val) => handleInputChange({ target: { name: 'needApprovalExtraHoursWeekdays', value: val, type: 'select' }})}
+                                    />
                                 </div>
 
                                 <div className="form-group-shift">
-                                    <label>Need OT Request For Same Day <span className="required">*</span></label>
-                                    <select name="needOTRequestSameDay" value={formData.needOTRequestSameDay} onChange={handleInputChange}>
-                                        <option value={false}>No</option>
-                                        <option value={true}>Yes</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="Need OT Request For Same Day"
+                                        options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                        value={formData.needOTRequestSameDay}
+                                        onChange={(val) => handleInputChange({ target: { name: 'needOTRequestSameDay', value: val, type: 'select' }})}
+                                    />
                                 </div>
 
                                 <div className="form-group-shift">
-                                    <label>OT Request Type <span className="required">*</span></label>
-                                    <select name="otRequestType" value={formData.otRequestType} onChange={handleInputChange}>
-                                        <option value="Get approval before overtime work">Get approval before overtime work</option>
-                                        <option value="Get approval after overtime work">Get approval after overtime work</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="OT Request Type"
+                                        options={[
+                                            { label: 'Get approval before overtime work', value: 'Get approval before overtime work' },
+                                            { label: 'Get approval after overtime work', value: 'Get approval after overtime work' }
+                                        ]}
+                                        value={formData.otRequestType}
+                                        onChange={(val) => handleInputChange({ target: { name: 'otRequestType', value: val, type: 'select' }})}
+                                    />
                                 </div>
                             </>
                         )}
 
                         <div className="form-group-shift">
-                            <label>Shift Time Extra Payout <span className="required">*</span></label>
-                            <select name="extraPayoutMultiplier" value={formData.extraPayoutMultiplier} onChange={handleInputChange}>
-                                <option value="Default">Default</option>
-                                <option value="1x">1x</option>
-                                <option value="1.5x">1.5x</option>
-                                <option value="2x">2x</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Shift Time Extra Payout"
+                                options={[
+                                    { label: 'Default', value: 'Default' },
+                                    { label: 'Before Shift Time', value: 'Before Shift Time' },
+                                    { label: 'After Shift Time', value: 'After Shift Time' }
+                                ]}
+                                value={formData.extraPayoutMultiplier}
+                                onChange={(val) => handleInputChange({ target: { name: 'extraPayoutMultiplier', value: val, type: 'select' }})}
+                            />
                         </div>
                     </div>
                 </div>
@@ -721,33 +769,39 @@ const AddShift = () => {
                     <h2 className="card-title">Comp Off Leave</h2>
                     <div className="form-grid">
                         <div className="form-group-shift">
-                            <label>Add Comp Off Leave On Extra Day <span className="required">*</span></label>
-                            <select name="compOffOnExtraDay" value={formData.compOffOnExtraDay} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Add Comp Off Leave On Extra Day"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.compOffOnExtraDay}
+                                onChange={(val) => handleInputChange({ target: { name: 'compOffOnExtraDay', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Add Comp Off Leave On Extra Hours After Shift Hours Completed (Working Days) <span className="required">*</span></label>
-                            <select name="compOffOnExtraHoursWorkingDay" value={formData.compOffOnExtraHoursWorkingDay} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Add Comp Off Leave On Extra Hours After Shift Hours Completed (Working Days)"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.compOffOnExtraHoursWorkingDay}
+                                onChange={(val) => handleInputChange({ target: { name: 'compOffOnExtraHoursWorkingDay', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         {(formData.compOffOnExtraDay === true || formData.compOffOnExtraDay === 'true' || 
                           formData.compOffOnExtraHoursWorkingDay === true || formData.compOffOnExtraHoursWorkingDay === 'true') && (
                             <>
                                 <div className="form-group-shift">
-                                    <label>Comp Off Expiry Type <span className="required">*</span></label>
-                                    <select name="compOffExpiryType" value={formData.compOffExpiryType} onChange={handleInputChange}>
-                                        <option value="None">None</option>
-                                        <option value="Custom Days">Custom Days</option>
-                                        <option value="End of Month">End of Month</option>
-                                        <option value="End of Quarter">End of Quarter</option>
-                                        <option value="End of Year">End of Year</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="Comp Off Expiry Type"
+                                        options={[
+                                            { label: 'None', value: 'None' },
+                                            { label: 'Custom Days', value: 'Custom Days' },
+                                            { label: 'End of Month', value: 'End of Month' },
+                                            { label: 'End of Quarter', value: 'End of Quarter' },
+                                            { label: 'End of Year', value: 'End of Year' }
+                                        ]}
+                                        value={formData.compOffExpiryType}
+                                        onChange={(val) => handleInputChange({ target: { name: 'compOffExpiryType', value: val, type: 'select' }})}
+                                    />
                                 </div>
 
                                 {formData.compOffExpiryType === 'Custom Days' && (
@@ -779,19 +833,21 @@ const AddShift = () => {
                                 </div>
 
                                 <div className="form-group-shift">
-                                    <label>Apply Comp Off Leave On Past Date <span className="required">*</span></label>
-                                    <select name="applyCompOffOnPastDate" value={formData.applyCompOffOnPastDate} onChange={handleInputChange}>
-                                        <option value={false}>No</option>
-                                        <option value={true}>Yes</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="Apply Comp Off Leave On Past Date"
+                                        options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                        value={formData.applyCompOffOnPastDate}
+                                        onChange={(val) => handleInputChange({ target: { name: 'applyCompOffOnPastDate', value: val, type: 'select' }})}
+                                    />
                                 </div>
 
                                 <div className="form-group-shift">
-                                    <label>Exclude comp off with auto leave <span className="required">*</span></label>
-                                    <select name="excludeCompOffWithAutoLeave" value={formData.excludeCompOffWithAutoLeave} onChange={handleInputChange}>
-                                        <option value={false}>No</option>
-                                        <option value={true}>Yes</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        label="Exclude comp off with auto leave"
+                                        options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                        value={formData.excludeCompOffWithAutoLeave}
+                                        onChange={(val) => handleInputChange({ target: { name: 'excludeCompOffWithAutoLeave', value: val, type: 'select' }})}
+                                    />
                                 </div>
                             </>
                         )}
@@ -803,27 +859,33 @@ const AddShift = () => {
                     <h2 className="card-title">Break Settings</h2>
                     <div className="form-grid">
                         <div className="form-group-shift">
-                            <label>Take Breaks Setting <span className="required">*</span></label>
-                            <select name="breakMode" value={formData.breakMode} onChange={handleInputChange}>
-                                <option value="Defined Minutes">Defined Minutes</option>
-                                <option value="Anytime Between Shift">Anytime Between Shift</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Take Breaks Setting"
+                                options={[
+                                    { label: 'Defined Minutes', value: 'Defined Minutes' },
+                                    { label: 'Anytime Between Shift', value: 'Anytime Between Shift' }
+                                ]}
+                                value={formData.breakMode}
+                                onChange={(val) => handleInputChange({ target: { name: 'breakMode', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Take Break With Approval In Face App</label>
-                            <select name="breakApprovalFaceApp" value={formData.breakApprovalFaceApp} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Take Break With Approval In Face App"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.breakApprovalFaceApp}
+                                onChange={(val) => handleInputChange({ target: { name: 'breakApprovalFaceApp', value: val, type: 'select' }})}
+                            />
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Take Break With Approval In Employee App</label>
-                            <select name="breakApprovalEmployeeApp" value={formData.breakApprovalEmployeeApp} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
+                            <SearchableSelect 
+                                label="Take Break With Approval In Employee App"
+                                options={[{ label: 'No', value: false }, { label: 'Yes', value: true }]}
+                                value={formData.breakApprovalEmployeeApp}
+                                onChange={(val) => handleInputChange({ target: { name: 'breakApprovalEmployeeApp', value: val, type: 'select' }})}
+                            />
                         </div>
                     </div>
                 </div>

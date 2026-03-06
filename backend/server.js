@@ -18,6 +18,7 @@ import dashboardRoutes from './routes/Dashboard.Route.js';
 import companyRoutes from './routes/Company.Routes.js';
 import breakTypeRoutes from './routes/BreakType.Routes.js';
 import shiftRoutes from './routes/Shift.Routes.js';
+import penaltyRuleRoutes from './routes/PenaltyRule.Routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,6 +51,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/break-types', breakTypeRoutes);
 app.use('/api/shifts', shiftRoutes);
+app.use('/api/penalty-rules', penaltyRuleRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
