@@ -19,6 +19,8 @@ import companyRoutes from './routes/Company.Routes.js';
 import breakTypeRoutes from './routes/BreakType.Routes.js';
 import shiftRoutes from './routes/Shift.Routes.js';
 import penaltyRuleRoutes from './routes/PenaltyRule.Routes.js';
+import graceTimeRoutes from './routes/GraceTime.Routes.js';
+import leaveTypeRoutes from './routes/LeaveType.Routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,6 +54,8 @@ app.use('/api/company', companyRoutes);
 app.use('/api/break-types', breakTypeRoutes);
 app.use('/api/shifts', shiftRoutes);
 app.use('/api/penalty-rules', penaltyRuleRoutes);
+app.use('/api/grace-times', graceTimeRoutes);
+app.use('/api/leave-types', leaveTypeRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

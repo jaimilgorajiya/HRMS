@@ -20,6 +20,8 @@ import Shift from './pages/Shift';
 import AddShift from './pages/AddShift';
 import EditShift from './pages/EditShift';
 import PenaltyRules from './pages/PenaltyRules';
+import GraceTime from './pages/GraceTime';
+import LeaveType from './pages/LeaveType';
 
 function App() {
   return (
@@ -52,9 +54,9 @@ function App() {
               <Route path="shift/edit/:id" element={<EditShift />} />
               <Route path="shift/manage" element={<Shift />} />
               <Route path="shift/penalty" element={<PenaltyRules />} />
-              <Route path="shift/grace-time" element={<ModulePlaceholder title="Add Next Day Grace Time" />} />
+              <Route path="shift/grace-time" element={<GraceTime />} />
               <Route path="shift-settings" element={<ModulePlaceholder title="Shift Settings" />} />
-              <Route path="leave-settings" element={<ModulePlaceholder title="Leave Settings" />} />
+              <Route path="leave/type" element={<LeaveType />} />
               <Route path="leave/*" element={<ModulePlaceholder title="Leave Management" />} />
               <Route path="payroll-settings" element={<ModulePlaceholder title="Payroll Settings" />} />
               <Route path="payroll/*" element={<ModulePlaceholder title="Payroll Management" />} />

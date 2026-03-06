@@ -238,7 +238,7 @@ const Designation = () => {
                                         <td style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{d.designationName}</td>
                                         <td>{d.designationAlias || '-'}</td>
                                         <td>
-                                            <button className="btn-action btn-edit-theme" onClick={() => handleEdit(d)}><Edit2 size={14} /></button>
+                                            <button className="btn-action-edit" onClick={() => handleEdit(d)} title="Edit"><Edit2 size={16} /></button>
                                         </td>
                                     </tr>
                                 ))

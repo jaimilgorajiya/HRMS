@@ -224,12 +224,12 @@ const Branch = () => {
                                 {branch.branchCode && (
                                     <div style={{ fontSize: '12px', color: 'var(--text-light)' }}>Code: {branch.branchCode}</div>
                                 )}
-                                <div className="branch-card-actions">
+                                <div className="branch-card-actions" style={{ marginTop: 'auto', paddingTop: '15px' }}>
                                     {!isReordering && (
-                                        <>
-                                            <button className="icon-btn" onClick={() => handleEdit(branch)}><Edit2 size={16} /></button>
-                                            <button className="icon-btn btn-delete" onClick={() => handleDelete(branch._id)}><Trash2 size={16} /></button>
-                                        </>
+                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                            <button className="btn-action-edit" onClick={() => handleEdit(branch)} title="Edit"><Edit2 size={16} /></button>
+                                            <button className="btn-action-delete" onClick={() => handleDelete(branch._id)} title="Delete"><Trash2 size={16} /></button>
+                                        </div>
                                     )}
                                 </div>
                             </div>

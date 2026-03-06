@@ -196,11 +196,11 @@ const BreakType = () => {
                         </div>
                         <div className="card-footer">
                             <div className="footer-left-actions" style={{ display: 'flex', gap: '8px' }}>
-                                <button className="dept-icon-btn edit" onClick={() => handleEdit(bt)} style={{ border: '1px solid #E2E8F0', padding: '6px 14px', fontSize: '11px', fontWeight: '700', borderRadius: '8px' }}>
-                                    <Edit2 size={12} style={{ marginRight: '6px' }} /> EDIT
+                                <button className="btn-action-edit" onClick={() => handleEdit(bt)} title="Edit">
+                                    <Edit2 size={16} />
                                 </button>
-                                <button className="dept-icon-btn delete" onClick={() => handleDelete(bt._id)} style={{ border: '1px solid #FEE2E2', background: '#FEF2F2', padding: '6px 14px', fontSize: '11px', fontWeight: '700', color: '#EF4444', borderRadius: '8px' }}>
-                                    <Trash2 size={12} style={{ marginRight: '6px' }} /> DELETE
+                                <button className="btn-action-delete" onClick={() => handleDelete(bt._id)} title="Delete">
+                                    <Trash2 size={16} />
                                 </button>
                             </div>
                             <div className="status-toggle-wrapper">

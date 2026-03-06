@@ -1,7 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Search, Check } from 'lucide-react';
+import { ChevronDown, Search, Check, X } from 'lucide-react';
 
-const SearchableSelect = ({ options, value, onChange, placeholder = "Select...", label = "", searchable = false }) => {
+const SearchableSelect = ({ 
+    options, 
+    value, 
+    onChange, 
+    placeholder = "Select...", 
+    label = "", 
+    searchable = false,
+    multiple = false,
+    required = false
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const dropdownRef = useRef(null);
@@ -9,9 +18,28 @@ const SearchableSelect = ({ options, value, onChange, placeholder = "Select...",
     const toggleDropdown = () => setIsOpen(!isOpen);
 
     const handleSelect = (optionValue) => {
-        onChange(optionValue);
-        setIsOpen(false);
-        setSearchTerm('');
+        if (multiple) {
+            const newValue = Array.isArray(value) ? [...value] : [];
+            const index = newValue.indexOf(optionValue);
+            if (index === -1) {
+                newValue.push(optionValue);
+            } else {
+                newValue.splice(index, 1);
+            }
+            onChange(newValue);
+        } else {
+            onChange(optionValue);
+            setIsOpen(false);
+            setSearchTerm('');
+        }
+    };
+
+    const removeOption = (e, optionValue) => {
+        e.stopPropagation();
+        if (multiple && Array.isArray(value)) {
+            const newValue = value.filter(v => v !== optionValue);
+            onChange(newValue);
+        }
     };
 
     useEffect(() => {
@@ -28,18 +56,30 @@ const SearchableSelect = ({ options, value, onChange, placeholder = "Select...",
         option.label.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const selectedOption = options.find(opt => opt.value === value);
+    const getSelectedLabels = () => {
+        if (multiple) {
+            if (!Array.isArray(value) || value.length === 0) return null;
+            return options.filter(opt => value.includes(opt.value));
+        }
+        return options.find(opt => opt.value === value);
+    };
+
+    const selected = getSelectedLabels();
 
     return (
         <div className="searchable-select-container" ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
-            {label && <label style={{ fontSize: '15px', fontWeight: '600', color: '#1E293B', marginBottom: '8px', display: 'block' }}>{label}</label>}
+            {label && (
+                <label style={{ fontSize: '15px', fontWeight: '600', color: '#1E293B', marginBottom: '8px', display: 'block' }}>
+                    {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+                </label>
+            )}
             
             <div 
                 className={`select-trigger ${isOpen ? 'active' : ''}`}
                 onClick={toggleDropdown}
                 style={{
-                    height: '48px',
-                    padding: '0 16px',
+                    minHeight: '48px',
+                    padding: '6px 16px',
                     border: isOpen ? '1.5px solid #2563EB' : '1.5px solid #E2E8F0',
                     borderRadius: '10px',
                     backgroundColor: '#fff',
@@ -51,10 +91,38 @@ const SearchableSelect = ({ options, value, onChange, placeholder = "Select...",
                     boxShadow: isOpen ? '0 0 0 4px rgba(37, 99, 235, 0.1)' : '0 1px 2px rgba(15, 23, 42, 0.05)',
                 }}
             >
-                <span style={{ color: selectedOption ? '#1E293B' : '#94A3B8', fontSize: '15px', fontWeight: '500' }}>
-                    {selectedOption ? selectedOption.label : placeholder}
-                </span>
-                <ChevronDown size={18} style={{ color: '#64748B', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', flex: 1 }}>
+                    {multiple ? (
+                        selected && selected.length > 0 ? (
+                            selected.map(opt => (
+                                <span key={opt.value} style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    backgroundColor: '#EFF6FF',
+                                    color: '#2563EB',
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    fontSize: '13px',
+                                    fontWeight: '500',
+                                    border: '1px solid #DBEAFE'
+                                }}>
+                                    {opt.label}
+                                    <X 
+                                        size={14} 
+                                        onClick={(e) => removeOption(e, opt.value)}
+                                        style={{ cursor: 'pointer' }}
+                                    />
+                                </span>
+                            ))
+                        ) : <span style={{ color: '#94A3B8', fontSize: '15px', fontWeight: '500' }}>{placeholder}</span>
+                    ) : (
+                        <span style={{ color: selected ? '#1E293B' : '#94A3B8', fontSize: '15px', fontWeight: '500' }}>
+                            {selected ? selected.label : placeholder}
+                        </span>
+                    )}
+                </div>
+                <ChevronDown size={18} style={{ color: '#64748B', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none', marginLeft: '8px' }} />
             </div>
 
             {isOpen && (
@@ -72,7 +140,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder = "Select...",
                     animation: 'dropdownIn 0.2s ease-out'
                 }}>
                     {searchable && (
-                        <div style={{ padding: '6px', borderBottom: '1px solid #F1F5F9' }}>
+                        <div style={{ padding: '8px', borderBottom: '1px solid #F1F5F9' }}>
                             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                 <Search size={14} style={{ position: 'absolute', left: '10px', color: '#94A3B8' }} />
                                 <input 
@@ -81,13 +149,14 @@ const SearchableSelect = ({ options, value, onChange, placeholder = "Select...",
                                     placeholder="Search..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
                                     style={{
                                         width: '100%',
-                                        height: '30px',
-                                        padding: '0 10px 0 30px',
+                                        height: '36px',
+                                        padding: '0 10px 0 32px',
                                         border: '1px solid #E2E8F0',
-                                        borderRadius: '5px',
-                                        fontSize: '12.5px',
+                                        borderRadius: '8px',
+                                        fontSize: '14px',
                                         outline: 'none',
                                         backgroundColor: '#F8FAFC'
                                     }}
@@ -96,34 +165,44 @@ const SearchableSelect = ({ options, value, onChange, placeholder = "Select...",
                         </div>
                     )}
                     
-                    <div style={{ maxHeight: '200px', overflowY: 'auto', padding: '3px' }}>
+                    <div style={{ maxHeight: '250px', overflowY: 'auto', padding: '4px' }}>
                         {filteredOptions.length > 0 ? (
-                            filteredOptions.map((option) => (
-                                <div 
-                                    key={option.value}
-                                    onClick={() => handleSelect(option.value)}
-                                    style={{
-                                        padding: '6px 12px',
-                                        fontSize: '13.5px',
-                                        fontWeight: '500',
-                                        color: (option.value === value || (option.value === false && value === false)) ? '#2563EB' : '#475569',
-                                        backgroundColor: (option.value === value || (option.value === false && value === false)) ? '#EFF6FF' : 'transparent',
-                                        borderRadius: '5px',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        transition: 'background 0.1s'
-                                    }}
-                                    onMouseEnter={(e) => e.target.style.backgroundColor = (option.value === value || (option.value === false && value === false)) ? '#EFF6FF' : '#F8FAFC'}
-                                    onMouseLeave={(e) => e.target.style.backgroundColor = (option.value === value || (option.value === false && value === false)) ? '#EFF6FF' : 'transparent'}
-                                >
-                                    {option.label}
-                                    {(option.value === value || (option.value === false && value === false)) && <Check size={14} />}
-                                </div>
-                            ))
+                            filteredOptions.map((option) => {
+                                const isSelected = multiple 
+                                    ? Array.isArray(value) && value.includes(option.value)
+                                    : value === option.value;
+
+                                return (
+                                    <div 
+                                        key={option.value}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSelect(option.value);
+                                        }}
+                                        style={{
+                                            padding: '8px 12px',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            color: isSelected ? '#2563EB' : '#475569',
+                                            backgroundColor: isSelected ? '#EFF6FF' : 'transparent',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            transition: 'background 0.1s',
+                                            marginBottom: '2px'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isSelected ? '#EFF6FF' : '#F8FAFC'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isSelected ? '#EFF6FF' : 'transparent'}
+                                    >
+                                        {option.label}
+                                        {isSelected && <Check size={16} />}
+                                    </div>
+                                );
+                            })
                         ) : (
-                            <div style={{ padding: '20px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
+                            <div style={{ padding: '20px', textAlign: 'center', color: '#94A3B8', fontSize: '14px' }}>
                                 No results found
                             </div>
                         )}
@@ -142,3 +221,4 @@ const SearchableSelect = ({ options, value, onChange, placeholder = "Select...",
 };
 
 export default SearchableSelect;
+

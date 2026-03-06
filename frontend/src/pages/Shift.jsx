@@ -217,14 +217,14 @@ const Shift = () => {
                                         <td>
                                             <div className="action-buttons-cell">
                                                 <button
-                                                    className="btn-action btn-edit-theme"
+                                                    className="btn-action-edit"
                                                     onClick={() => navigate(`/admin/shift/edit/${shift._id}`)}
                                                     title="Edit Shift"
                                                 >
                                                     <Edit2 size={16} />
                                                 </button>
                                                 <button
-                                                    className="btn-action btn-delete-theme"
+                                                    className="btn-action-delete"
                                                     onClick={() => handleDelete(shift._id)}
                                                     title="Delete Shift"
                                                 >

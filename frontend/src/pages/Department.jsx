@@ -216,8 +216,8 @@ const Department = () => {
                                             <div key={dept._id} className="dept-item-card">
                                                 <span className="dept-name">{dept.name}</span>
                                                 <div className="dept-item-actions">
-                                                    <button className="dept-icon-btn edit" onClick={() => handleEdit(dept)}><Edit2 size={14} /></button>
-                                                    <button className="dept-icon-btn delete" onClick={() => handleDelete(dept._id)}><Trash2 size={14} /></button>
+                                                    <button className="btn-action-edit" onClick={() => handleEdit(dept)} title="Edit"><Edit2 size={16} /></button>
+                                                    <button className="btn-action-delete" onClick={() => handleDelete(dept._id)} title="Delete"><Trash2 size={16} /></button>
                                                 </div>
                                             </div>
                                         ))}
