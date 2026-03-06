@@ -194,17 +194,37 @@ const LeaveType = () => {
     };
 
     const toggleStatus = async (id, currentStatus) => {
-        try {
-            const response = await fetch(`${apiUrl}/api/leave-types/${id}/toggle-status`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (data.success) {
-                fetchLeaveTypes();
+        const isActive = currentStatus === 'Active';
+        const result = await Swal.fire({
+            title: isActive ? 'Deactivate Leave Type?' : 'Activate Leave Type?',
+            text: `Are you sure you want to ${isActive ? 'deactivate' : 'activate'} this leave type?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#64748B',
+            confirmButtonText: `Yes, ${isActive ? 'deactivate' : 'activate'} it!`
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`${apiUrl}/api/leave-types/${id}/toggle-status`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: `Leave type ${isActive ? 'deactivated' : 'activated'} successfully.`,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    fetchLeaveTypes();
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Failed to update status', 'error');
             }
-        } catch (error) {
-            Swal.fire('Error', 'Failed to update status', 'error');
         }
     };
 
