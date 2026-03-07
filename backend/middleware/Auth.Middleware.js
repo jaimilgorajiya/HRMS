@@ -1,4 +1,3 @@
-
 import jwt from "jsonwebtoken";
 import User from "../models/User.Model.js";
 
@@ -11,15 +10,13 @@ const verifyToken = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("VerifyToken - Decoded:", decoded);
-
+        
         if (!decoded) {
             return res.status(401).json({ success: false, message: "Unauthorized - Invalid Token" });
         }
         
         const user = await User.findById(decoded.userId).select("-password");
-        console.log("VerifyToken - User Role:", user?.role);
-
+        
         if (!user) {
             return res.status(401).json({ success: false, message: "Unauthorized - User Not Found" });
         }

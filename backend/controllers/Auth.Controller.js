@@ -2,11 +2,6 @@ import User from "../models/User.Model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { generateEmployeeId } from "../utils/employeeId.js";
-import fs from 'fs';
-
-const logToFile = (msg) => {
-    fs.appendFileSync('login_debug.log', `${new Date().toISOString()} - ${msg}\n`);
-};
 
 const generateTokenAndSetCookie = (userId, res) => {
     const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -102,13 +97,10 @@ const login = async (req, res) => {
 
     email = email.trim().toLowerCase();
 
-    logToFile(`Login attempt for: ${email}`);
-
     // Find user - using case-insensitive search to be safe for existing data
     const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
 
     if (!user) {
-      logToFile(`User not found: ${email}`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -117,7 +109,6 @@ const login = async (req, res) => {
 
     // Check status - allow if undefined/missing for backwards compatibility
     if (user.status && user.status !== "Active") {
-      logToFile(`User account blocked: ${email}`);
       return res.status(403).json({
         success: false,
         message: "Account is blocked. Contact admin.",
@@ -128,14 +119,13 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      logToFile(`Invalid password for: ${email} (Password length: ${password.length})`);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
       });
     }
 
-    logToFile(`Login success for: ${email}`);
+
 
     // Generate JWT Cookie
     const token = generateTokenAndSetCookie(user._id, res);
@@ -192,7 +182,7 @@ const verifyUser = async (req, res) => {
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        const userId = req.user._id;
+        const userId = req.user ? req.user._id : null;
 
         // Validation
         if (!currentPassword || !newPassword) {
@@ -201,6 +191,10 @@ const changePassword = async (req, res) => {
 
         if (currentPassword === newPassword) {
             return res.status(400).json({ success: false, message: "New password cannot be the same as the current password" });
+        }
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
         const user = await User.findById(userId);
@@ -218,14 +212,25 @@ const changePassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        // Update password
-        user.password = hashedPassword;
-        await user.save();
+        // Update password using findByIdAndUpdate to target only the password field
+        // This avoids validation errors on other unrelated fields like workSetup.shift
+        
+        // Sanitize the shift field if it's an empty string to prevent future validation errors
+        if (user.workSetup && user.workSetup.shift === "") {
+            await User.findByIdAndUpdate(userId, { 
+                $set: { password: hashedPassword },
+                $unset: { "workSetup.shift": "" } 
+            });
+        } else {
+            await User.findByIdAndUpdate(userId, { 
+                $set: { password: hashedPassword } 
+            });
+        }
 
         res.status(200).json({ success: true, message: "Password updated successfully" });
 
     } catch (error) {
-        console.error("Change Password Error:", error.message);
+        console.error("Change Password Error:", error);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };

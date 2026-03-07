@@ -4,3 +4,21 @@
 2026-03-05T05:07:22.285Z - Login success for: jaimilgorajiya555@gmail.com
 2026-03-06T05:23:13.063Z - Login attempt for: jaimilgorajiya555@gmail.com
 2026-03-06T05:23:13.474Z - Login success for: jaimilgorajiya555@gmail.com
+2026-03-07T04:20:09.264Z - Login attempt for: jaimilgorajiya555@gmail.com
+2026-03-07T04:20:09.393Z - Login success for: jaimilgorajiya555@gmail.com
+    2026-03-07T07:22:26.251Z - Change Password attempt for user: 69955b16ea3a1dce9b869511
+2026-03-07T07:22:26.259Z - Comparing passwords for user 69955b16ea3a1dce9b869511
+2026-03-07T07:22:26.348Z - Hashing new password for user 69955b16ea3a1dce9b869511
+2026-03-07T07:22:26.441Z - Saving new password for user 69955b16ea3a1dce9b869511
+2026-03-07T07:22:26.454Z - Change Password Error for user 69955b16ea3a1dce9b869511: User validation failed: workSetup.shift: Cast to ObjectId failed for value "" (type string) at path "workSetup.shift" because of "BSONError"
+Stack: ValidationError: User validation failed: workSetup.shift: Cast to ObjectId failed for value "" (type string) at path "workSetup.shift" because of "BSONError"
+    at Document.invalidate (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\document.js:3405:32)
+    at init (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\document.js:821:18)
+    at init (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\document.js:787:7)
+    at Document.$__init (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\document.js:717:3)
+    at model.syncWrapper [as $__init] (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\kareem\index.js:291:25)
+    at Document.init (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\document.js:658:8)
+    at Document.$init (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\document.js:674:42)
+    at Object.createModelAndInit (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\queryHelpers.js:127:12)
+    at completeOne (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\query.js:3329:11)
+    at Query._completeOne (C:\Users\jaimi\OneDrive\Desktop\Everything\Personal\HRMS\backend\node_modules\mongoose\lib\query.js:2653:7)
