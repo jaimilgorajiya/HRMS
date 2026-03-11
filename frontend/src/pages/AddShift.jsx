@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, RotateCcw } from 'lucide-react';
@@ -10,7 +12,7 @@ import '../styles/AddShift.css';
 
 const AddShift = () => {
     const navigate = useNavigate();
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+    
 
     const initialFormData = {
         shiftName: '',
@@ -154,7 +156,7 @@ const AddShift = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/shifts/add`, {
+            const response = await authenticatedFetch(`${API_URL}/api/shifts/add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

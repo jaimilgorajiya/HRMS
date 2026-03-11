@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, Check, Search, Filter, ChevronLeft, ChevronRight, ToggleLeft, ToggleRight, Info } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -25,7 +27,6 @@ const LeaveType = () => {
         applyOnPastDays: 'No'
     });
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -35,7 +36,7 @@ const LeaveType = () => {
     const fetchLeaveTypes = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${apiUrl}/api/leave-types`, {
+            const response = await authenticatedFetch(`${API_URL}/api/leave-types`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -53,7 +54,7 @@ const LeaveType = () => {
         const { name, value, type, checked } = e.target;
         setFormData({
             ...formData,
-            [name]: type === 'checkbox' || type === 'radio' && name === 'isBirthdayAnniversary' ? (value === 'true') : value
+            [name]: type === 'checkbox' ? checked : value
         });
     };
 
@@ -63,11 +64,11 @@ const LeaveType = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const endpoint = isEditing ? `${apiUrl}/api/leave-types/${currentId}` : `${apiUrl}/api/leave-types`;
+        const endpoint = isEditing ? `${API_URL}/api/leave-types/${currentId}` : `${API_URL}/api/leave-types`;
         const method = isEditing ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authenticatedFetch(endpoint, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -111,18 +112,18 @@ const LeaveType = () => {
         setCurrentId(null);
     };
 
-    const handleEdit = (lt) => {
+    const handleEdit = (item) => {
         setFormData({
-            name: lt.name,
-            shortName: lt.shortName || '',
-            attachmentRequired: lt.attachmentRequired || 'No',
-            applyOnHoliday: lt.applyOnHoliday || 'No',
-            applicableFor: lt.applicableFor || 'All',
-            isBirthdayAnniversary: lt.isBirthdayAnniversary || false,
-            description: lt.description || '',
-            applyOnPastDays: lt.applyOnPastDays || 'No'
+            name: item.name,
+            shortName: item.shortName || '',
+            attachmentRequired: item.attachmentRequired || 'No',
+            applyOnHoliday: item.applyOnHoliday || 'No',
+            applicableFor: item.applicableFor || 'All',
+            isBirthdayAnniversary: item.isBirthdayAnniversary || false,
+            description: item.description || '',
+            applyOnPastDays: item.applyOnPastDays || 'No'
         });
-        setCurrentId(lt._id);
+        setCurrentId(item._id);
         setIsEditing(true);
         setIsModalOpen(true);
     };
@@ -130,7 +131,7 @@ const LeaveType = () => {
     const handleDelete = async (id) => {
         const result = await Swal.fire({
             title: 'Are you sure?',
-            text: "You won't be able to revert this!",
+            text: "This action cannot be undone!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
@@ -140,7 +141,7 @@ const LeaveType = () => {
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/leave-types/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/leave-types/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -173,7 +174,7 @@ const LeaveType = () => {
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/leave-types/bulk-delete`, {
+                const response = await authenticatedFetch(`${API_URL}/api/leave-types/bulk-delete`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -207,7 +208,7 @@ const LeaveType = () => {
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/leave-types/${id}/toggle-status`, {
+                const response = await authenticatedFetch(`${API_URL}/api/leave-types/${id}/toggle-status`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -251,292 +252,160 @@ const LeaveType = () => {
     };
 
     return (
-        <div style={{ padding: '0px', width: '100%', minHeight: '100vh', background: '#F8FAFC' }}>
-            <div style={{ padding: '20px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1 style={{ fontSize: '20px', fontWeight: '600', color: '#1E293B', margin: 0 }}>Leave Types</h1>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <button 
-                        onClick={() => { resetForm(); setIsModalOpen(true); }}
-                        style={{ background: '#3B648B', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: '600' }}
-                    >
-                        <Plus size={16} /> ADD
-                    </button>
-                    <button 
-                        onClick={handleBulkDelete}
-                        style={{ background: '#EF4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: '600' }}
-                    >
-                        <Trash2 size={16} /> DELETE
-                    </button>
+        <div className="hrm-container">
+            <div className="hrm-header">
+                <h1 className="hrm-title">Leave Types</h1>
+                <div className="hrm-header-actions">
+                    <button className="btn-hrm btn-hrm-primary" onClick={() => { resetForm(); setIsModalOpen(true); }}><Plus size={18} /> ADD</button>
+                    <button className="btn-hrm btn-hrm-danger" onClick={handleBulkDelete}><Trash2 size={18} /> DELETE</button>
                 </div>
             </div>
 
-            <div style={{ padding: '0 30px 40px' }}>
-                <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)', border: '1px solid #E2E8F0' }}>
-                    
-                    {/* Table Filters */}
-                    <div style={{ padding: '20px 24px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-                        <div style={{ position: 'relative' }}>
-                            <span style={{ marginRight: '10px', color: '#64748B', fontSize: '14px' }}>Search:</span>
-                            <input 
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{ border: '1.5px solid #E2E8F0', borderRadius: '6px', padding: '6px 12px', width: '250px', outline: 'none' }}
-                            />
-                        </div>
+            <div className="hrm-card">
+                <div className="hrm-card-header" style={{ justifyContent: 'flex-end' }}>
+                    <div className="search-wrapper">
+                        <Search size={16} color="#64748B" />
+                        <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
+                </div>
 
-                    {/* Table */}
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1200px' }}>
-                            <thead>
-                                <tr style={{ background: '#F8FAFC' }}>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Sr. No</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={paginatedData.length > 0 && selectedIds.length === paginatedData.length}
-                                            onChange={handleSelectAll}
-                                            style={{ cursor: 'pointer' }}
-                                        />
-                                    </th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Action</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Name</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Short Name</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Leaves</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Group</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Attachment</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Holiday</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Applicable For</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Past Days</th>
-                                    <th style={{ padding: '12px 24px', color: '#64748B', fontWeight: '600', fontSize: '13px', borderBottom: '1.5px solid #E2E8F0' }}>Description</th>
+                <div className="hrm-table-wrapper">
+                    <table className="hrm-table">
+                        <thead>
+                            <tr>
+                                <th style={{ width: '60px' }}>Sr. No</th>
+                                <th style={{ width: '40px' }}>
+                                    <input type="checkbox" checked={paginatedData.length > 0 && selectedIds.length === paginatedData.length} onChange={handleSelectAll} />
+                                </th>
+                                <th style={{ width: '100px' }}>Action</th>
+                                <th>Name</th>
+                                <th>Short Name</th>
+                                <th>Attachment</th>
+                                <th>Holiday</th>
+                                <th>Applicable For</th>
+                                <th>Past Days</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr><td colSpan="10" style={{ textAlign: 'center', padding: '40px' }}>Loading...</td></tr>
+                            ) : paginatedData.length > 0 ? paginatedData.map((item, index) => (
+                                <tr key={item._id}>
+                                    <td>{(currentPage - 1) * entriesPerPage + index + 1}</td>
+                                    <td><input type="checkbox" checked={selectedIds.includes(item._id)} onChange={() => handleSelectRow(item._id)} /></td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <button className="btn-action-edit" onClick={() => handleEdit(item)}><Edit2 size={14} /></button>
+                                            <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }} onClick={() => toggleStatus(item._id, item.status)}>
+                                                {item.status === 'Active' ? <ToggleRight size={24} color="#22C55E" /> : <ToggleLeft size={24} color="#94A3B8" />}
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td style={{ fontWeight: '600', color: '#1E293B' }}>{item.name}</td>
+                                    <td>{item.shortName || '--'}</td>
+                                    <td><span className={`dept-count`} style={{ background: item.attachmentRequired === 'Yes' ? '#FEF2F2' : '#F0FDF4', color: item.attachmentRequired === 'Yes' ? '#EF4444' : '#16A34A', border: 'none' }}>{item.attachmentRequired}</span></td>
+                                    <td>{item.applyOnHoliday}</td>
+                                    <td>{item.applicableFor}</td>
+                                    <td>{item.applyOnPastDays}</td>
+                                    <td style={{ fontSize: '13px', color: '#64748B', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description || '--'}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {loading ? (
-                                    <tr>
-                                        <td colSpan="12" style={{ padding: '30px', textAlign: 'center', color: '#64748B' }}>Loading...</td>
-                                    </tr>
-                                ) : paginatedData.length > 0 ? paginatedData.map((item, index) => (
-                                    <tr key={item._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                                        <td style={{ padding: '12px 24px', color: '#1E293B', fontSize: '14px' }}>{(currentPage - 1) * entriesPerPage + index + 1}</td>
-                                        <td style={{ padding: '12px 24px' }}>
-                                            <input 
-                                                type="checkbox" 
-                                                checked={selectedIds.includes(item._id)}
-                                                onChange={() => handleSelectRow(item._id)}
-                                                style={{ cursor: 'pointer' }} 
-                                            />
-                                        </td>
-                                        <td style={{ padding: '12px 24px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <button 
-                                                    onClick={() => handleEdit(item)}
-                                                    className="btn-action-edit"
-                                                    title="Edit"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button 
-                                                    onClick={() => toggleStatus(item._id, item.status)}
-                                                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}
-                                                >
-                                                    {item.status === 'Active' ? <ToggleRight size={28} color="#22C55E" /> : <ToggleLeft size={28} color="#94A3B8" />}
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '12px 24px', color: '#1E293B', fontSize: '14px', fontWeight: '500' }}>{item.name}</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '14px' }}>{item.shortName || '--'}</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '14px' }}>0</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '14px' }}>Default</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '14px' }}>{item.attachmentRequired}</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '14px' }}>{item.applyOnHoliday}</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '14px' }}>{item.applicableFor}</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '14px' }}>{item.applyOnPastDays}</td>
-                                        <td style={{ padding: '12px 24px', color: '#475569', fontSize: '13px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description || '--'}</td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="12" style={{ padding: '30px', textAlign: 'center', color: '#64748B' }}>No data found</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                            )) : (
+                                <tr><td colSpan="10" style={{ textAlign: 'center', padding: '40px' }}>No records found</td></tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-                    {/* Pagination */}
-                    <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', borderTop: '1px solid #F1F5F9' }}>
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                            <button 
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                style={{ padding: '6px 10px', border: '1.5px solid #E2E8F0', borderRadius: '6px', background: 'white', cursor: 'pointer', opacity: currentPage === 1 ? 0.5 : 1 }}
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
+                {totalPages > 1 && (
+                    <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #F1F5F9' }}>
+                        <div style={{ fontSize: '13px', color: '#64748B' }}>Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, filteredData.length)} of {filteredData.length} entries</div>
+                        <div className="pagination">
+                            <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}><ChevronLeft size={16} /></button>
                             {[...Array(totalPages)].map((_, i) => (
-                                <button 
-                                    key={i} 
-                                    onClick={() => setCurrentPage(i + 1)}
-                                    style={{ 
-                                        padding: '6px 12px', border: '1.5px solid #E2E8F0', borderRadius: '6px', 
-                                        background: currentPage === i + 1 ? '#3B648B' : 'white', 
-                                        color: currentPage === i + 1 ? 'white' : '#1E293B',
-                                        cursor: 'pointer', fontWeight: '600'
-                                    }}
-                                >
-                                    {i + 1}
-                                </button>
+                                <button key={i} className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
                             ))}
-                            <button 
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages || totalPages === 0}
-                                style={{ padding: '6px 10px', border: '1.5px solid #E2E8F0', borderRadius: '6px', background: 'white', cursor: 'pointer', opacity: (currentPage === totalPages || totalPages === 0) ? 0.5 : 1 }}
-                            >
-                                <ChevronRight size={16} />
-                            </button>
+                            <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}><ChevronRight size={16} /></button>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
 
-            {/* Modal */}
             {isModalOpen && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                    <div style={{ background: 'white', borderRadius: '12px', width: '850px', maxWidth: '95%', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
-                        <div style={{ background: '#3B648B', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
-                            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Leave Type</h2>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>
-                                <X size={24} />
-                            </button>
+                <div className="hrm-modal-overlay">
+                    <div className="hrm-modal-content">
+                        <div className="hrm-modal-header">
+                            <h2>{isEditing ? 'Edit Leave Type' : 'Add Leave Type'}</h2>
+                            <button className="icon-btn" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                         </div>
-                        <form onSubmit={handleSubmit} style={{ padding: '30px' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#475569' }}>Leave Type Name <span style={{ color: '#EF4444' }}>*</span></label>
-                                    <input 
-                                        type="text" 
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        placeholder="Leave Type Name"
-                                        required 
-                                        style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #E2E8F0', borderRadius: '8px', outline: 'none' }}
-                                    />
-                                </div>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#475569' }}>Leave Type Short Name</label>
-                                    <input 
-                                        type="text" 
-                                        name="shortName"
-                                        value={formData.shortName}
-                                        onChange={handleInputChange}
-                                        placeholder="Leave Type Short Name"
-                                        style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #E2E8F0', borderRadius: '8px', outline: 'none' }}
-                                    />
-                                </div>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <SearchableSelect 
-                                        label="Attachment Required"
-                                        required={true}
-                                        options={[
-                                            { label: 'No', value: 'No' },
-                                            { label: 'Yes', value: 'Yes' }
-                                        ]}
-                                        value={formData.attachmentRequired}
-                                        onChange={(val) => setFormData({ ...formData, attachmentRequired: val })}
-                                        placeholder="Select Option"
-                                    />
-                                </div>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <SearchableSelect 
-                                        label="Apply Leave On Holiday"
-                                        required={true}
-                                        options={[
-                                            { label: 'No', value: 'No' },
-                                            { label: 'Yes', value: 'Yes' }
-                                        ]}
-                                        value={formData.applyOnHoliday}
-                                        onChange={(val) => setFormData({ ...formData, applyOnHoliday: val })}
-                                        placeholder="Select Option"
-                                    />
-                                </div>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <SearchableSelect 
-                                        label="Applicable For"
-                                        required={true}
-                                        options={[
-                                            { label: 'All', value: 'All' },
-                                            { label: 'Male Only', value: 'Male Only' },
-                                            { label: 'Female Only', value: 'Female Only' },
-                                            { label: 'Married', value: 'Married' },
-                                            { label: 'Un-Married', value: 'Un-Married' },
-                                            { label: 'Married Female Only', value: 'Married Female Only' },
-                                            { label: 'Married Male Only', value: 'Married Male Only' }
-                                        ]}
-                                        value={formData.applicableFor}
-                                        onChange={(val) => setFormData({ ...formData, applicableFor: val })}
-                                        placeholder="Select Option"
-                                        searchable={true}
-                                    />
-                                </div>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#475569' }}>Is Birthday/Anniversary Leave <span style={{ color: '#EF4444' }}>*</span></label>
-                                    <div style={{ display: 'flex', gap: '30px', marginTop: '10px' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                                            <input 
-                                                type="radio" 
-                                                name="isBirthdayAnniversary" 
-                                                value="false"
-                                                checked={formData.isBirthdayAnniversary === false}
-                                                onChange={() => handleRadioChange('isBirthdayAnniversary', false)}
-                                                style={{ accentColor: '#3B648B' }}
-                                            /> No
-                                        </label>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                                            <input 
-                                                type="radio" 
-                                                name="isBirthdayAnniversary" 
-                                                value="true"
-                                                checked={formData.isBirthdayAnniversary === true}
-                                                onChange={() => handleRadioChange('isBirthdayAnniversary', true)}
-                                                style={{ accentColor: '#3B648B' }}
-                                            /> Yes (Applicable on Birthday/Anniversary date only)
-                                        </label>
+                        <form onSubmit={handleSubmit}>
+                            <div className="hrm-modal-body">
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Name <span className="req">*</span></label>
+                                        <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="hrm-input" placeholder="e.g. Casual Leave" required />
+                                    </div>
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Short Name</label>
+                                        <input type="text" name="shortName" value={formData.shortName} onChange={handleInputChange} className="hrm-input" placeholder="e.g. CL" />
                                     </div>
                                 </div>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#475569' }}>Leave Type Description</label>
-                                    <textarea 
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleInputChange}
-                                        placeholder="Leave Type Description"
-                                        style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #E2E8F0', borderRadius: '8px', outline: 'none', height: '100px', resize: 'vertical' }}
-                                    />
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Attachment Required?</label>
+                                        <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input type="radio" name="attachmentRequired" value="Yes" checked={formData.attachmentRequired === 'Yes'} onChange={() => handleRadioChange('attachmentRequired', 'Yes')} /> Yes
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input type="radio" name="attachmentRequired" value="No" checked={formData.attachmentRequired === 'No'} onChange={() => handleRadioChange('attachmentRequired', 'No')} /> No
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Apply On Holiday?</label>
+                                        <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input type="radio" name="applyOnHoliday" value="Yes" checked={formData.applyOnHoliday === 'Yes'} onChange={() => handleRadioChange('applyOnHoliday', 'Yes')} /> Yes
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input type="radio" name="applyOnHoliday" value="No" checked={formData.applyOnHoliday === 'No'} onChange={() => handleRadioChange('applyOnHoliday', 'No')} /> No
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style={{ marginBottom: '20px' }}>
-                                    <SearchableSelect 
-                                        label="Leave Applied On Past Days"
-                                        required={true}
-                                        options={[
-                                            { label: 'No', value: 'No' },
-                                            { label: 'Yes', value: 'Yes' }
-                                        ]}
-                                        value={formData.applyOnPastDays}
-                                        onChange={(val) => setFormData({ ...formData, applyOnPastDays: val })}
-                                        placeholder="Select Option"
-                                    />
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Applicable For</label>
+                                        <select name="applicableFor" value={formData.applicableFor} onChange={handleInputChange} className="hrm-select">
+                                            <option value="All">All</option>
+                                            <option value="Male Only">Male Only</option>
+                                            <option value="Female Only">Female Only</option>
+                                        </select>
+                                    </div>
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Apply On Past Days?</label>
+                                        <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input type="radio" name="applyOnPastDays" value="Yes" checked={formData.applyOnPastDays === 'Yes'} onChange={() => handleRadioChange('applyOnPastDays', 'Yes')} /> Yes
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                <input type="radio" name="applyOnPastDays" value="No" checked={formData.applyOnPastDays === 'No'} onChange={() => handleRadioChange('applyOnPastDays', 'No')} /> No
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Description</label>
+                                    <textarea name="description" value={formData.description} onChange={handleInputChange} className="hrm-textarea" placeholder="More about this leave type..."></textarea>
                                 </div>
                             </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', borderTop: '1px solid #F1F5F9', paddingTop: '30px' }}>
-                                <button 
-                                    type="submit"
-                                    style={{ background: '#3B648B', color: 'white', border: 'none', padding: '12px 30px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '600' }}
-                                >
-                                    <Check size={18} /> {isEditing ? 'UPDATE' : 'ADD'}
-                                </button>
+                            <div className="hrm-modal-footer">
+                                <button type="button" className="btn-hrm btn-hrm-secondary" onClick={() => setIsModalOpen(false)}>CANCEL</button>
+                                <button type="submit" className="btn-hrm btn-hrm-primary"><Save size={18} /> {isEditing ? 'UPDATE' : 'SAVE'}</button>
                             </div>
                         </form>
                     </div>
@@ -547,4 +416,3 @@ const LeaveType = () => {
 };
 
 export default LeaveType;
-

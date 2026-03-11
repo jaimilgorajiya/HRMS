@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Save, X, Edit2, AlertCircle, Check, Search } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -12,7 +14,7 @@ const GraceTime = () => {
     const [fetchingShifts, setFetchingShifts] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+    
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -37,7 +39,7 @@ const GraceTime = () => {
     const fetchShifts = async () => {
         try {
             setFetchingShifts(true);
-            const response = await fetch(`${apiUrl}/api/shifts`, {
+            const response = await authenticatedFetch(`${API_URL}/api/shifts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -53,7 +55,7 @@ const GraceTime = () => {
 
     const fetchAllRules = async () => {
         try {
-            const response = await fetch(`${apiUrl}/api/grace-times`, {
+            const response = await authenticatedFetch(`${API_URL}/api/grace-times`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -99,7 +101,7 @@ const GraceTime = () => {
 
         try {
             setLoading(true);
-            const response = await fetch(`${apiUrl}/api/grace-times`, {
+            const response = await authenticatedFetch(`${API_URL}/api/grace-times`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -137,7 +139,7 @@ const GraceTime = () => {
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/grace-times/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/grace-times/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });

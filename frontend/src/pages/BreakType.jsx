@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, Check, Coffee, Utensils, Clock, ToggleLeft, ToggleRight } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -14,7 +16,7 @@ const BreakType = () => {
         minutes: ''
     });
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+    
 
     useEffect(() => {
         fetchBreakTypes();
@@ -24,7 +26,7 @@ const BreakType = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/break-types`, {
+            const response = await authenticatedFetch(`${API_URL}/api/break-types`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -45,11 +47,11 @@ const BreakType = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const endpoint = isEditing ? `${apiUrl}/api/break-types/update/${currentId}` : `${apiUrl}/api/break-types/add`;
+        const endpoint = isEditing ? `${API_URL}/api/break-types/update/${currentId}` : `${API_URL}/api/break-types/add`;
         const method = isEditing ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authenticatedFetch(endpoint, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -106,7 +108,7 @@ const BreakType = () => {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/api/break-types/delete/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/break-types/delete/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -135,7 +137,7 @@ const BreakType = () => {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/api/break-types/update/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/break-types/update/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

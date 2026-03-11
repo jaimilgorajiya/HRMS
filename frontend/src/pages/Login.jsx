@@ -1,14 +1,49 @@
+import API_URL from '../config/api';
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Login = ({ isRegister }) => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const location = useLocation();
 
-  // Clear error message when switching between Login and Register
+  // Handle session expiration message
   useEffect(() => {
-    setError("");
-  }, [isRegister]);
+    const params = new URLSearchParams(location.search);
+    if (params.get('expired') === 'true') {
+      setError("Your session has expired. Please login again.");
+      // Clear the param from the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [location.search]);
 
+  const [formData, setFormData] = useState(() => {
+    const remembered = localStorage.getItem("rememberedCredentials");
+    if (remembered) {
+      try {
+        const { email, password } = JSON.parse(remembered);
+        return {
+          name: "",
+          email: email || "",
+          password: password || "",
+          rememberMe: true,
+        };
+      } catch (e) {
+        console.error("Error parsing remembered credentials:", e);
+      }
+    }
+    return {
+      name: "",
+      email: "",
+      password: "",
+      rememberMe: false,
+    };
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Auto-redirect if already logged in, or clear partial session
   useEffect(() => {
     const userString = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -17,13 +52,9 @@ const Login = ({ isRegister }) => {
       try {
         const user = JSON.parse(userString);
         if (user && user.role) {
-          if (user.role === "Admin") {
-            navigate("/admin", { replace: true });
-          } else if (user.role === "Manager") {
-            navigate("/manager-dashboard", { replace: true });
-          } else {
-            navigate("/employee-dashboard", { replace: true });
-          }
+          const path = user.role === "Admin" ? "/admin" : 
+                       user.role === "Manager" ? "/manager-dashboard" : "/employee-dashboard";
+          navigate(path, { replace: true });
           return;
         }
       } catch (e) {
@@ -31,32 +62,59 @@ const Login = ({ isRegister }) => {
       }
     }
     
-    // If we're on the login page and session is incomplete/invalid, clear it
+    // Clear partial session if on login page
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   }, [navigate]);
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  // Handle form reset and remembered credentials when switching modes
+  useEffect(() => {
+    setError("");
+    
+    if (isRegister) {
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        rememberMe: false,
+      });
+    } else {
+      const remembered = localStorage.getItem("rememberedCredentials");
+      if (remembered) {
+        try {
+          const { email, password } = JSON.parse(remembered);
+          setFormData({
+            name: "",
+            email: email || "",
+            password: password || "",
+            rememberMe: true,
+          });
+        } catch (e) {
+          console.error("Error parsing remembered credentials:", e);
+        }
+      } else {
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          rememberMe: false,
+        });
+      }
+    }
+  }, [isRegister]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,8 +122,8 @@ const Login = ({ isRegister }) => {
     setError("");
 
     const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
-    const url = `${apiUrl}${endpoint}`;
+    
+    const url = `${API_URL}${endpoint}`;
 
     const trimmedEmail = formData.email.trim().toLowerCase();
     const trimmedPassword = formData.password;
@@ -77,7 +135,7 @@ const Login = ({ isRegister }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(isRegister ? { ...formData, name: trimmedName, email: trimmedEmail, role: "Admin" } : {
+        body: JSON.stringify(isRegister ? { name: trimmedName, email: trimmedEmail, password: formData.password, role: "Admin" } : {
           email: trimmedEmail,
           password: trimmedPassword
         }),
@@ -89,6 +147,16 @@ const Login = ({ isRegister }) => {
         // Save user data and token
         localStorage.setItem("token", data.user.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Handle Remember Me
+        if (formData.rememberMe) {
+          localStorage.setItem("rememberedCredentials", JSON.stringify({
+            email: trimmedEmail,
+            password: trimmedPassword
+          }));
+        } else {
+          localStorage.removeItem("rememberedCredentials");
+        }
 
         // Redirect based on role
         const role = data.user.role;
@@ -192,7 +260,12 @@ const Login = ({ isRegister }) => {
 
             <div className="remember-forgot">
               <label className="remember-me">
-                <input type="checkbox" />
+                <input 
+                  type="checkbox" 
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleInputChange}
+                />
                 <span>Remember me</span>
               </label>
               <a href="#" className="forgot-link">

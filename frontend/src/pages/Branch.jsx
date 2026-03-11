@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X, Check, Building2, MapPin, Grip, GripVertical } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -16,8 +18,6 @@ const Branch = () => {
         branchType: ''
     });
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
-
     useEffect(() => {
         fetchBranches();
     }, []);
@@ -26,7 +26,7 @@ const Branch = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/branches`, {
+            const response = await authenticatedFetch(`${API_URL}/api/branches`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -47,11 +47,11 @@ const Branch = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const endpoint = isEditing ? `${apiUrl}/api/branches/${currentId}` : `${apiUrl}/api/branches/add`;
+        const endpoint = isEditing ? `${API_URL}/api/branches/${currentId}` : `${API_URL}/api/branches/add`;
         const method = isEditing ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authenticatedFetch(endpoint, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ const Branch = () => {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/api/branches/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/branches/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -124,18 +124,13 @@ const Branch = () => {
     const onDragStart = (e, index) => {
         setDraggedItem(branches[index]);
         e.dataTransfer.effectAllowed = "move";
-        // Use e.currentTarget to ensure we get the card itself
         e.dataTransfer.setDragImage(e.currentTarget, 20, 20);
     };
 
     const onDragOver = (e, index) => {
         e.preventDefault();
         const draggedOverItem = branches[index];
-
-        if (draggedItem === draggedOverItem) {
-            return;
-        }
-
+        if (draggedItem === draggedOverItem) return;
         let items = branches.filter(item => item !== draggedItem);
         items.splice(index, 0, draggedItem);
         setBranches(items);
@@ -148,7 +143,7 @@ const Branch = () => {
     const handleSaveOrder = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/branches/reorder`, {
+            const response = await authenticatedFetch(`${API_URL}/api/branches/reorder`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,37 +166,37 @@ const Branch = () => {
                 Swal.fire('Error', data.error || 'Failed to update order', 'error');
             }
         } catch (error) {
-            console.error("Save order error:", error);
             Swal.fire('Error', 'Failed to save order', 'error');
         }
     };
 
     return (
-        <div className="branch-container">
-            <div className="designation-header">
-                <h1 className="profile-title">Branches</h1>
-                <div className="header-actions">
+        <div className="hrm-container">
+            <div className="hrm-header">
+                <h1 className="hrm-title">Branches</h1>
+                <div className="hrm-header-actions">
                     {isReordering ? (
                         <>
-                            <button className="btn-theme btn-theme-primary" onClick={handleSaveOrder}><Check size={16} /> Save Order</button>
-                            <button className="btn-theme btn-theme-secondary" onClick={() => { setIsReordering(false); fetchBranches(); }}>Cancel</button>
+                            <button className="btn-hrm btn-hrm-primary" onClick={handleSaveOrder}><Check size={18} /> SAVE ORDER</button>
+                            <button className="btn-hrm btn-hrm-secondary" onClick={() => { setIsReordering(false); fetchBranches(); }}>CANCEL</button>
                         </>
                     ) : (
                         <>
-                            <button className="btn-theme btn-theme-secondary" onClick={() => setIsReordering(true)}>Change Order</button>
-                            <button className="btn-theme btn-theme-primary" onClick={() => { setIsEditing(false); setFormData({ branchName: '', branchCode: '', branchType: '' }); setIsModalOpen(true); }}><Plus size={16} /> Add More Branch</button>
+                            <button className="btn-hrm btn-hrm-secondary" onClick={() => setIsReordering(true)}>CHANGE ORDER</button>
+                            <button className="btn-hrm btn-hrm-primary" onClick={() => { setIsEditing(false); setFormData({ branchName: '', branchCode: '', branchType: '' }); setIsModalOpen(true); }}><Plus size={18} /> ADD BRANCH</button>
                         </>
                     )}
                 </div>
             </div>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '50px' }}>Loading branches...</div>
+                <div style={{ textAlign: 'center', padding: '100px 0', color: '#64748B' }}>Loading branches...</div>
             ) : (
                 <div className="branch-grid">
                     {branches.length === 0 ? (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
-                            No branches found. Add your first branch.
+                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '100px 0', color: '#94A3B8' }}>
+                            <Building2 size={48} style={{ marginBottom: '15px', opacity: 0.3 }} />
+                            <p>No branches found. Add your first branch.</p>
                         </div>
                     ) : (
                         branches.map((branch, index) => (
@@ -212,26 +207,27 @@ const Branch = () => {
                                 onDragStart={(e) => onDragStart(e, index)}
                                 onDragOver={(e) => onDragOver(e, index)}
                                 onDragEnd={onDragEnd}
+                                style={{ padding: '30px' }}
                             >
                                 {isReordering && (
-                                    <div className="drag-handle">
+                                    <div className="drag-handle" style={{ top: '15px', right: '15px' }}>
                                         <GripVertical size={20} />
                                     </div>
                                 )}
-                                <Building2 size={32} color="var(--primary-blue)" />
-                                <div className="branch-card-title">{branch.branchName}</div>
-                                <div className="branch-card-type">{branch.branchType}</div>
-                                {branch.branchCode && (
-                                    <div style={{ fontSize: '12px', color: 'var(--text-light)' }}>Code: {branch.branchCode}</div>
-                                )}
-                                <div className="branch-card-actions" style={{ marginTop: 'auto', paddingTop: '15px' }}>
-                                    {!isReordering && (
-                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                            <button className="btn-action-edit" onClick={() => handleEdit(branch)} title="Edit"><Edit2 size={16} /></button>
-                                            <button className="btn-action-delete" onClick={() => handleDelete(branch._id)} title="Delete"><Trash2 size={16} /></button>
-                                        </div>
-                                    )}
+                                <div style={{ background: '#EEF2FF', padding: '15px', borderRadius: '12px', display: 'inline-flex', marginBottom: '20px' }}>
+                                    <Building2 size={32} color="#3B82FB" />
                                 </div>
+                                <div style={{ fontSize: '18px', fontWeight: '800', color: '#1E293B', marginBottom: '8px' }}>{branch.branchName}</div>
+                                <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748B', background: '#F1F5F9', padding: '4px 12px', borderRadius: '20px', marginBottom: '12px' }}>{branch.branchType}</div>
+                                {branch.branchCode && (
+                                    <div style={{ fontSize: '12px', color: '#94A3B8' }}>Code: {branch.branchCode}</div>
+                                )}
+                                {!isReordering && (
+                                    <div style={{ display: 'flex', gap: '8px', marginTop: '25px' }}>
+                                        <button className="btn-action-edit" onClick={() => handleEdit(branch)} title="Edit"><Edit2 size={16} /></button>
+                                        <button className="btn-action-delete" onClick={() => handleDelete(branch._id)} title="Delete"><Trash2 size={16} /></button>
+                                    </div>
+                                )}
                             </div>
                         ))
                     )}
@@ -239,36 +235,36 @@ const Branch = () => {
             )}
 
             {isModalOpen && (
-                <div className="modal-theme-overlay">
-                    <div className="modal-theme-content">
-                        <div className="modal-theme-header">
+                <div className="hrm-modal-overlay">
+                    <div className="hrm-modal-content">
+                        <div className="hrm-modal-header">
                             <h2>{isEditing ? 'Edit Branch' : 'Add New Branch'}</h2>
                             <button className="icon-btn" style={{ border: 'none' }} onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="modal-theme-body">
-                                <div className="form-row">
-                                    <div className="form-group-hrm">
-                                        <label>Branch Name <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                        <input type="text" className="form-control-hrm" name="branchName" value={formData.branchName} onChange={handleInputChange} placeholder="e.g. Pune Office" required />
+                            <div className="hrm-modal-body">
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Branch Name <span className="req">*</span></label>
+                                        <input type="text" className="hrm-input" name="branchName" value={formData.branchName} onChange={handleInputChange} placeholder="e.g. Pune Office" required />
                                     </div>
-                                    <div className="form-group-hrm">
-                                        <label>Branch Code</label>
-                                        <input type="text" className="form-control-hrm" name="branchCode" value={formData.branchCode} onChange={handleInputChange} placeholder="e.g. PN-01" />
+                                    <div className="hrm-form-group">
+                                        <label className="hrm-label">Branch Code</label>
+                                        <input type="text" className="hrm-input" name="branchCode" value={formData.branchCode} onChange={handleInputChange} placeholder="e.g. PN-01" />
                                     </div>
                                 </div>
-                                <div className="form-group-hrm">
-                                    <label>Branch Type <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                    <select className="form-control-hrm" name="branchType" value={formData.branchType} onChange={handleInputChange} required>
-                                        <option value="">-- Select --</option>
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Branch Type <span className="req">*</span></label>
+                                    <select className="hrm-select" name="branchType" value={formData.branchType} onChange={handleInputChange} required>
+                                        <option value="">-- Select Type --</option>
                                         <option value="Non-Metro city">Non-Metro city</option>
                                         <option value="Metro city">Metro city</option>
                                     </select>
                                 </div>
                             </div>
-                            <div className="modal-theme-footer">
-                                <button type="button" className="btn-theme btn-theme-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn-theme btn-theme-primary"><Check size={18} /> {isEditing ? 'Update' : 'Save'}</button>
+                            <div className="hrm-modal-footer">
+                                <button type="button" className="btn-hrm btn-hrm-secondary" onClick={() => setIsModalOpen(false)}>CANCEL</button>
+                                <button type="submit" className="btn-hrm btn-hrm-primary"><Check size={18} /> {isEditing ? 'UPDATE' : 'SAVE'}</button>
                             </div>
                         </form>
                     </div>

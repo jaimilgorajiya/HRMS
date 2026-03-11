@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const penaltySlabSchema = new mongoose.Schema({
     penaltyType: { 
         type: String, 
-        enum: ['Auto Leave', 'Late In Minutes', 'Rejected Attendance', 'Break Penalty', 'Task Due Date'], 
+        enum: ['Auto Leave', 'Late In Minutes', 'Break Penalty'], 
         default: 'Auto Leave' 
     },
     minTime: { 
@@ -14,7 +14,7 @@ const penaltySlabSchema = new mongoose.Schema({
     },
     type: { 
         type: String, 
-        enum: ['Flat', 'Percentage', 'Per Minute (Flat Amount)', 'Per Minute (As Per Salary)'], 
+        enum: ['Flat', 'Percentage', 'Per Minute (Flat Amount)', 'Per Minute (As Per Salary)', 'Half Day Salary', 'Full Day Salary'], 
         default: 'Flat' 
     },
     value: { 

@@ -2610,10 +2610,277 @@ select:focus {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.profile-title {
-  font-size: 24px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0;
-  letter-spacing: -0.02em;
+
+/* ==========================================================================
+   HRMS GLOBAL DESIGN SYSTEM (Consistency Standard)
+   ========================================================================== */
+
+
+/* 1. Containers & Layout */
+.hrm-container, .designation-container, .company-details-container, .branch-container {
+    padding: 30px;
+    background-color: var(--bg-main);
+    min-height: 100vh;
+}
+
+.hrm-header, .designation-header, .company-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.hrm-title, .profile-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.hrm-header-actions, .header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+
+/* 2. Cards */
+.hrm-card, .designation-card, .branch-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+.hrm-card-header, .card-header-hrm {
+    background: #f8fafc;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hrm-card-header h2, .hrm-card-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #334155;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hrm-card-body {
+    padding: 24px;
+}
+
+/* 3. Button System */
+.btn-hrm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-hrm-primary {
+    background: #3B648B; /* Dark Blue theme from screenshot */
+    color: white;
+    box-shadow: 0 4px 6px rgba(59, 100, 139, 0.2);
+}
+
+.btn-hrm-primary:hover {
+    background: #2D4D6B;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(59, 100, 139, 0.3);
+}
+
+.btn-hrm-danger {
+    background: #EF4444;
+    color: white;
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+.btn-hrm-danger:hover {
+    background: #DC2626;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-hrm-secondary {
+    background: white !important;
+    border: 1.5px solid #E2E8F0 !important;
+    color: #475569 !important;
+    text-transform: none;
+    font-weight: 600;
+}
+
+.btn-hrm-secondary:hover {
+    background: #F8FAFC !important;
+    border-color: #CBD5E1 !important;
+}
+
+/* 4. Form System */
+.hrm-form-group, .form-group-hrm {
+    margin-bottom: 20px;
+}
+
+.hrm-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.hrm-label span.req {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+.hrm-input, .hrm-select, .hrm-textarea, .form-control-hrm {
+    width: 100%;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1E293B;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.hrm-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    padding-right: 48px !important;
+    cursor: pointer;
+}
+
+.hrm-input:focus, .hrm-select:focus, .hrm-textarea:focus {
+    border-color: #3B648B;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(59, 100, 139, 0.1), 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.hrm-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* 5. Tables */
+.hrm-table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.hrm-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+    text-align: left;
+}
+
+.hrm-table th {
+    padding: 14px 24px;
+    background: #F8FAFC;
+    color: #64748B;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid #E2E8F0;
+}
+
+.hrm-table td {
+    padding: 14px 24px;
+    color: #1E293B;
+    font-size: 14px;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+.hrm-table tr:hover td {
+    background: #F8FAFC;
+}
+
+.hrm-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* 6. Modals */
+.hrm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.hrm-modal-content {
+    background: white;
+    width: 600px;
+    max-width: 95%;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: hrmModalSlideUp 0.3s ease-out;
+}
+
+@keyframes hrmModalSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hrm-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hrm-modal-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1E293B;
+    margin: 0;
+}
+
+.hrm-modal-body {
+    padding: 24px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.hrm-modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #F1F5F9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background: #F8FAFC;
 }

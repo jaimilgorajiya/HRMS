@@ -1,7 +1,8 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, Upload, X, Check, Search } from 'lucide-react';
+import { Plus, Trash2, Edit2, Upload, X, Check, Search, Save, ChevronLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
-// Global CSS in index.css
 
 const Designation = () => {
     const [designations, setDesignations] = useState([]);
@@ -20,8 +21,6 @@ const Designation = () => {
         jobDescription: ''
     });
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
-
     useEffect(() => {
         fetchDesignations();
     }, []);
@@ -30,7 +29,7 @@ const Designation = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/designations`, {
+            const response = await authenticatedFetch(`${API_URL}/api/designations`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -51,11 +50,11 @@ const Designation = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const endpoint = isEditing ? `${apiUrl}/api/designations/${currentId}` : `${apiUrl}/api/designations/add`;
+        const endpoint = isEditing ? `${API_URL}/api/designations/${currentId}` : `${API_URL}/api/designations/add`;
         const method = isEditing ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authenticatedFetch(endpoint, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,8 +69,7 @@ const Designation = () => {
                     title: 'Success!',
                     text: isEditing ? 'Designation updated successfully.' : 'Designation added successfully.',
                     icon: 'success',
-                    confirmButtonColor: '#2563EB',
-                    timer: 2000,
+                    timer: 1500,
                     showConfirmButton: false
                 });
                 setIsModalOpen(false);
@@ -111,7 +109,7 @@ const Designation = () => {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/api/designations/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/designations/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -128,18 +126,13 @@ const Designation = () => {
 
     const handleBulkDelete = async () => {
         if (selectedDesignations.length === 0) {
-            Swal.fire({
-                title: 'No Selection',
-                text: 'Please select at least one designation to delete.',
-                icon: 'info',
-                confirmButtonColor: '#2563EB'
-            });
+            Swal.fire('Info', 'Please select designations to delete', 'info');
             return;
         }
 
         const result = await Swal.fire({
             title: 'Are you sure?',
-            text: `You are about to delete ${selectedDesignations.length} designations!`,
+            text: `Delete ${selectedDesignations.length} selected items?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
@@ -150,7 +143,7 @@ const Designation = () => {
             try {
                 const token = localStorage.getItem('token');
                 for (let id of selectedDesignations) {
-                    await fetch(`${apiUrl}/api/designations/${id}`, {
+                    await authenticatedFetch(`${API_URL}/api/designations/${id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -164,22 +157,6 @@ const Designation = () => {
         }
     };
 
-    const toggleSelectAll = () => {
-        if (selectedDesignations.length === filteredDesignations.length) {
-            setSelectedDesignations([]);
-        } else {
-            setSelectedDesignations(filteredDesignations.map(d => d._id));
-        }
-    };
-
-    const toggleSelect = (id) => {
-        if (selectedDesignations.includes(id)) {
-            setSelectedDesignations(selectedDesignations.filter(i => i !== id));
-        } else {
-            setSelectedDesignations([...selectedDesignations, id]);
-        }
-    };
-
     const filteredDesignations = designations.filter(d => 
         d.designationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (d.designationAlias && d.designationAlias.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -190,55 +167,60 @@ const Designation = () => {
     const currentEntries = filteredDesignations.slice(indexOfFirstEntry, indexOfLastEntry);
     const totalPages = Math.ceil(filteredDesignations.length / entriesPerPage);
 
+    const toggleSelectAll = () => {
+        if (selectedDesignations.length === currentEntries.length) {
+            setSelectedDesignations([]);
+        } else {
+            setSelectedDesignations(currentEntries.map(d => d._id));
+        }
+    };
+
     return (
-        <div className="designation-container">
-            <div className="designation-header">
-                <h1 className="profile-title">Designation</h1>
-                <div className="header-actions">
-                    <button className="btn-theme btn-theme-secondary"><Upload size={16} /> Import Bulk</button>
-                    <button className="btn-theme btn-theme-primary" onClick={() => { setIsEditing(false); setFormData({ designationName: '', designationAlias: '', jobDescription: '' }); setIsModalOpen(true); }}><Plus size={16} /> Add</button>
-                    <button className="btn-theme btn-theme-danger" onClick={handleBulkDelete}><Trash2 size={16} /> Delete</button>
+        <div className="hrm-container">
+            <div className="hrm-header">
+                <h1 className="hrm-title">Designations</h1>
+                <div className="hrm-header-actions">
+                    <button className="btn-hrm btn-hrm-secondary"><Upload size={18} /> IMPORT</button>
+                    <button className="btn-hrm btn-hrm-primary" onClick={() => { setIsEditing(false); setFormData({ designationName: '', designationAlias: '', jobDescription: '' }); setIsModalOpen(true); }}><Plus size={18} /> ADD</button>
+                    <button className="btn-hrm btn-hrm-danger" onClick={handleBulkDelete}><Trash2 size={18} /> DELETE</button>
                 </div>
             </div>
 
-            <div className="designation-card">
-                <div className="table-controls">
-
-                    <div className="search-control">
-                        <div className="search-wrapper">
-                            <Search size={16} color="var(--text-light)" />
-                            <input type="text" placeholder="Search designations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                        </div>
+            <div className="hrm-card">
+                <div className="hrm-card-header" style={{ justifyContent: 'flex-end' }}>
+                    <div className="search-wrapper">
+                        <Search size={16} color="#64748B" />
+                        <input type="text" placeholder="Search designations..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                 </div>
 
-                <div className="table-wrapper">
-                    <table className="designation-table">
+                <div className="hrm-table-wrapper">
+                    <table className="hrm-table">
                         <thead>
                             <tr>
-                                <th>S.No</th>
-                                <th><input type="checkbox" checked={selectedDesignations.length > 0 && selectedDesignations.length === filteredDesignations.length} onChange={toggleSelectAll} /></th>
+                                <th style={{ width: '60px' }}>Sr. No</th>
+                                <th style={{ width: '40px' }}><input type="checkbox" checked={currentEntries.length > 0 && selectedDesignations.length === currentEntries.length} onChange={toggleSelectAll} /></th>
                                 <th>Code</th>
-                                <th>Designation</th>
-                                <th>Designation Alias</th>
-                                <th>Action</th>
+                                <th>Designation Name</th>
+                                <th>Alias</th>
+                                <th style={{ width: '80px' }}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {loading ? (
-                                <tr><td colSpan="7" style={{ textAlign: 'center' }}>Loading...</td></tr>
+                                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>Loading...</td></tr>
                             ) : currentEntries.length === 0 ? (
-                                <tr><td colSpan="7" style={{ textAlign: 'center' }}>No records found</td></tr>
+                                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>No records found</td></tr>
                             ) : (
                                 currentEntries.map((d, index) => (
                                     <tr key={d._id}>
                                         <td>{indexOfFirstEntry + index + 1}</td>
-                                        <td><input type="checkbox" checked={selectedDesignations.includes(d._id)} onChange={() => toggleSelect(d._id)} /></td>
-                                        <td><span className="percentage" style={{ border: 'none', background: '#F1F5F9', color: 'var(--text-main)' }}>{d.designationCode}</span></td>
-                                        <td style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{d.designationName}</td>
-                                        <td>{d.designationAlias || '-'}</td>
+                                        <td><input type="checkbox" checked={selectedDesignations.includes(d._id)} onChange={() => setSelectedDesignations(prev => prev.includes(d._id) ? prev.filter(i => i !== d._id) : [...prev, d._id])} /></td>
+                                        <td><span style={{ background: '#F1F5F9', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', color: '#64748B' }}>{d.designationCode}</span></td>
+                                        <td style={{ fontWeight: '600', color: '#1E293B' }}>{d.designationName}</td>
+                                        <td>{d.designationAlias || '--'}</td>
                                         <td>
-                                            <button className="btn-action-edit" onClick={() => handleEdit(d)} title="Edit"><Edit2 size={16} /></button>
+                                            <button className="btn-action-edit" onClick={() => handleEdit(d)} title="Edit"><Edit2 size={14} /></button>
                                         </td>
                                     </tr>
                                 ))
@@ -247,45 +229,45 @@ const Designation = () => {
                     </table>
                 </div>
 
-                <div className="designation-footer">
-                    <div>Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, filteredDesignations.length)} of {filteredDesignations.length} entries</div>
-                    {totalPages > 1 && (
+                {totalPages > 1 && (
+                    <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #F1F5F9' }}>
+                         <div style={{ fontSize: '13px', color: '#64748B' }}>Showing {indexOfFirstEntry + 1} to {Math.min(indexOfLastEntry, filteredDesignations.length)} of {filteredDesignations.length} entries</div>
                         <div className="pagination">
-                            <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>Prev</button>
+                            <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}><ChevronLeft size={16} /></button>
                             {[...Array(totalPages)].map((_, i) => (
                                 <button key={i} className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
                             ))}
-                            <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
+                            <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}><ChevronRight size={16} /></button>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
             {isModalOpen && (
-                <div className="modal-theme-overlay">
-                    <div className="modal-theme-content">
-                        <div className="modal-theme-header">
+                <div className="hrm-modal-overlay">
+                    <div className="hrm-modal-content">
+                        <div className="hrm-modal-header">
                             <h2>{isEditing ? 'Edit Designation' : 'Add New Designation'}</h2>
                             <button className="icon-btn" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="modal-theme-body">
-                                <div className="form-group-hrm" style={{ marginBottom: '20px' }}>
-                                    <label>Designation Name <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                    <input type="text" className="form-control-hrm" name="designationName" value={formData.designationName} onChange={handleInputChange} placeholder="e.g. Software Engineer" required />
+                            <div className="hrm-modal-body">
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Designation Name <span className="req">*</span></label>
+                                    <input type="text" className="hrm-input" name="designationName" value={formData.designationName} onChange={handleInputChange} placeholder="e.g. Software Engineer" required />
                                 </div>
-                                <div className="form-group-hrm" style={{ marginBottom: '20px' }}>
-                                    <label>Designation Alias</label>
-                                    <input type="text" className="form-control-hrm" name="designationAlias" value={formData.designationAlias} onChange={handleInputChange} placeholder="e.g. SE" />
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Designation Alias</label>
+                                    <input type="text" className="hrm-input" name="designationAlias" value={formData.designationAlias} onChange={handleInputChange} placeholder="e.g. SE" />
                                 </div>
-                                <div className="form-group-hrm">
-                                    <label>Job Description</label>
-                                    <textarea className="form-control-hrm textarea-hrm" name="jobDescription" value={formData.jobDescription} onChange={handleInputChange} placeholder="Describe the roles and responsibilities..." style={{ minHeight: '120px' }}></textarea>
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Job Description</label>
+                                    <textarea className="hrm-textarea" name="jobDescription" value={formData.jobDescription} onChange={handleInputChange} placeholder="Describe the roles and responsibilities..." style={{ minHeight: '120px' }}></textarea>
                                 </div>
                             </div>
-                            <div className="modal-theme-footer">
-                                <button type="button" className="btn-theme btn-theme-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn-theme btn-theme-primary"><Check size={18} /> {isEditing ? 'Update' : 'Save'}</button>
+                            <div className="hrm-modal-footer">
+                                <button type="button" className="btn-hrm btn-hrm-secondary" onClick={() => setIsModalOpen(false)}>CANCEL</button>
+                                <button type="submit" className="btn-hrm btn-hrm-primary"><Save size={18} /> {isEditing ? 'UPDATE' : 'SAVE'}</button>
                             </div>
                         </form>
                     </div>

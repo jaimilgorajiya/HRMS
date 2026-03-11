@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -14,13 +16,13 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
   const [companyLogo, setCompanyLogo] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+  
 
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${apiUrl}/api/company`, {
+        const response = await authenticatedFetch(`${API_URL}/api/company`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -28,7 +30,7 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
         if (response.ok) {
           const data = await response.json();
           if (data && data.logo) {
-            setCompanyLogo(data.logo.startsWith('http') ? data.logo : `${apiUrl}${data.logo}`);
+            setCompanyLogo(data.logo.startsWith('http') ? data.logo : `${API_URL}${data.logo}`);
           }
         }
       } catch (error) {
@@ -41,7 +43,7 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
     // Listen for cross-component updates
     const handleCompanyUpdate = (event) => {
       if (event.detail && event.detail.logo) {
-        setCompanyLogo(event.detail.logo.startsWith('http') ? event.detail.logo : `${apiUrl}${event.detail.logo}`);
+        setCompanyLogo(event.detail.logo.startsWith('http') ? event.detail.logo : `${API_URL}${event.detail.logo}`);
       }
     };
     window.addEventListener('companyDetailsUpdated', handleCompanyUpdate);

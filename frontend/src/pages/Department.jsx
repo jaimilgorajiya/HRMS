@@ -1,5 +1,7 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, Check, GripVertical, Building2, Layout } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Check, GripVertical, Building2, Layout, Save } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 const Department = () => {
@@ -10,7 +12,6 @@ const Department = () => {
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentId, setCurrentId] = useState(null);
-    const [activeBranchId, setActiveBranchId] = useState('');
 
     const [formData, setFormData] = useState({
         name: '',
@@ -18,8 +19,6 @@ const Department = () => {
     });
 
     const [bulkDepartments, setBulkDepartments] = useState(['']);
-
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
 
     useEffect(() => {
         fetchInitialData();
@@ -30,8 +29,8 @@ const Department = () => {
             setLoading(true);
             const token = localStorage.getItem('token');
             const [branchRes, deptRes] = await Promise.all([
-                fetch(`${apiUrl}/api/branches`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`${apiUrl}/api/departments`, { headers: { 'Authorization': `Bearer ${token}` } })
+                authenticatedFetch(`${API_URL}/api/branches`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                authenticatedFetch(`${API_URL}/api/departments`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             const branchData = await branchRes.json();
@@ -39,7 +38,6 @@ const Department = () => {
 
             if (branchData.success) setBranches(branchData.branches);
             if (deptData.success) {
-                // Sort departments by order field from database
                 setDepartments(deptData.departments.sort((a,b) => a.order - b.order));
             }
         } catch (error) {
@@ -56,11 +54,11 @@ const Department = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const endpoint = isEditing ? `${apiUrl}/api/departments/${currentId}` : `${apiUrl}/api/departments/add`;
+        const endpoint = isEditing ? `${API_URL}/api/departments/${currentId}` : `${API_URL}/api/departments/add`;
         const method = isEditing ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await authenticatedFetch(endpoint, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,7 +98,7 @@ const Department = () => {
 
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`${apiUrl}/api/departments/bulk-add`, {
+            const response = await authenticatedFetch(`${API_URL}/api/departments/bulk-add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -157,7 +155,7 @@ const Department = () => {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/api/departments/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/departments/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -187,37 +185,38 @@ const Department = () => {
     if (loading) return <div className="loading-container">Loading Departments...</div>;
 
     return (
-        <div className="designation-container">
-            <div className="designation-header">
-                <h1 className="profile-title">Departments</h1>
-                <div className="header-actions">
-                    <button className="btn-theme btn-theme-primary" onClick={() => { setIsBulkModalOpen(true); setFormData({ ...formData, branchId: branches[0]?._id }); }}><Plus size={16} /> Add Multiple Departments</button>
+        <div className="hrm-container">
+            <div className="hrm-header">
+                <h1 className="hrm-title">Departments</h1>
+                <div className="hrm-header-actions">
+                    <button className="btn-hrm btn-hrm-primary" onClick={() => { setIsBulkModalOpen(true); setFormData({ ...formData, branchId: branches[0]?._id }); }}><Plus size={18} /> ADD MULTIPLE</button>
                 </div>
             </div>
 
-            <div className="department-branch-list">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
                 {branches.length === 0 ? (
-                    <div className="empty-state">No branches found. Please add branches first.</div>
+                    <div style={{ textAlign: 'center', padding: '100px 0', color: '#94A3B8', background: 'white', borderRadius: '12px' }}>No branches found. Please add branches first.</div>
                 ) : (
                     branches.filter(branch => departments.some(d => d.branchId === branch._id)).map(branch => {
                         const branchDepts = departments.filter(d => d.branchId === branch._id).sort((a,b) => a.order - b.order);
                         return (
-                            <div key={branch._id} className="branch-dept-section">
-                                <div className="branch-dept-header">
-                                    <div className="branch-title-with-count">
-                                        <h3>{branch.branchName.toUpperCase()} BRANCH</h3>
+                            <div key={branch._id} className="hrm-card" style={{ marginBottom: 0 }}>
+                                <div className="hrm-card-header">
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ background: '#EEF2FF', padding: '8px', borderRadius: '8px' }}><Building2 size={18} color="#3B82FB" /></div>
+                                        <h3 style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{branch.branchName} BRANCH</h3>
                                         <span className="dept-count">{branchDepts.length}</span>
                                     </div>
-                                    <button className="branch-add-btn" onClick={() => { setIsEditing(false); setFormData({ name: '', branchId: branch._id }); setIsModalOpen(true); }}><Plus size={14} /> ADD</button>
+                                    <button className="btn-hrm btn-hrm-secondary" style={{ padding: '6px 16px', fontSize: '12px' }} onClick={() => { setIsEditing(false); setFormData({ name: '', branchId: branch._id }); setIsModalOpen(true); }}><Plus size={14} /> ADD</button>
                                 </div>
-                                <div className="dept-list-wrapper">
-                                    <div className="dept-items-grid">
-                                        {branchDepts.map((dept, index) => (
-                                            <div key={dept._id} className="dept-item-card">
-                                                <span className="dept-name">{dept.name}</span>
-                                                <div className="dept-item-actions">
-                                                    <button className="btn-action-edit" onClick={() => handleEdit(dept)} title="Edit"><Edit2 size={16} /></button>
-                                                    <button className="btn-action-delete" onClick={() => handleDelete(dept._id)} title="Delete"><Trash2 size={16} /></button>
+                                <div className="hrm-card-body">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                                        {branchDepts.map((dept) => (
+                                            <div key={dept._id} style={{ background: '#F8FAFC', padding: '16px 20px', borderRadius: '12px', border: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s' }}>
+                                                <span style={{ fontWeight: '700', color: '#1E293B', fontSize: '14px' }}>{dept.name}</span>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button className="btn-action-edit" onClick={() => handleEdit(dept)}><Edit2 size={14} /></button>
+                                                    <button className="btn-action-delete" onClick={() => handleDelete(dept._id)}><Trash2 size={14} /></button>
                                                 </div>
                                             </div>
                                         ))}
@@ -227,41 +226,43 @@ const Department = () => {
                         );
                     })
                 )}
-                {/* Fallback if all branches have 0 departments */}
+                
                 {!loading && branches.length > 0 && !branches.some(branch => departments.some(d => d.branchId === branch._id)) && (
-                    <div className="empty-state" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
-                        All branches currently have 0 departments. Use the "Add Multiple Departments" button to start.
+                    <div className="hrm-card" style={{ padding: '60px', textAlign: 'center' }}>
+                        <Layout size={48} style={{ marginBottom: '20px', opacity: 0.2 }} />
+                        <p style={{ color: '#64748B' }}>All branches currently have 0 departments.</p>
+                        <button className="btn-hrm btn-hrm-primary" style={{ marginTop: '20px' }} onClick={() => { setIsBulkModalOpen(true); setFormData({ ...formData, branchId: branches[0]?._id }); }}>Add Your First Department</button>
                     </div>
                 )}
             </div>
 
             {/* Single Add Modal */}
             {isModalOpen && (
-                <div className="modal-theme-overlay">
-                    <div className="modal-theme-content">
-                        <div className="modal-theme-header">
+                <div className="hrm-modal-overlay">
+                    <div className="hrm-modal-content">
+                        <div className="hrm-modal-header">
                             <h2>{isEditing ? 'Edit Department' : 'Add New Department'}</h2>
                             <button className="icon-btn" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                         </div>
                         <form onSubmit={handleSubmit}>
-                            <div className="modal-theme-body">
-                                <div className="form-group-hrm" style={{ marginBottom: '20px' }}>
-                                    <label>Branch <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                    <select className="form-control-hrm" name="branchId" value={formData.branchId} onChange={handleInputChange} required disabled={isEditing}>
+                            <div className="hrm-modal-body">
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Branch <span className="req">*</span></label>
+                                    <select className="hrm-select" name="branchId" value={formData.branchId} onChange={handleInputChange} required disabled={isEditing}>
                                         <option value="">-- Select Branch --</option>
                                         {branches.map(b => (
                                             <option key={b._id} value={b._id}>{b.branchName}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <div className="form-group-hrm">
-                                    <label>Department Name <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                    <input type="text" className="form-control-hrm" name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Sales" required />
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Department Name <span className="req">*</span></label>
+                                    <input type="text" className="hrm-input" name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Sales" required />
                                 </div>
                             </div>
-                            <div className="modal-theme-footer">
-                                <button type="button" className="btn-theme btn-theme-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn-theme btn-theme-primary"><Check size={18} /> {isEditing ? 'Update' : 'Save'}</button>
+                            <div className="hrm-modal-footer">
+                                <button type="button" className="btn-hrm btn-hrm-secondary" onClick={() => setIsModalOpen(false)}>CANCEL</button>
+                                <button type="submit" className="btn-hrm btn-hrm-primary"><Save size={18} /> {isEditing ? 'UPDATE' : 'SAVE'}</button>
                             </div>
                         </form>
                     </div>
@@ -270,46 +271,48 @@ const Department = () => {
 
             {/* Bulk Add Modal */}
             {isBulkModalOpen && (
-                <div className="modal-theme-overlay">
-                    <div className="modal-theme-content" style={{ width: '700px' }}>
-                        <div className="modal-theme-header">
+                <div className="hrm-modal-overlay">
+                    <div className="hrm-modal-content" style={{ width: '700px' }}>
+                        <div className="hrm-modal-header">
                             <h2>Add Multiple Departments</h2>
                             <button className="icon-btn" onClick={() => setIsBulkModalOpen(false)}><X size={20} /></button>
                         </div>
                         <form onSubmit={handleBulkSubmit}>
-                            <div className="modal-theme-body">
-                                <div className="form-group-hrm" style={{ marginBottom: '24px' }}>
-                                    <label>Branch <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                    <select className="form-control-hrm" name="branchId" value={formData.branchId} onChange={handleInputChange} required>
+                            <div className="hrm-modal-body">
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Branch <span className="req">*</span></label>
+                                    <select className="hrm-select" name="branchId" value={formData.branchId} onChange={handleInputChange} required>
                                         <option value="">-- Select Branch --</option>
                                         {branches.map(b => (
                                             <option key={b._id} value={b._id}>{b.branchName}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <div className="bulk-dept-rows">
-                                    <label style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'block' }}>Department Names</label>
-                                    {bulkDepartments.map((val, idx) => (
-                                        <div key={idx} className="bulk-row">
-                                            <input 
-                                                type="text" 
-                                                className="form-control-hrm" 
-                                                value={val} 
-                                                onChange={(e) => handleBulkRowChange(idx, e.target.value)} 
-                                                placeholder={`Department ${idx + 1}`}
-                                                required={idx === 0}
-                                            />
-                                            {bulkDepartments.length > 1 && (
-                                                <button type="button" className="btn-remove-row" onClick={() => removeBulkRow(idx)}><Trash2 size={16} /></button>
-                                            )}
-                                        </div>
-                                    ))}
-                                    <button type="button" className="btn-add-row" onClick={addBulkRow}><Plus size={16} /> Add More Row</button>
+                                <div style={{ marginTop: '30px' }}>
+                                    <label className="hrm-label">Department Names</label>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        {bulkDepartments.map((val, idx) => (
+                                            <div key={idx} style={{ display: 'flex', gap: '10px' }}>
+                                                <input 
+                                                    type="text" 
+                                                    className="hrm-input" 
+                                                    value={val} 
+                                                    onChange={(e) => handleBulkRowChange(idx, e.target.value)} 
+                                                    placeholder={`Department #${idx + 1}`}
+                                                    required={idx === 0}
+                                                />
+                                                {bulkDepartments.length > 1 && (
+                                                    <button type="button" className="btn-hrm btn-hrm-danger" style={{ padding: '10px' }} onClick={() => removeBulkRow(idx)}><Trash2 size={16} /></button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button type="button" className="btn-hrm btn-hrm-secondary" style={{ width: '100%', marginTop: '15px', borderStyle: 'dashed' }} onClick={addBulkRow}><Plus size={16} /> ADD MORE ROW</button>
                                 </div>
                             </div>
-                            <div className="modal-theme-footer">
-                                <button type="button" className="btn-theme btn-theme-secondary" onClick={() => setIsBulkModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="btn-theme btn-theme-primary"><Check size={18} /> Save All</button>
+                            <div className="hrm-modal-footer">
+                                <button type="button" className="btn-hrm btn-hrm-secondary" onClick={() => setIsBulkModalOpen(false)}>CANCEL</button>
+                                <button type="submit" className="btn-hrm btn-hrm-primary"><Save size={18} /> SAVE ALL</button>
                             </div>
                         </form>
                     </div>

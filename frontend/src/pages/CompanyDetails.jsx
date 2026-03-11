@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Building2, 
@@ -65,7 +67,7 @@ const CompanyDetails = () => {
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+  
 
   // Component to handle map search functionality
   const MapSearchControl = () => {
@@ -164,7 +166,7 @@ const CompanyDetails = () => {
 
   const fetchCompanyDetails = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/company`, {
+      const response = await authenticatedFetch(`${API_URL}/api/company`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -173,7 +175,7 @@ const CompanyDetails = () => {
       if (data && data._id) {
         setFormData(data);
         if (data.logo) {
-          setLogoPreview(data.logo.startsWith('http') ? data.logo : `${apiUrl}${data.logo}`);
+          setLogoPreview(data.logo.startsWith('http') ? data.logo : `${API_URL}${data.logo}`);
         }
         // Sync with Header/Sidebar
         window.dispatchEvent(new CustomEvent('companyDetailsUpdated', { 
@@ -278,7 +280,7 @@ const CompanyDetails = () => {
         logoFormData.append('file', logo);
         
         const token = localStorage.getItem('token');
-        const uploadRes = await fetch(`${apiUrl}/api/upload`, {
+        const uploadRes = await authenticatedFetch(`${API_URL}/api/upload`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -292,7 +294,7 @@ const CompanyDetails = () => {
         }
       }
 
-      const response = await fetch(`${apiUrl}/api/company`, {
+      const response = await authenticatedFetch(`${API_URL}/api/company`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

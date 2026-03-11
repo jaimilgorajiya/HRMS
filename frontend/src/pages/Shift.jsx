@@ -1,8 +1,10 @@
+import authenticatedFetch from '../utils/apiHandler';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Users, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import '../styles/ManageShift.css';
+import API_URL from '../config/api';
 
 const Shift = () => {
     const [shifts, setShifts] = useState([]);
@@ -10,7 +12,6 @@ const Shift = () => {
     const [selectedShifts, setSelectedShifts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
 
     useEffect(() => {
         fetchShifts();
@@ -20,7 +21,7 @@ const Shift = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/shifts`, {
+            const response = await authenticatedFetch(`${API_URL}/api/shifts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -48,7 +49,7 @@ const Shift = () => {
         if (result.isConfirmed) {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${apiUrl}/api/shifts/delete/${id}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/shifts/delete/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -95,7 +96,7 @@ const Shift = () => {
                 const token = localStorage.getItem('token');
                 await Promise.all(
                     selectedShifts.map(id =>
-                        fetch(`${apiUrl}/api/shifts/delete/${id}`, {
+                        authenticatedFetch(`${API_URL}/api/shifts/delete/${id}`, {
                             method: 'DELETE',
                             headers: { 'Authorization': `Bearer ${token}` }
                         })

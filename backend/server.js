@@ -21,6 +21,10 @@ import shiftRoutes from './routes/Shift.Routes.js';
 import penaltyRuleRoutes from './routes/PenaltyRule.Routes.js';
 import graceTimeRoutes from './routes/GraceTime.Routes.js';
 import leaveTypeRoutes from './routes/LeaveType.Routes.js';
+import earningDeductionTypeRoutes from './routes/EarningDeductionType.Routes.js';
+import documentTypeRoutes from './routes/DocumentType.Routes.js';
+
+import payrollSettingRoutes from './routes/PayrollSetting.Routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -56,6 +60,9 @@ app.use('/api/shifts', shiftRoutes);
 app.use('/api/penalty-rules', penaltyRuleRoutes);
 app.use('/api/grace-times', graceTimeRoutes);
 app.use('/api/leave-types', leaveTypeRoutes);
+app.use('/api/earning-deduction-types', earningDeductionTypeRoutes);
+app.use('/api/payroll-settings', payrollSettingRoutes);
+app.use('/api/document-types', documentTypeRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

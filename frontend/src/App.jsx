@@ -22,6 +22,9 @@ import EditShift from './pages/EditShift';
 import PenaltyRules from './pages/PenaltyRules';
 import GraceTime from './pages/GraceTime';
 import LeaveType from './pages/LeaveType';
+import EarningDeductionType from './pages/EarningDeductionType';
+import PayrollTaxSetting from './pages/PayrollTaxSetting';
+import DocumentType from './pages/DocumentType';
 
 function App() {
   return (
@@ -59,8 +62,10 @@ function App() {
               <Route path="leave/type" element={<LeaveType />} />
               <Route path="leave/*" element={<ModulePlaceholder title="Leave Management" />} />
               <Route path="payroll-settings" element={<ModulePlaceholder title="Payroll Settings" />} />
+              <Route path="payroll/tax-setting" element={<PayrollTaxSetting />} />
+              <Route path="payroll/earning-deduction" element={<EarningDeductionType />} />
               <Route path="payroll/*" element={<ModulePlaceholder title="Payroll Management" />} />
-              <Route path="document-settings" element={<ModulePlaceholder title="Document Settings" />} />
+              <Route path="document/emp-types" element={<DocumentType />} />
               <Route path="document/*" element={<ModulePlaceholder title="Document Management" />} />
               <Route path="app-access" element={<ModulePlaceholder title="App Access" />} />
 

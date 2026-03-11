@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Save, X, AlertCircle, Minus } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -10,7 +12,6 @@ const PenaltyRules = () => {
     const [loading, setLoading] = useState(false);
     const [fetchingShifts, setFetchingShifts] = useState(true);
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -28,7 +29,7 @@ const PenaltyRules = () => {
     const fetchShifts = async () => {
         try {
             setFetchingShifts(true);
-            const response = await fetch(`${apiUrl}/api/shifts`, {
+            const response = await authenticatedFetch(`${API_URL}/api/shifts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -46,7 +47,7 @@ const PenaltyRules = () => {
     const fetchPenaltyRules = async (shiftId) => {
         try {
             setLoading(true);
-            const response = await fetch(`${apiUrl}/api/penalty-rules/${shiftId}`, {
+            const response = await authenticatedFetch(`${API_URL}/api/penalty-rules/${shiftId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -58,6 +59,28 @@ const PenaltyRules = () => {
             Swal.fire('Error', 'Failed to fetch penalty rules', 'error');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const getTypeOptions = (penaltyType) => {
+        switch(penaltyType) {
+            case 'Late In Minutes':
+            case 'Break Penalty':
+                return [
+                    { label: 'Flat', value: 'Flat' },
+                    { label: 'Percentage', value: 'Percentage' },
+                    { label: 'Per Minute (Flat Amount)', value: 'Per Minute (Flat Amount)' },
+                    { label: 'Per Minute (As Per Salary)', value: 'Per Minute (As Per Salary)' },
+                    { label: 'Half Day Salary', value: 'Half Day Salary' },
+                    { label: 'Full Day Salary', value: 'Full Day Salary' }
+                ];
+            case 'Auto Leave':
+                return [
+                    { label: 'Half Day Salary', value: 'Half Day Salary' },
+                    { label: 'Full Day Salary', value: 'Full Day Salary' }
+                ];
+            default:
+                return [{ label: 'Flat', value: 'Flat' }];
         }
     };
 
@@ -78,26 +101,29 @@ const PenaltyRules = () => {
 
     const handleSlabChange = (index, field, value) => {
         const newSlabs = [...slabs];
-        newSlabs[index] = { ...newSlabs[index], [field]: value };
+        newSlabs[index][field] = value;
+
+        if (field === 'type' && ['Half Day Salary', 'Full Day Salary'].includes(value)) {
+            newSlabs[index].value = value === 'Half Day Salary' ? '0.5' : '1';
+        }
+
         setSlabs(newSlabs);
     };
 
     const handleRemoveAllSlabs = async () => {
-        if (!selectedShift) return;
-
         const result = await Swal.fire({
             title: 'Are you sure?',
-            text: "This will remove all penalty slabs for this shift.",
+            text: "This will remove all slabs for this shift. This cannot be undone!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonColor: '#ff4d4f',
+            cancelButtonColor: '#64748b',
             confirmButtonText: 'Yes, remove all!'
         });
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${apiUrl}/api/penalty-rules/${selectedShift}`, {
+                const response = await authenticatedFetch(`${API_URL}/api/penalty-rules/${selectedShift}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -128,7 +154,7 @@ const PenaltyRules = () => {
 
         try {
             setLoading(true);
-            const response = await fetch(`${apiUrl}/api/penalty-rules/save`, {
+            const response = await authenticatedFetch(`${API_URL}/api/penalty-rules/save`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -157,15 +183,15 @@ const PenaltyRules = () => {
     if (fetchingShifts) return <div className="loading-container">Loading Shifts...</div>;
 
     return (
-        <div className="designation-container">
-            <div className="designation-header">
-                <h1 className="profile-title">Penalty Rules</h1>
+        <div className="hrm-container">
+            <div className="hrm-header">
+                <h1 className="hrm-title">Penalty Rules</h1>
             </div>
 
-            <div className="designation-card" style={{ marginTop: '20px', overflow: 'visible' }}>
-                <div className="penalty-rules-form" style={{ padding: '30px' }}>
-                    <div className="row-hrm" style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', marginBottom: '30px' }}>
-                        <div className="form-group-hrm" style={{ flex: 1, maxWidth: '400px' }}>
+            <div className="hrm-card" style={{ overflow: 'visible' }}>
+                <div className="hrm-card-body">
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
+                        <div className="hrm-form-group" style={{ flex: 1, maxWidth: '400px', marginBottom: 0 }}>
                             <SearchableSelect 
                                 label="Shift Name"
                                 options={shifts.map(shift => ({ label: shift.shiftName, value: shift._id }))}
@@ -175,225 +201,92 @@ const PenaltyRules = () => {
                             />
                         </div>
                         {selectedShift && slabs.length > 0 && (
-                            <button 
-                                className="btn-theme" 
-                                style={{ 
-                                    height: '48px', 
-                                    padding: '0 24px', 
-                                    background: '#ff4d4f', 
-                                    color: 'white',
-                                    borderRadius: '10px',
-                                    fontWeight: '700',
-                                    fontSize: '13px',
-                                    letterSpacing: '0.5px'
-                                }}
-                                onClick={handleRemoveAllSlabs}
-                            >
-                                REMOVE ALL SLABS
+                            <button className="btn-hrm btn-hrm-danger" onClick={handleRemoveAllSlabs}>
+                                <Trash2 size={18} /> REMOVE ALL SLABS
                             </button>
                         )}
                     </div>
 
                     {selectedShift && (
                         <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '30px' }}>
-                            <div className="penalty-slabs-container">
+                            <div>
                                 {slabs.map((slab, index) => (
-                                    <div key={index} className="slab-row-wrapper" style={{ marginBottom: '30px' }}>
-                                        {/* Row 1 */}
+                                    <div key={index} style={{ 
+                                        padding: '25px', 
+                                        background: '#f8fafc', 
+                                        borderRadius: '12px', 
+                                        border: '1px solid #e2e8f0', 
+                                        marginBottom: '30px',
+                                        position: 'relative'
+                                    }}>
                                         <div style={{ 
                                             display: 'grid', 
-                                            gridTemplateColumns: ['Late In Minutes', 'Break Penalty'].includes(slab.penaltyType) ? '1.2fr 1fr 1fr 1fr' : '1.2fr 1fr 1fr 1fr 0.4fr', 
+                                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
                                             gap: '25px', 
-                                            marginBottom: '15px',
                                             alignItems: 'flex-end'
                                         }}>
-                                            <div className="form-group-hrm">
+                                            <div className="hrm-form-group" style={{ marginBottom: 0 }}>
                                                 <SearchableSelect 
                                                     label="Penalty Type"
                                                     options={[
                                                         { label: 'Auto Leave', value: 'Auto Leave' },
                                                         { label: 'Late In Minutes', value: 'Late In Minutes' },
-                                                        { label: 'Rejected Attendance', value: 'Rejected Attendance' },
-                                                        { label: 'Break Penalty', value: 'Break Penalty' },
-                                                        { label: 'Task Due Date', value: 'Task Due Date' }
+                                                        { label: 'Break Penalty', value: 'Break Penalty' }
                                                     ]}
                                                     value={slab.penaltyType}
                                                     onChange={(val) => handleSlabChange(index, 'penaltyType', val)}
                                                 />
                                             </div>
 
-                                            {/* Dynamic Field 1: Minimum Time / No of Attendance / Ratio */}
-                                            <div className="form-group-hrm">
-                                                <label>
-                                                    {slab.penaltyType === 'Auto Leave' || slab.penaltyType === 'Rejected Attendance' ? 'No of Attendance/Leave' : 
-                                                     slab.penaltyType === 'Task Due Date' ? 'Missed Deadline Task Ratio(%)' : 
-                                                     'Minimum Time (In Minutes)'} <span style={{ color: 'var(--danger)' }}>*</span>
+                                            <div className="hrm-form-group" style={{ marginBottom: 0 }}>
+                                                <label className="hrm-label">
+                                                    {slab.penaltyType === 'Auto Leave' ? 'No of Attendance/Leave' : 'Min Time (Min)'} <span className="req">*</span>
                                                 </label>
-                                                <input 
-                                                    type="number" 
-                                                    className="form-control-hrm"
-                                                    placeholder="05"
-                                                    value={slab.minTime}
-                                                    onChange={(e) => handleSlabChange(index, 'minTime', e.target.value)}
+                                                <input type="number" className="hrm-input" placeholder="05" value={slab.minTime} onChange={(e) => handleSlabChange(index, 'minTime', e.target.value)} />
+                                            </div>
+
+                                            {['Late In Minutes', 'Break Penalty'].includes(slab.penaltyType) && (
+                                                <div className="hrm-form-group" style={{ marginBottom: 0 }}>
+                                                    <label className="hrm-label">Max Time (Min) <span className="req">*</span></label>
+                                                    <input type="number" className="hrm-input" placeholder="45" value={slab.maxTime} onChange={(e) => handleSlabChange(index, 'maxTime', e.target.value)} />
+                                                </div>
+                                            )}
+
+                                            <div className="hrm-form-group" style={{ marginBottom: 0 }}>
+                                                <SearchableSelect 
+                                                    label="Type"
+                                                    options={getTypeOptions(slab.penaltyType)}
+                                                    value={slab.type}
+                                                    onChange={(val) => handleSlabChange(index, 'type', val)}
                                                 />
                                             </div>
 
-                                            {/* Dynamic Field 2: Maximum Time (Only for certain types) */}
-                                            {['Late In Minutes', 'Break Penalty'].includes(slab.penaltyType) ? (
-                                                <div className="form-group-hrm">
-                                                    <label>Maximum Time (In Minutes) <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                                    <input 
-                                                        type="number" 
-                                                        className="form-control-hrm"
-                                                        placeholder="45"
-                                                        value={slab.maxTime}
-                                                        onChange={(e) => handleSlabChange(index, 'maxTime', e.target.value)}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="form-group-hrm">
-                                                    <SearchableSelect 
-                                                        label="Type"
-                                                        options={[
-                                                            { label: 'Flat', value: 'Flat' },
-                                                            { label: 'Percentage', value: 'Percentage' },
-                                                            { label: 'Per Minute (Flat Amount)', value: 'Per Minute (Flat Amount)' },
-                                                            { label: 'Per Minute (As Per Salary)', value: 'Per Minute (As Per Salary)' }
-                                                        ]}
-                                                        value={slab.type}
-                                                        onChange={(val) => handleSlabChange(index, 'type', val)}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {/* Dynamic Field 3: Type (for types with maxTime) or Value (for others) */}
-                                            {['Late In Minutes', 'Break Penalty'].includes(slab.penaltyType) ? (
-                                                <div className="form-group-hrm">
-                                                    <SearchableSelect 
-                                                        label="Type"
-                                                        options={[
-                                                            { label: 'Flat', value: 'Flat' },
-                                                            { label: 'Percentage', value: 'Percentage' },
-                                                            { label: 'Per Minute (Flat Amount)', value: 'Per Minute (Flat Amount)' },
-                                                            { label: 'Per Minute (As Per Salary)', value: 'Per Minute (As Per Salary)' }
-                                                        ]}
-                                                        value={slab.type}
-                                                        onChange={(val) => handleSlabChange(index, 'type', val)}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="form-group-hrm">
-                                                    <label>Penalty Value <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                                    <input 
-                                                        type="number" 
-                                                        className="form-control-hrm"
-                                                        placeholder="150"
-                                                        value={slab.value}
-                                                        onChange={(e) => handleSlabChange(index, 'value', e.target.value)}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {/* Remove Button for Single-Row Layouts */}
-                                            {!['Late In Minutes', 'Break Penalty'].includes(slab.penaltyType) && (
-                                                <button 
-                                                    className="btn-remove-slab" 
-                                                    style={{ 
-                                                        background: '#fee2e2', 
-                                                        color: '#ff4d4f', 
-                                                        border: '1px solid #fecaca', 
-                                                        width: '48px',
-                                                        height: '48px',
-                                                        borderRadius: '10px',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                    onClick={() => handleRemoveSlab(index)}
-                                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#ff4d4f'; e.currentTarget.style.color = 'white'; }}
-                                                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fee2e2'; e.currentTarget.style.color = '#ff4d4f'; }}
-                                                >
-                                                    <Minus size={20} />
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        {/* Row 2: Penalty Value (Only for Multi-Row Layouts) */}
-                                        {['Late In Minutes', 'Break Penalty'].includes(slab.penaltyType) && (
-                                            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px' }}>
-                                                <div className="form-group-hrm" style={{ width: 'calc(25% - 15px)' }}>
-                                                    <label>Penalty Value <span style={{ color: 'var(--danger)' }}>*</span></label>
-                                                    <input 
-                                                        type="number" 
-                                                        className="form-control-hrm"
-                                                        placeholder="150"
-                                                        value={slab.value}
-                                                        onChange={(e) => handleSlabChange(index, 'value', e.target.value)}
-                                                    />
-                                                </div>
-                                                <button 
-                                                    className="btn-remove-slab" 
-                                                    style={{ 
-                                                        background: '#fee2e2', 
-                                                        color: '#ff4d4f', 
-                                                        border: '1px solid #fecaca', 
-                                                        width: '48px',
-                                                        height: '48px',
-                                                        borderRadius: '10px',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                    onClick={() => handleRemoveSlab(index)}
-                                                    onMouseEnter={(e) => { e.target.style.background = '#ff4d4f'; e.target.style.color = 'white'; }}
-                                                    onMouseLeave={(e) => { e.target.style.background = '#fee2e2'; e.target.style.color = '#ff4d4f'; }}
-                                                >
-                                                    <Minus size={20} />
-                                                </button>
+                                            <div className="hrm-form-group" style={{ marginBottom: 0 }}>
+                                                <label className="hrm-label">Penalty Value <span className="req">*</span></label>
+                                                <input 
+                                                    type="number" 
+                                                    className="hrm-input"
+                                                    placeholder={['Half Day Salary', 'Full Day Salary'].includes(slab.type) ? "Days" : "150"}
+                                                    value={slab.value}
+                                                    onChange={(e) => handleSlabChange(index, 'value', e.target.value)}
+                                                    disabled={['Half Day Salary', 'Full Day Salary'].includes(slab.type)}
+                                                />
                                             </div>
-                                        )}
+
+                                            <button className="btn-hrm btn-hrm-danger" style={{ padding: '12px', minWidth: '48px', height: '48px' }} onClick={() => handleRemoveSlab(index)}>
+                                                <Minus size={20} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <button 
-                                className="add-slab-btn" 
-                                style={{ 
-                                    background: 'none', 
-                                    border: 'none', 
-                                    color: '#1e40af', 
-                                    fontWeight: '800', 
-                                    textTransform: 'uppercase',
-                                    fontSize: '14px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    marginTop: '10px',
-                                    padding: '10px 0'
-                                }}
-                                onClick={handleAddSlab}
-                            >
-                                <span style={{ fontSize: '18px' }}>+</span> ADD MORE PENALTY SLAB
+                            <button className="btn-hrm btn-hrm-secondary" style={{ borderStyle: 'dashed', width: '100%', marginBottom: '30px' }} onClick={handleAddSlab}>
+                                <Plus size={18} /> ADD MORE PENALTY SLAB
                             </button>
 
-                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
-                                <button 
-                                    className="btn-theme btn-theme-primary" 
-                                    style={{ 
-                                        padding: '12px 40px', 
-                                        gap: '12px',
-                                        fontSize: '16px',
-                                        background: '#2c5282',
-                                        borderRadius: '8px'
-                                    }}
-                                    onClick={handleSave}
-                                    disabled={loading}
-                                >
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <button className="btn-hrm btn-hrm-primary" style={{ padding: '12px 60px' }} onClick={handleSave} disabled={loading}>
                                     <Save size={20} /> {loading ? 'SAVING...' : 'SAVE'}
                                 </button>
                             </div>

@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Check, RotateCcw } from 'lucide-react';
@@ -10,7 +12,7 @@ import '../styles/AddShift.css';
 const EditShift = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+    
     const [loading, setLoading] = useState(true);
 
     const initialFormData = {
@@ -90,7 +92,7 @@ const EditShift = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/shifts/${id}`, {
+            const response = await authenticatedFetch(`${API_URL}/api/shifts/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -182,7 +184,7 @@ const EditShift = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${apiUrl}/api/shifts/update/${id}`, {
+            const response = await authenticatedFetch(`${API_URL}/api/shifts/update/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Mail, Phone, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -28,13 +30,13 @@ const MyProfile = () => {
   };
   
   const fileInputRef = useRef(null);
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+  
   
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${apiUrl}/api/company`, {
+        const response = await authenticatedFetch(`${API_URL}/api/company`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -55,7 +57,7 @@ const MyProfile = () => {
 
   const getFullLogoUrl = (logoPath) => {
     if (!logoPath) return null;
-    return logoPath.startsWith('http') ? logoPath : `${apiUrl}${logoPath}`;
+    return logoPath.startsWith('http') ? logoPath : `${API_URL}${logoPath}`;
   };
 
   const handlePasswordChange = (e) => {
@@ -96,7 +98,7 @@ const MyProfile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${apiUrl}/api/auth/change-password`, {
+      const response = await authenticatedFetch(`${API_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,7 +169,7 @@ const MyProfile = () => {
               uploadDataForm.append('file', file);
               
               const token = localStorage.getItem('token');
-              const uploadRes = await fetch(`${apiUrl}/api/upload`, {
+              const uploadRes = await authenticatedFetch(`${API_URL}/api/upload`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${token}`
@@ -179,7 +181,7 @@ const MyProfile = () => {
               if (uploadData.success) {
                   const newLogoUrl = uploadData.fileUrl;
                   
-                  const response = await fetch(`${apiUrl}/api/company`, {
+                  const response = await authenticatedFetch(`${API_URL}/api/company`, {
                     method: 'PUT',
                     headers: {
                       'Content-Type': 'application/json',
@@ -325,7 +327,6 @@ const MyProfile = () => {
                     <Lock size={20} className="header-icon-premium"/>
                     <h2 className="card-title-premium">Security Settings</h2>
                  </div>
-                 <span className="last-updated">Change your password regularly</span>
               </div>
               
               <form onSubmit={handleSave} className="password-form-premium">

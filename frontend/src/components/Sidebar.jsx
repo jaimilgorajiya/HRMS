@@ -1,3 +1,5 @@
+import authenticatedFetch from '../utils/apiHandler';
+import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 
@@ -10,9 +12,9 @@ const Sidebar = ({ isCollapsed }) => {
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:7000";
+        
         const token = localStorage.getItem('token');
-        const response = await fetch(`${apiUrl}/api/company`, {
+        const response = await authenticatedFetch(`${API_URL}/api/company`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
