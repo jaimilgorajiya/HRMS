@@ -173,27 +173,27 @@ const EarningDeductionType = () => {
     const deductions = data.filter(item => item.type === 'Deductions');
 
     const renderTable = (items, title) => (
-        <div style={{ flex: 1, minWidth: '450px', background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+        <div style={{ minWidth: '380px', flex: '0 1 auto', background: 'white', borderRadius: '12px', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.08)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #F1F5F9', background: '#fcfcfc' }}>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#475569' }}>{title}</h3>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#1E293B' }}>{title}</h3>
             </div>
             <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table className="hrm-table">
                     <thead>
-                        <tr style={{ background: '#F8FAFC' }}>
-                            <th style={{ padding: '12px 16px', color: '#64748B', fontWeight: '600', fontSize: '12px', borderBottom: '1.5px solid #E2E8F0', width: '60px' }}>Sr. No</th>
-                            <th style={{ padding: '12px 16px', color: '#64748B', fontWeight: '600', fontSize: '12px', borderBottom: '1.5px solid #E2E8F0' }}>{title.includes('Earning') ? 'Earning Name' : 'Deduction Name'}</th>
-                            <th style={{ padding: '12px 16px', color: '#64748B', fontWeight: '600', fontSize: '12px', borderBottom: '1.5px solid #E2E8F0', width: '100px', textAlign: 'center' }}>Action</th>
+                        <tr>
+                            <th style={{ width: '80px', textAlign: 'center' }}>SR. NO</th>
+                            <th style={{ width: '220px' }}>{title.includes('Earning') ? 'EARNING NAME' : 'DEDUCTION NAME'}</th>
+                            <th style={{ width: '120px', textAlign: 'center' }}>ACTION</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#64748B' }}>Loading...</td></tr>
+                            <tr><td colSpan="3" style={{ textAlign: 'center' }}>Loading...</td></tr>
                         ) : items.length > 0 ? items.map((item, index) => (
-                            <tr key={item._id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                                <td style={{ padding: '12px 16px', color: '#1E293B', fontSize: '13px' }}>{index + 1}</td>
-                                <td style={{ padding: '12px 16px', color: '#3B82F6', fontSize: '13px', fontWeight: '500' }}>{item.name}</td>
-                                <td style={{ padding: '12px 16px' }}>
+                            <tr key={item._id}>
+                                <td style={{ textAlign: 'center' }}>{index + 1}</td>
+                                <td style={{ color: '#3B82F6', fontWeight: '600' }}>{item.name}</td>
+                                <td>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                         <button 
                                             onClick={() => toggleStatus(item._id, item.status)}
@@ -204,24 +204,22 @@ const EarningDeductionType = () => {
                                         <button 
                                             onClick={() => handleEdit(item)}
                                             className="btn-action-edit"
-                                            style={{ padding: '5px', width: '28px', height: '28px' }}
                                             title="Edit"
                                         >
-                                            <Edit2 size={14} />
+                                            <Edit2 size={16} />
                                         </button>
                                         <button 
                                             onClick={() => handleDelete(item._id)}
                                             className="btn-action-delete"
-                                            style={{ padding: '5px', width: '28px', height: '28px' }}
                                             title="Delete"
                                         >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         )) : (
-                            <tr><td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#64748B' }}>No {title.toLowerCase()} found</td></tr>
+                            <tr><td colSpan="3" style={{ textAlign: 'center', padding: '30px' }}>No {title.toLowerCase()} found</td></tr>
                         )}
                     </tbody>
                 </table>
@@ -230,95 +228,92 @@ const EarningDeductionType = () => {
     );
 
     return (
-        <div style={{ padding: '0px', width: '100%', minHeight: '100vh', background: '#F4F7FE' }}>
-            <div style={{ padding: '20px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#1E293B', margin: 0 }}>Earning Deduction Type</h1>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <button 
-                        onClick={() => { resetForm(); setIsModalOpen(true); }}
-                        style={{ background: '#3B648B', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600' }}
-                    >
-                        <Plus size={14} /> ADD
+        <div className="hrm-container">
+            <div className="hrm-header">
+                <h1 className="hrm-title">Earning Deduction Type</h1>
+                <div className="hrm-header-actions">
+                    <button className="btn-hrm btn-hrm-primary" onClick={() => { resetForm(); setIsModalOpen(true); }}>
+                        <Plus size={18} /> ADD
                     </button>
                 </div>
             </div>
 
-            <div style={{ padding: '0 30px 40px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
                 {renderTable(earnings, "Earning List")}
                 {renderTable(deductions, "Deduction List")}
             </div>
 
-            {/* Modal */}
             {isModalOpen && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                    <div style={{ background: 'white', borderRadius: '8px', width: '500px', maxWidth: '95%', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
-                        <div style={{ background: 'linear-gradient(90deg, #3B648B 0%, #4facfe 100%)', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
-                            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#fff' }}>Earning Deduction Type</h2>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', display: 'flex' }}>
-                                <X size={20} />
-                            </button>
+                <div className="hrm-modal-overlay">
+                    <div className="hrm-modal-content">
+                        <div className="hrm-modal-header">
+                            <h2>{isEditing ? 'Edit Earning Deduction Type' : 'Add Earning Deduction Type'}</h2>
+                            <button className="icon-btn" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                         </div>
-                        <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#475569' }}>Earning Deduction name <span style={{ color: '#EF4444' }}>*</span></label>
+                        <form onSubmit={handleSubmit}>
+                            <div className="hrm-modal-body">
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Earning Deduction name <span className="req">*</span></label>
                                     <input 
                                         type="text" 
                                         name="name"
                                         value={formData.name}
                                         onChange={handleInputChange}
+                                        className="hrm-input"
                                         placeholder="Enter name"
                                         required 
-                                        style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: '6px', outline: 'none', fontSize: '13px' }}
                                     />
                                 </div>
 
-                                <SearchableSelect 
-                                    label="Earning Deduction Type"
-                                    required={true}
-                                    options={[
-                                        { label: 'Earnings', value: 'Earnings' },
-                                        { label: 'Deductions', value: 'Deductions' }
-                                    ]}
-                                    value={formData.type}
-                                    onChange={(val) => setFormData({ ...formData, type: val })}
-                                />
-
-                                {formData.type === 'Earnings' && (
+                                <div className="hrm-form-group">
                                     <SearchableSelect 
-                                        label="Allowance Type"
+                                        label="Earning Deduction Type"
                                         required={true}
                                         options={[
-                                            { label: 'None', value: 'None' },
-                                            { label: 'Bonus Allowance', value: 'Bonus Allowance' },
-                                            { label: 'Special Allowance', value: 'Special Allowance' },
-                                            { label: 'Transport Allowance', value: 'Transport Allowance' },
-                                            { label: 'Other', value: 'Other' }
+                                            { label: 'Earnings', value: 'Earnings' },
+                                            { label: 'Deductions', value: 'Deductions' }
                                         ]}
-                                        value={formData.allowanceType}
-                                        onChange={(val) => setFormData({ ...formData, allowanceType: val })}
-                                        searchable={true}
+                                        value={formData.type}
+                                        onChange={(val) => setFormData({ ...formData, type: val })}
                                     />
+                                </div>
+
+                                {formData.type === 'Earnings' && (
+                                    <div className="hrm-form-group">
+                                        <SearchableSelect 
+                                            label="Allowance Type"
+                                            required={true}
+                                            options={[
+                                                { label: 'None', value: 'None' },
+                                                { label: 'Bonus Allowance', value: 'Bonus Allowance' },
+                                                { label: 'Special Allowance', value: 'Special Allowance' },
+                                                { label: 'Transport Allowance', value: 'Transport Allowance' },
+                                                { label: 'Other', value: 'Other' }
+                                            ]}
+                                            value={formData.allowanceType}
+                                            onChange={(val) => setFormData({ ...formData, allowanceType: val })}
+                                            searchable={true}
+                                        />
+                                    </div>
                                 )}
 
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#475569' }}>Description</label>
+                                <div className="hrm-form-group">
+                                    <label className="hrm-label">Description</label>
                                     <textarea 
                                         name="description"
                                         value={formData.description}
                                         onChange={handleInputChange}
+                                        className="hrm-textarea"
                                         placeholder="Enter description"
-                                        style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: '6px', outline: 'none', height: '80px', resize: 'none', fontSize: '13px' }}
+                                        style={{ height: '80px' }}
                                     />
                                 </div>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
-                                <button 
-                                    type="submit"
-                                    style={{ background: '#3B648B', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600' }}
-                                >
-                                    <Check size={16} /> {isEditing ? 'UPDATE' : 'ADD'}
+                            <div className="hrm-modal-footer">
+                                <button type="button" className="btn-hrm btn-hrm-secondary" onClick={() => setIsModalOpen(false)}>CANCEL</button>
+                                <button type="submit" className="btn-hrm btn-hrm-primary">
+                                    <Check size={18} /> {isEditing ? 'UPDATE' : 'SAVE'}
                                 </button>
                             </div>
                         </form>

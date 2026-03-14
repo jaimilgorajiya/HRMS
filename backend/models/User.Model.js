@@ -59,6 +59,24 @@ const userSchema = new mongoose.Schema(
             relation: String,
             phone: String
         },
+        aliasName: {
+            type: String
+        },
+        countryCode: {
+            type: String
+        },
+        probationPeriodDays: {
+            type: Number
+        },
+        trainingCompletionDate: {
+            type: Date
+        },
+        dateOfPermanent: {
+            type: Date
+        },
+        branch: {
+            type: String
+        },
         employeeId: {
             type: String,
             unique: true,
@@ -103,6 +121,37 @@ const userSchema = new mongoose.Schema(
         },
         reportingTo: {
             type: String
+        },
+        subDepartment: {
+            type: String
+        },
+        grade: {
+            type: String
+        },
+        employeeLevel: {
+            type: String
+        },
+        biometricId: {
+            type: String
+        },
+        previousMemberId: {
+            type: String
+        },
+        isInternationalWorker: {
+            type: String,
+            default: "No"
+        },
+        insuranceNumber: {
+            type: String
+        },
+        insuranceCompanyName: {
+            type: String
+        },
+        insuranceExpiryDate: {
+            type: Date
+        },
+        retirementAge: {
+            type: Number
         },
         inviteSent: {
             type: Boolean,

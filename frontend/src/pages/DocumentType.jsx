@@ -53,7 +53,10 @@ const DocumentType = () => {
             setLoading(true);
             const response = await authenticatedFetch(`${API_URL}/api/document-types`);
             const data = await response.json();
-            if (Array.isArray(data)) {
+            if (data.success && Array.isArray(data.documentTypes)) {
+                setDocuments(data.documentTypes);
+            } else if (Array.isArray(data)) {
+                // Fallback for old raw array format just in case
                 setDocuments(data);
             }
         } catch (error) {

@@ -5,12 +5,23 @@ import { generateEmployeeId } from "../utils/employeeId.js";
 
 const createUser = async (req, res) => {
     try {
-        const { email, firstName, lastName } = req.body;
+        const { emailId, email, firstName, lastName } = req.body;
+        const targetEmail = emailId || email;
         
+        if (!targetEmail) {
+            return res.status(400).json({ success: false, message: "Email is required" });
+        }
+
         // Check if user already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email: targetEmail });
         if (existingUser) {
             return res.status(400).json({ success: false, message: "User with this email already exists" });
+        }
+        
+        // Handle profile photo if uploaded
+        let profilePhoto = req.body.profilePhoto;
+        if (req.file) {
+            profilePhoto = req.file.filename;
         }
 
         // Generate employee ID if not provided
@@ -26,19 +37,25 @@ const createUser = async (req, res) => {
         // Construct full name
         const name = `${firstName || ''} ${lastName || ''}`.trim() || req.body.name || 'Unnamed User';
 
-        // Create new user with all fields
+        // Create new user with all fields, mapping as necessary
         const newUser = new User({
             ...req.body,
+            email: targetEmail,
+            dateJoined: req.body.dateOfJoining || req.body.dateJoined,
+            workSetup: {
+                location: req.body.jobLocation || req.body.branch || (req.body.workSetup ? req.body.workSetup.location : '')
+            },
+            profilePhoto,
             name,
             employeeId,
             password: hashedPassword,
-            forcePasswordReset: true // Always force password reset for new users
+            forcePasswordReset: true
         });
 
         await newUser.save();
         
         // Send welcome email with credentials
-        const emailResult = await sendWelcomeEmail(email, name, employeeId, temporaryPassword);
+        const emailResult = await sendWelcomeEmail(targetEmail, name, employeeId, temporaryPassword);
         
         // Return user without password
         const userResponse = newUser.toObject();
@@ -53,18 +70,31 @@ const createUser = async (req, res) => {
             emailSent: emailResult.success
         });
     } catch (error) {
-        console.log("Error in createUser controller", error.message);
+        console.error("Error in createUser controller:", error);
         
-        // Handle duplicate key errors
+        // Handle duplicate key errors (code 11000)
         if (error.code === 11000) {
             const field = Object.keys(error.keyPattern)[0];
             return res.status(400).json({ 
                 success: false, 
-                message: `A user with this ${field} already exists` 
+                message: `Duplicate field error: A user with this ${field} already exists.` 
+            });
+        }
+
+        // Handle Mongoose validation errors
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({ 
+                success: false, 
+                message: `Validation error: ${messages.join(', ')}` 
             });
         }
         
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error during employee creation",
+            error: error.message 
+        });
     }
 };
 

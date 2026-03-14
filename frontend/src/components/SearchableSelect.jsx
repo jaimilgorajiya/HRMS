@@ -69,26 +69,38 @@ const SearchableSelect = ({
     return (
         <div className="searchable-select-container" ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
             {label && (
-                <label style={{ fontSize: '15px', fontWeight: '600', color: '#1E293B', marginBottom: '8px', display: 'block' }}>
-                    {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+                <label style={{ fontSize: '14.5px', fontWeight: '600', color: '#475569', marginBottom: '8px', display: 'block' }}>
+                    {label} {required && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
                 </label>
             )}
             
             <div 
                 className={`select-trigger ${isOpen ? 'active' : ''}`}
                 onClick={toggleDropdown}
+                onMouseEnter={(e) => {
+                    if (!isOpen) {
+                        e.currentTarget.style.borderColor = '#CBD5E1';
+                        e.currentTarget.style.backgroundColor = '#F8FAFC';
+                    }
+                }}
+                onMouseLeave={(e) => {
+                    if (!isOpen) {
+                        e.currentTarget.style.borderColor = '#E2E8F0';
+                        e.currentTarget.style.backgroundColor = '#fff';
+                    }
+                }}
                 style={{
-                    minHeight: '48px',
-                    padding: '6px 16px',
-                    border: isOpen ? '1.5px solid #2563EB' : '1.5px solid #E2E8F0',
+                    minHeight: '45px',
+                    padding: '8px 16px',
+                    border: isOpen ? '1.5px solid #3B648B' : '1.5px solid #E2E8F0',
                     borderRadius: '10px',
-                    backgroundColor: '#fff',
+                    backgroundColor: isOpen ? '#fff' : '#fff',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     cursor: 'pointer',
                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: isOpen ? '0 0 0 4px rgba(37, 99, 235, 0.1)' : '0 1px 2px rgba(15, 23, 42, 0.05)',
+                    boxShadow: isOpen ? '0 0 0 4px rgba(59, 100, 139, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08)' : '0 1px 2px rgba(15, 23, 42, 0.05)',
                 }}
             >
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', flex: 1 }}>
@@ -99,13 +111,13 @@ const SearchableSelect = ({
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    backgroundColor: '#EFF6FF',
-                                    color: '#2563EB',
+                                    backgroundColor: 'rgba(59, 100, 139, 0.08)',
+                                    color: '#3B648B',
                                     padding: '2px 8px',
                                     borderRadius: '6px',
                                     fontSize: '13px',
                                     fontWeight: '500',
-                                    border: '1px solid #DBEAFE'
+                                    border: '1px solid rgba(59, 100, 139, 0.15)'
                                 }}>
                                     {opt.label}
                                     <X 
@@ -183,8 +195,8 @@ const SearchableSelect = ({
                                             padding: '8px 12px',
                                             fontSize: '14px',
                                             fontWeight: '500',
-                                            color: isSelected ? '#2563EB' : '#475569',
-                                            backgroundColor: isSelected ? '#EFF6FF' : 'transparent',
+                                            color: isSelected ? '#3B648B' : '#475569',
+                                            backgroundColor: isSelected ? 'rgba(59, 100, 139, 0.08)' : 'transparent',
                                             borderRadius: '6px',
                                             cursor: 'pointer',
                                             display: 'flex',
@@ -193,8 +205,8 @@ const SearchableSelect = ({
                                             transition: 'background 0.1s',
                                             marginBottom: '2px'
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isSelected ? '#EFF6FF' : '#F8FAFC'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isSelected ? '#EFF6FF' : 'transparent'}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isSelected ? 'rgba(59, 100, 139, 0.08)' : '#F8FAFC'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isSelected ? 'rgba(59, 100, 139, 0.08)' : 'transparent'}
                                     >
                                         {option.label}
                                         {isSelected && <Check size={16} />}

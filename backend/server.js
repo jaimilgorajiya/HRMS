@@ -24,6 +24,8 @@ import leaveTypeRoutes from './routes/LeaveType.Routes.js';
 import earningDeductionTypeRoutes from './routes/EarningDeductionType.Routes.js';
 import documentTypeRoutes from './routes/DocumentType.Routes.js';
 
+import onboardingDocSettingRoutes from './routes/OnboardingDocSetting.Routes.js';
+
 import payrollSettingRoutes from './routes/PayrollSetting.Routes.js';
 
 const app = express();
@@ -36,7 +38,15 @@ verifyEmailConfig();
 
 app.use(express.json());
 app.use(cors({
-    origin: [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", 'http://192.168.29.90:5175'], // Add common dev ports
+    origin: [
+        process.env.CLIENT_URL, 
+        'http://localhost:5173', 
+        'http://localhost:5174', 
+        'http://localhost:5175',
+        'http://192.168.29.90:5173',
+        'http://192.168.29.90:5174',
+        'http://192.168.29.90:5175'
+    ],
     credentials: true,
 }));
 app.use(cookieParser());
@@ -63,6 +73,7 @@ app.use('/api/leave-types', leaveTypeRoutes);
 app.use('/api/earning-deduction-types', earningDeductionTypeRoutes);
 app.use('/api/payroll-settings', payrollSettingRoutes);
 app.use('/api/document-types', documentTypeRoutes);
+app.use('/api/onboarding-doc-settings', onboardingDocSettingRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

@@ -4,7 +4,7 @@ export const getDocumentTypes = async (req, res) => {
     try {
         const adminId = req.user._id;
         const documents = await DocumentType.find({ adminId }).sort({ createdAt: -1 });
-        res.status(200).json(documents);
+        res.status(200).json({ success: true, documentTypes: documents });
     } catch (error) {
         console.error("Error in getDocumentTypes:", error);
         res.status(500).json({ success: false, message: "Internal Server Error" });

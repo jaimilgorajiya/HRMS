@@ -91,14 +91,6 @@ const Sidebar = ({ isCollapsed }) => {
   };
 
   const menuItems = [
-// ... existing menuItems ...
-// Update the rendering logic below:
-// In the map:
-// For top-level segments:
-// onClick={() => toggleMenu(item.title, menuItems.filter(m => m.subItems).map(m => m.title))}
-// For sub-menus:
-// onClick={() => toggleMenu(sub.title, item.subItems.filter(s => s.children).map(s => s.title))}
-
     {
       title: "Dashboard",
       icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
@@ -170,13 +162,25 @@ const Sidebar = ({ isCollapsed }) => {
       icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
       subItems: [
         { 
-          title: "Employee Management", 
+          title: "Employee & Management", 
           path: "/admin/employees",
           children: [
-            { title: "Employees Management", path: "/admin/employees/manage" },
+            { title: "Employees", path: "/admin/employees/list" },
+            { title: "Management", path: "/admin/employees/manage" },
             { title: "Ex Employee", path: "/admin/employees/ex" },
-            { title: "Emp Onboarding", path: "/admin/employees/onboarding" },
-            { title: "Emp Offboarding", path: "/admin/employees/offboarding" }
+            { title: "Employee Onboarding", path: "/admin/employees/onboarding" },
+            { title: "Employee Offboarding", path: "/admin/employees/offboarding" },
+            { title: "Management Role", path: "/admin/employees/mgmt-role" },
+            { title: "Employee Level Assign", path: "/admin/employees/level-assign" },
+            { title: "Profile Change Request", path: "/admin/employees/profile-request" },
+            { title: "Change Branch", path: "/admin/employees/change-branch" },
+            { title: "Update Bulk Employee ID", path: "/admin/employees/bulk-id" },
+            { title: "Employees Level Hierarchy Chart", path: "/admin/employees/hierarchy" },
+            { title: "Employee Resignation", path: "/admin/employees/resignation" },
+            { title: "Other Employee", path: "/admin/employees/other" },
+            { title: "Upcoming Retirement", path: "/admin/employees/retirement" },
+            { title: "Bulk Upload", path: "/admin/employees/bulk-upload" },
+            { title: "Employee Promotion", path: "/admin/employees/promotion" }
           ]
         },
         { 
@@ -202,72 +206,6 @@ const Sidebar = ({ isCollapsed }) => {
             { title: "Attendance Request", path: "/admin/attendance/request" },
             { title: "Absent Emp", path: "/admin/attendance/absent" },
             { title: "Delete Attendance", path: "/admin/attendance/delete" }
-          ]
-        },
-        { 
-          title: "Leave Management", 
-          path: "/admin/leaves",
-          children: [
-            { title: "Assign Bulk Leave", path: "/admin/leaves/bulk" },
-            { title: "Leave Balance", path: "/admin/leaves/balance" },
-            { title: "Leave Request", path: "/admin/leaves/request" },
-            { title: "Auto Leave", path: "/admin/leaves/auto" },
-            { title: "Leave Pay Out", path: "/admin/leaves/payout" },
-            { title: "Short Leave", path: "/admin/leaves/short" },
-            { title: "Sandwich Leave", path: "/admin/leaves/sandwich" },
-            { title: "Deleted Auto Leave", path: "/admin/leaves/auto-deleted" },
-            { title: "Leave Enchashment Request", path: "/admin/leaves/encashment" },
-            { title: "Carry Forward Leave", path: "/admin/leaves/carry-forward" },
-            { title: "Short Leave Request", path: "/admin/leaves/short-request" },
-            { title: "Leave Cancellation", path: "/admin/leaves/cancellation" }
-          ]
-        },
-        { 
-          title: "Payroll", 
-          path: "/admin/payroll",
-          children: [
-            { title: "Employee CTC", path: "/admin/payroll/ctc" },
-            { title: "Create Salary Slip", path: "/admin/payroll/create" },
-            { title: "Create Bulk Salary Slip", path: "/admin/payroll/create-bulk" },
-            { title: "Generated Salary Slip", path: "/admin/payroll/generated" },
-            { title: "Checked Salary Slip", path: "/admin/payroll/checked" },
-            { title: "Published Salary Slip", path: "/admin/payroll/published" },
-            { title: "Other Earning / Deduction", path: "/admin/payroll/other" },
-            { title: "Manage Incentive", path: "/admin/payroll/incentive" },
-            { title: "FnF", path: "/admin/payroll/fnf" },
-            { title: "Bank Accounts", path: "/admin/payroll/bank" },
-            { title: "Form T", path: "/admin/payroll/form-t" }
-          ]
-        },
-        { 
-          title: "WFH Management", 
-          path: "/admin/wfh",
-          children: [
-            { title: "WFH Requests", path: "/admin/wfh/requests" },
-            { title: "WFH Balance Sheet", path: "/admin/wfh/balance" }
-          ]
-        },
-        { 
-          title: "Holidays", 
-          path: "/admin/holidays",
-          children: [
-            { title: "Add Holiday", path: "/admin/holidays/add" },
-            { title: "Manage Holiday", path: "/admin/holidays/manage" }
-          ]
-        },
-        { 
-          title: "Documents", 
-          path: "/admin/documents",
-          children: [
-            { title: "Manage Company Docs", path: "/admin/documents/company" },
-            { title: "Employee Docs", path: "/admin/documents/employee" }
-          ]
-        },
-        { 
-          title: "Emp Engagement", 
-          path: "/admin/engagement",
-          children: [
-            { title: "Upcoming Celebrations", path: "/admin/engagement/celebrations" }
           ]
         }
       ]
