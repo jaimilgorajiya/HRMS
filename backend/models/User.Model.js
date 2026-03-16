@@ -206,16 +206,22 @@ const userSchema = new mongoose.Schema(
                 default: false
             }
         },
-        documents: {
-            resume: String,
-            idProof: String,
-            photograph: String,
-            offerLetter: String,
-            appointmentLetter: String,
-            nda: String,
-            bankPassbook: String,
-            panCard: String
-        },
+        documents: [{
+            documentType: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'DocumentType',
+                required: true
+            },
+            fileUrl: { type: String, required: true },
+            originalName: String,
+            documentNumber: String,
+            issueDate: Date,
+            expiryDate: Date,
+            uploadedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }],
         verification: {
             status: {
                 type: String,

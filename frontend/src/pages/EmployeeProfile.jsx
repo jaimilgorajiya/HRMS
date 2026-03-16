@@ -22,7 +22,8 @@ const EmployeeProfile = () => {
         { id: 'Job Information', label: 'Job Information', icon: <Briefcase size={16} /> },
         { id: 'Contact Detail', label: 'Contact Detail', icon: <Phone size={16} /> },
         { id: 'Personal Info', label: 'Personal Info', icon: <User size={16} /> },
-        { id: 'Experience', label: 'Experience', icon: <History size={16} /> }
+        { id: 'Experience', label: 'Experience', icon: <History size={16} /> },
+        { id: 'Documents', label: 'Documents', icon: <FileText size={16} /> }
     ];
     
     // Experience specific states
@@ -38,6 +39,17 @@ const EmployeeProfile = () => {
         description: ''
     });
     
+    // Document specific states
+    const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+    const [viewingDoc, setViewingDoc] = useState(null);
+    const [docFormData, setDocFormData] = useState({
+        documentType: '',
+        documentNumber: '',
+        issueDate: '',
+        expiryDate: '',
+        file: null
+    });
+    
     // New states for premium phone dropdowns
     const [activePhoneDropdown, setActivePhoneDropdown] = useState(null);
     const [codeSearch, setCodeSearch] = useState('');
@@ -48,6 +60,7 @@ const EmployeeProfile = () => {
     const [departments, setDepartments] = useState([]);
     const [designations, setDesignations] = useState([]);
     const [shifts, setShifts] = useState([]);
+    const [documentTypes, setDocumentTypes] = useState([]);
     const [countries, setCountries] = useState([]);
 
     const [formData, setFormData] = useState({});
@@ -217,25 +230,93 @@ const EmployeeProfile = () => {
             }
         }
     };
+
+    const handleUploadDocument = async (e) => {
+        e.preventDefault();
+        if (!docFormData.documentType || !docFormData.file) {
+            return Swal.fire('Error', 'Please select a document type and attach a file', 'error');
+        }
+        
+        const data = new FormData();
+        data.append('documentType', docFormData.documentType);
+        data.append('file', docFormData.file);
+        if (docFormData.documentNumber) data.append('documentNumber', docFormData.documentNumber);
+        if (docFormData.issueDate) data.append('issueDate', docFormData.issueDate);
+        if (docFormData.expiryDate) data.append('expiryDate', docFormData.expiryDate);
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/api/users/${id}/documents`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: data
+            });
+            const resData = await response.json();
+            if (resData.success) {
+                setFormData(resData.user);
+                setIsDocModalOpen(false);
+                setDocFormData({ documentType: '', documentNumber: '', issueDate: '', expiryDate: '', file: null });
+                Swal.fire('Success', 'Document uploaded successfully', 'success');
+            } else {
+                Swal.fire('Error', resData.message || 'Failed to upload document', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'An error occurred while uploading', 'error');
+        }
+    };
+
+    const handleDeleteDocument = async (docId) => {
+        const result = await Swal.fire({
+            title: 'Delete Document?',
+            text: "Are you sure you want to remove this document?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/users/${id}/documents/${docId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    setFormData(data.user);
+                    Swal.fire('Deleted', 'Document removed successfully', 'success');
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to delete document', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Failed to delete document', 'error');
+            }
+        }
+    };
+    
     const fetchDropdownData = async () => {
         const token = localStorage.getItem('token');
         try {
-            const [branchRes, deptRes, desigRes, shiftRes] = await Promise.all([
+            const [branchRes, deptRes, desigRes, shiftRes, docTypeRes] = await Promise.all([
                 authenticatedFetch(`${API_URL}/api/branches`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/departments`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/designations`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                authenticatedFetch(`${API_URL}/api/shifts`, { headers: { 'Authorization': `Bearer ${token}` } })
+                authenticatedFetch(`${API_URL}/api/shifts`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                authenticatedFetch(`${API_URL}/api/document-types`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             const bData = await branchRes.json();
             const dData = await deptRes.json();
             const deData = await desigRes.json();
             const sData = await shiftRes.json();
+            const docData = await docTypeRes.json();
 
             if (bData.success) setBranches(bData.branches);
             if (dData.success) setDepartments(dData.departments);
             if (deData.success) setDesignations(deData.designations);
             if (sData.success) setShifts(sData.shifts);
+            if (docData.success) setDocumentTypes(docData.documentTypes.filter(d => d.status)); // Only keep active
         } catch (error) {
             console.error("Error fetching dropdowns:", error);
         }
@@ -714,19 +795,103 @@ const EmployeeProfile = () => {
                                         <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', margin: 0 }}>Past Experience</h3>
                                         <button onClick={() => setIsExpModalOpen(true)} style={{ background: '#f43f5e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textTransform: 'uppercase' }}><Plus size={16} /> ADD PAST EXPERIENCE</button>
                                     </div>
-                                    <div className="hrm-table-wrapper" style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-                                        <table className="hrm-table" style={{ border: 'none' }}>
-                                            <thead><tr><th style={{ width: '50px' }}>#</th><th>Company Name</th><th>Designation</th><th>Work From</th><th>Work To</th><th>Experience</th><th>Location</th><th style={{ textAlign: 'center' }}>Action</th></tr></thead>
+                                    <div className="hrm-table-wrapper" style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflowX: 'auto', width: '100%' }}>
+                                        <table className="hrm-table" style={{ border: 'none', width: '100%', minWidth: '750px', tableLayout: 'auto' }}>
+                                            <thead>
+                                                <tr>
+                                                    <th style={{ width: '30px', padding: '10px 5px' }}>#</th>
+                                                    <th style={{ padding: '10px 5px' }}>Company Name</th>
+                                                    <th style={{ padding: '10px 5px' }}>Designation</th>
+                                                    <th style={{ padding: '10px 5px' }}>Work From</th>
+                                                    <th style={{ padding: '10px 5px' }}>Work To</th>
+                                                    <th style={{ padding: '10px 5px' }}>Experience</th>
+                                                    <th style={{ padding: '10px 5px' }}>Location</th>
+                                                    <th style={{ textAlign: 'center', width: '80px', padding: '10px 5px' }}>Action</th>
+                                                </tr>
+                                            </thead>
                                             <tbody>
                                                 {formData.pastExperience?.length > 0 ? formData.pastExperience.map((exp, idx) => (
                                                     <tr key={idx}>
-                                                        <td>{idx + 1}</td><td style={{ fontWeight: '700', color: '#1E293B' }}>{exp.companyName}</td><td>{exp.designation}</td>
-                                                        <td>{new Date(exp.workFrom).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-                                                        <td>{exp.isCurrent ? 'Current...' : new Date(exp.workTo).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-                                                        <td>{calculateDuration(exp.workFrom, exp.workTo, exp.isCurrent)}</td><td>{exp.location}</td>
-                                                        <td style={{ textAlign: 'center' }}><div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}><button onClick={() => handleEditExperience(idx)} style={{ border: 'none', background: 'transparent', color: '#3B648B', cursor: 'pointer', padding: '5px' }} title="Edit"><Edit2 size={16} /></button><button onClick={() => handleDeleteExperience(idx)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '5px' }} title="Delete"><Trash2 size={16} /></button></div></td>
+                                                        <td style={{ padding: '10px 5px' }}>{idx + 1}</td>
+                                                        <td style={{ fontWeight: '700', color: '#1E293B', padding: '10px 5px' }}>{exp.companyName}</td>
+                                                        <td style={{ padding: '10px 5px' }}>{exp.designation}</td>
+                                                        <td style={{ padding: '10px 5px', fontSize: '13px' }}>{new Date(exp.workFrom).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                                                        <td style={{ padding: '10px 5px', fontSize: '13px' }}>{exp.isCurrent ? 'Current' : new Date(exp.workTo).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                                                        <td style={{ padding: '10px 5px', fontSize: '13px' }}>{calculateDuration(exp.workFrom, exp.workTo, exp.isCurrent)}</td>
+                                                        <td style={{ padding: '10px 5px' }}>{exp.location}</td>
+                                                        <td style={{ textAlign: 'center', padding: '10px 5px' }}>
+                                                            <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                                                                <button onClick={() => handleEditExperience(idx)} style={{ border: 'none', background: 'transparent', color: '#3B648B', cursor: 'pointer', padding: '5px' }} title="Edit">
+                                                                    <Edit2 size={16} />
+                                                                </button>
+                                                                <button onClick={() => handleDeleteExperience(idx)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '5px' }} title="Delete">
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
                                                     </tr>
-                                                )) : (<tr><td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontStyle: 'italic' }}>No past experience records found.</td></tr>)}
+                                                )) : (
+                                                    <tr>
+                                                        <td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                                            No past experience records found.
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'Documents' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', gridColumn: 'span 2' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h3 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', margin: 0 }}>Employee Documents</h3>
+                                        <button onClick={() => setIsDocModalOpen(true)} style={{ background: '#f43f5e', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textTransform: 'uppercase' }}><Plus size={16} /> ADD DOCUMENT</button>
+                                    </div>
+                                    <div className="hrm-table-wrapper" style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflowX: 'auto', width: '100%' }}>
+                                        <table className="hrm-table" style={{ border: 'none', width: '100%', minWidth: '750px', tableLayout: 'auto' }}>
+                                            <thead>
+                                                <tr>
+                                                    <th style={{ width: '30px', padding: '10px 5px' }}>#</th>
+                                                    <th style={{ padding: '10px 5px' }}>Document Type</th>
+                                                    <th style={{ padding: '10px 5px' }}>Document No.</th>
+                                                    <th style={{ padding: '10px 5px' }}>Uploaded Date</th>
+                                                    <th style={{ padding: '10px 5px' }}>Attachment</th>
+                                                    <th style={{ textAlign: 'center', width: '60px', padding: '10px 5px' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {formData.documents?.length > 0 ? formData.documents.map((doc, idx) => (
+                                                    <tr key={idx}>
+                                                        <td style={{ padding: '10px 5px' }}>{idx + 1}</td>
+                                                        <td style={{ fontWeight: '700', color: '#1E293B', padding: '10px 5px' }}>{doc.documentType?.name || 'Unknown'}</td>
+                                                        <td style={{ padding: '10px 5px' }}>{doc.documentNumber || '-'}</td>
+                                                        <td style={{ padding: '10px 5px', fontSize: '13px' }}>{doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : '-'}</td>
+                                                        <td style={{ padding: '10px 5px' }}>{doc.fileUrl ? (
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={(e) => { e.preventDefault(); setViewingDoc({ url: `${API_URL}/uploads/${doc.fileUrl}`, type: doc.fileUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image' }) }} 
+                                                                style={{ background: 'none', border: 'none', color: '#3B648B', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit', padding: 0 }}
+                                                            >
+                                                                <Eye size={16} /> View
+                                                            </button>
+                                                        ) : '-'}</td>
+                                                        <td style={{ textAlign: 'center', padding: '10px 5px' }}>
+                                                            <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                                                                <button onClick={() => handleDeleteDocument(doc._id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '5px' }} title="Delete">
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )) : (
+                                                    <tr>
+                                                        <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontStyle: 'italic' }}>
+                                                            No documents uploaded yet.
+                                                        </td>
+                                                    </tr>
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>
@@ -810,6 +975,81 @@ const EmployeeProfile = () => {
                 </div>
             )}
 
+            {/* Document Modal */}
+            {isDocModalOpen && (
+                <div className="hrm-modal-overlay">
+                    <div className="hrm-modal-content" style={{ maxWidth: '500px' }}>
+                        <div className="hrm-modal-header">
+                            <h2 style={{ fontSize: '18px', fontWeight: '800' }}>Add Employee Document</h2>
+                            <button className="icon-btn" onClick={() => {
+                                setIsDocModalOpen(false);
+                                setDocFormData({ documentType: '', documentNumber: '', issueDate: '', expiryDate: '', file: null });
+                            }}><X size={20} /></button>
+                        </div>
+                        <form onSubmit={handleUploadDocument}>
+                            <div className="hrm-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div className="ss-form-group" style={{ position: 'relative', zIndex: 100 }}>
+                                    <SearchableSelect 
+                                        label="Document Type"
+                                        required={true}
+                                        searchable={true}
+                                        options={documentTypes.map(doc => ({ value: doc._id, label: doc.name }))}
+                                        value={docFormData.documentType}
+                                        onChange={(val) => setDocFormData(p => ({ ...p, documentType: val, documentNumber: '', issueDate: '', expiryDate: '', file: null }))}
+                                        placeholder="Select Document Type"
+                                    />
+                                </div>
+                                
+                                {(() => {
+                                    const selectedDocType = documentTypes.find(d => d._id === docFormData.documentType);
+                                    if (!selectedDocType) return null;
+
+                                    return (
+                                        <>
+                                            <div className="ss-form-group">
+                                                <label className="ss-label" style={{ fontSize: '12px' }}>Document Number *</label>
+                                                <input type="text" className="ss-input" required value={docFormData.documentNumber} onChange={e => setDocFormData(p => ({ ...p, documentNumber: e.target.value }))} placeholder={`Enter ${selectedDocType.name} number`} />
+                                            </div>
+
+                                            <div className="ss-form-group">
+                                                <label className="ss-label" style={{ fontSize: '12px' }}>Upload Document *</label>
+                                                <input type="file" className="ss-input" required onChange={e => setDocFormData(p => ({ ...p, file: e.target.files[0] }))} accept={selectedDocType.allowDocumentType === 'PDF Only' ? '.pdf' : selectedDocType.allowDocumentType === 'Image Only' ? 'image/*' : 'image/*,.pdf'} />
+                                            </div>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                            <div className="hrm-modal-footer">
+                                <button type="button" onClick={() => setIsDocModalOpen(false)} style={{ background: 'white', color: '#64748b', border: '1px solid #e2e8f0', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+                                <button type="submit" style={{ background: '#3B648B', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Upload Document</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Document Quick View Modal */}
+            {viewingDoc && (
+                <div className="hrm-modal-overlay" style={{ zIndex: 9999 }}>
+                    <div className="hrm-modal-content" style={{ width: '90%', maxWidth: '900px', height: '85vh', display: 'flex', flexDirection: 'column', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+                        <div className="hrm-modal-header" style={{ padding: '20px 24px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', margin: 0 }}>Document Quick View</h2>
+                            <button onClick={() => setViewingDoc(null)} style={{ background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', color: '#64748b', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#ef4444'; }} onMouseLeave={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="hrm-modal-body" style={{ flex: 1, padding: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#f8fafc', overflow: 'hidden' }}>
+                            <div style={{ width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden', background: '#fff', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
+                                {viewingDoc.type === 'pdf' ? (
+                                    <iframe src={viewingDoc.url} style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }} title="Document Viewer" />
+                                ) : (
+                                    <img src={viewingDoc.url} alt="Document View" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain', borderRadius: '8px' }} />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <style dangerouslySetInnerHTML={{ __html: `
                 .ss-form-group { display: flex; flex-direction: column; gap: 8px; }
                 .ss-label { font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }

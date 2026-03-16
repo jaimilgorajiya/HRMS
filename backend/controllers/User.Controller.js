@@ -148,6 +148,7 @@ const getUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
             .populate('workSetup.shift')
+            .populate('documents.documentType')
             .select("-password");
 
         if (!user) {
@@ -298,4 +299,65 @@ const getNextEmployeeId = async (req, res) => {
     }
 };
 
-export { createUser, getUsers, getUser, updateUser, deleteUser, getNextEmployeeId };
+const uploadUserDocument = async (req, res) => {
+    try {
+        const { documentType, documentNumber, issueDate, expiryDate } = req.body;
+        const file = req.file;
+
+        if (!documentType || !file) {
+            return res.status(400).json({ success: false, message: "Document type and file are required" });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const newDoc = {
+            documentType,
+            fileUrl: file.filename,
+            originalName: file.originalname,
+            documentNumber,
+            issueDate: issueDate || null,
+            expiryDate: expiryDate || null
+        };
+
+        user.documents.push(newDoc);
+        await user.save();
+
+        const populatedUser = await User.findById(req.params.id)
+            .populate('workSetup.shift')
+            .populate('documents.documentType')
+            .select("-password");
+        
+        res.status(200).json({ success: true, message: "Document uploaded successfully", user: populatedUser });
+    } catch (error) {
+        console.error("Error in uploadUserDocument:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+const deleteUserDocument = async (req, res) => {
+    try {
+        const { id, docId } = req.params;
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        
+        user.documents = user.documents.filter(doc => doc._id.toString() !== docId);
+        await user.save();
+        
+        const populatedUser = await User.findById(req.params.id)
+            .populate('workSetup.shift')
+            .populate('documents.documentType')
+            .select("-password");
+            
+        res.status(200).json({ success: true, message: "Document deleted successfully", user: populatedUser });
+    } catch (error) {
+        console.error("Error in deleteUserDocument:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+export { createUser, getUsers, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument };
