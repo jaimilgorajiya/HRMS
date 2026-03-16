@@ -28,16 +28,26 @@ const AddEmployee = () => {
         lastName: '',
         aliasName: '',
         countryCode: '+91',
-        mobileNo: '',
+        phone: '',
         dateOfBirth: '',
-        emailId: '',
-        dateOfJoining: '',
+        email: '',
+        dateJoined: '',
         probationPeriodDays: '',
         trainingCompletionDate: '',
         dateOfPermanent: '',
         gender: 'Male',
         employmentType: 'Full Time',
-        sendWhatsApp: true
+        sendWhatsApp: true,
+        subDepartment: '',
+        grade: '',
+        employeeLevel: '',
+        biometricId: '',
+        previousMemberId: '',
+        isInternationalWorker: 'No',
+        insuranceNumber: '',
+        insuranceCompanyName: '',
+        insuranceExpiryDate: '',
+        retirementAge: ''
     });
 
     const [profilePhoto, setProfilePhoto] = useState(null);
@@ -117,8 +127,8 @@ const AddEmployee = () => {
 
     // Auto-calculate Training Completion Date and Date of Permanent
     useEffect(() => {
-        if (formData.dateOfJoining && formData.probationPeriodDays) {
-            const joiningDate = new Date(formData.dateOfJoining);
+        if (formData.dateJoined && formData.probationPeriodDays) {
+            const joiningDate = new Date(formData.dateJoined);
             const days = parseInt(formData.probationPeriodDays);
             
             if (!isNaN(joiningDate.getTime()) && !isNaN(days)) {
@@ -134,7 +144,7 @@ const AddEmployee = () => {
                 }));
             }
         }
-    }, [formData.dateOfJoining, formData.probationPeriodDays]);
+    }, [formData.dateJoined, formData.probationPeriodDays]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -339,7 +349,7 @@ const AddEmployee = () => {
 
                         <div className="hrm-form-group">
                             <label className="hrm-label">Mobile No. <span className="req">*</span></label>
-                            <input type="tel" name="mobileNo" className="hrm-input" required placeholder="Enter mobile number" onChange={handleInputChange} />
+                            <input type="tel" name="phone" className="hrm-input" required placeholder="Enter mobile number" onChange={handleInputChange} />
                         </div>
 
                         <div className="hrm-form-group">
@@ -349,12 +359,12 @@ const AddEmployee = () => {
 
                         <div className="hrm-form-group">
                             <label className="hrm-label">Email ID</label>
-                            <input type="email" name="emailId" className="hrm-input" placeholder="Enter email" onChange={handleInputChange} />
+                            <input type="email" name="email" className="hrm-input" placeholder="Enter email" onChange={handleInputChange} />
                         </div>
 
                         <div className="hrm-form-group">
                             <label className="hrm-label">Date Of Joining <span className="req">*</span></label>
-                            <input type="date" name="dateOfJoining" className="hrm-input" required onChange={handleInputChange} />
+                            <input type="date" name="dateJoined" className="hrm-input" required onChange={handleInputChange} />
                         </div>
 
                         <div className="hrm-form-group">
@@ -385,21 +395,79 @@ const AddEmployee = () => {
                         </div>
 
 
-                         <div className="hrm-form-group">
+                        <div className="hrm-form-group">
+                             <SearchableSelect 
+                                 label="Employment Type"
+                                 required={true}
+                                 searchable={true}
+                                 placeholder="Employment Type"
+                                 options={[
+                                     { value: 'Full Time', label: 'Full Time' },
+                                     { value: 'Part Time', label: 'Part Time' },
+                                     { value: 'Contract', label: 'Contract' },
+                                     { value: 'Intern', label: 'Intern' },
+                                 ]}
+                                 value={formData.employmentType}
+                                 onChange={(val) => setFormData(prev => ({ ...prev, employmentType: val }))}
+                             />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Sub Department</label>
+                            <input type="text" name="subDepartment" className="hrm-input" placeholder="Enter sub department" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Grade</label>
+                            <input type="text" name="grade" className="hrm-input" placeholder="Enter grade (e.g. G1)" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Employee Level</label>
+                            <input type="text" name="employeeLevel" className="hrm-input" placeholder="Enter level (e.g. Junior)" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Biometric ID</label>
+                            <input type="text" name="biometricId" className="hrm-input" placeholder="Enter biometric ID" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Previous Member ID</label>
+                            <input type="text" name="previousMemberId" className="hrm-input" placeholder="Enter previous member ID" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
                             <SearchableSelect 
-                                label="Employment Type"
-                                required={true}
-                                searchable={true}
-                                placeholder="Employment Type"
+                                label="International Worker"
+                                required={false}
                                 options={[
-                                    { value: 'Full Time', label: 'Full Time' },
-                                    { value: 'Part Time', label: 'Part Time' },
-                                    { value: 'Contract', label: 'Contract' },
-                                    { value: 'Intern', label: 'Intern' },
+                                    { value: 'No', label: 'No' },
+                                    { value: 'Yes', label: 'Yes' }
                                 ]}
-                                value={formData.employmentType}
-                                onChange={(val) => setFormData(prev => ({ ...prev, employmentType: val }))}
+                                value={formData.isInternationalWorker}
+                                onChange={(val) => setFormData(prev => ({ ...prev, isInternationalWorker: val }))}
                             />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Retirement Age</label>
+                            <input type="number" name="retirementAge" className="hrm-input" placeholder="e.g. 60" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Insurance Number</label>
+                            <input type="text" name="insuranceNumber" className="hrm-input" placeholder="Enter insurance number" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Insurance Company</label>
+                            <input type="text" name="insuranceCompanyName" className="hrm-input" placeholder="Enter company name" onChange={handleInputChange} />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <label className="hrm-label">Insurance Expiry Date</label>
+                            <input type="date" name="insuranceExpiryDate" className="hrm-input" onChange={handleInputChange} />
                         </div>
                     </div>
 

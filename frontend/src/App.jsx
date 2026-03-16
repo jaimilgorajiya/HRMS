@@ -28,7 +28,6 @@ import DocumentType from './pages/DocumentType';
 import OnboardingDocSetting from './pages/OnboardingDocSetting';
 import Employees from './pages/Employees';
 import AddEmployee from './pages/AddEmployee';
-import EmployeeManagement from './pages/EmployeeManagement';
 import EmployeeProfile from './pages/EmployeeProfile';
 
 function App() {
@@ -79,7 +78,6 @@ function App() {
               <Route path="employees/list" element={<Employees />} />
               <Route path="employees/add" element={<AddEmployee />} />
               <Route path="employees/profile/:id" element={<EmployeeProfile />} />
-              <Route path="employees/manage" element={<EmployeeManagement />} />
               <Route path="employees/ex" element={<ModulePlaceholder title="Ex Employees" />} />
               <Route path="employees/onboarding" element={<ModulePlaceholder title="Employee Onboarding" />} />
               <Route path="employees/offboarding" element={<ModulePlaceholder title="Employee Offboarding" />} />

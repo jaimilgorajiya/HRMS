@@ -166,7 +166,6 @@ const Sidebar = ({ isCollapsed }) => {
           path: "/admin/employees",
           children: [
             { title: "Employees", path: "/admin/employees/list" },
-            { title: "Management", path: "/admin/employees/manage" },
             { title: "Ex Employee", path: "/admin/employees/ex" },
             { title: "Employee Onboarding", path: "/admin/employees/onboarding" },
             { title: "Employee Offboarding", path: "/admin/employees/offboarding" },

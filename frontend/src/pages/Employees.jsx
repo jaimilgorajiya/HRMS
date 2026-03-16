@@ -155,21 +155,6 @@ const Employees = () => {
                                 <h2 style={{ fontSize: '15px', fontWeight: '800', color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
                                     {deptName} <span style={{ color: '#94A3B8', fontWeight: '600' }}>({deptEmployees.length})</span>
                                 </h2>
-                                <button style={{ 
-                                    background: '#F97316', 
-                                    border: 'none', 
-                                    borderRadius: '8px', 
-                                    color: 'white', 
-                                    width: '32px', 
-                                    height: '32px', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    transition: 'transform 0.2s'
-                                }}>
-                                    <RotateCcw size={16} style={{ transform: 'rotate(90deg)' }} />
-                                </button>
                             </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

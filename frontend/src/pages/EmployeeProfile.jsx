@@ -140,6 +140,31 @@ const EmployeeProfile = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const calculateExperience = (joiningDate) => {
+        if (!joiningDate) return 'N/A';
+        const start = new Date(joiningDate);
+        const end = new Date();
+        let years = end.getFullYear() - start.getFullYear();
+        let months = end.getMonth() - start.getMonth();
+        let days = end.getDate() - start.getDate();
+
+        if (days < 0) {
+            months -= 1;
+            days += new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+        }
+        if (months < 0) {
+            years -= 1;
+            months += 12;
+        }
+
+        let result = [];
+        if (years > 0) result.push(`${years} ${years === 1 ? 'Year' : 'Years'}`);
+        if (months > 0) result.push(`${months} ${months === 1 ? 'Month' : 'Months'}`);
+        if (days > 0 && years === 0) result.push(`${days} ${days === 1 ? 'Day' : 'Days'}`);
+        
+        return result.length > 0 ? result.join(' ') : 'Joined Today';
+    };
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -216,6 +241,22 @@ const EmployeeProfile = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '25px' }}>
                 {/* Profile Card & Basic Info */}
                 <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '30px' }}>
+                    {/* Tenure Card */}
+                    <div style={{ 
+                        background: 'rgba(59, 100, 139, 0.05)', 
+                        padding: '10px 16px', 
+                        borderRadius: '10px', 
+                        border: '1px solid rgba(59, 100, 139, 0.1)',
+                        marginBottom: '25px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                    }}>
+                        <Clock size={16} color="#3B648B" />
+                        <span style={{ fontSize: '14px', color: '#64748b', fontWeight: '500' }}>Employee joined since: </span>
+                        <span style={{ fontSize: '15px', color: '#1e293b', fontWeight: '700' }}>{calculateExperience(formData.dateJoined)}</span>
+                    </div>
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '25px', marginBottom: '40px' }}>
                         <div style={{ position: 'relative' }}>
                             <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#f1f5f9', overflow: 'hidden', border: '3px solid #fff', boxShadow: '0 0 0 1px #e2e8f0' }}>
@@ -290,13 +331,33 @@ const EmployeeProfile = () => {
                         </div>
 
                         <div className="ss-form-group">
+                            <label className="ss-label">Grade</label>
+                            <input type="text" name="grade" value={formData.grade || ''} onChange={handleInputChange} className="ss-input" placeholder="e.g. G1, G2" />
+                        </div>
+
+                        <div className="ss-form-group">
+                            <label className="ss-label">Employee Level</label>
+                            <input type="text" name="employeeLevel" value={formData.employeeLevel || ''} onChange={handleInputChange} className="ss-input" placeholder="e.g. Junior, Senior" />
+                        </div>
+
+                        <div className="ss-form-group">
                             <label className="ss-label">Employee ID</label>
                             <input type="text" name="employeeId" value={formData.employeeId || ''} onChange={handleInputChange} className="ss-input" />
                         </div>
 
                         <div className="ss-form-group">
+                            <label className="ss-label">Biometric ID</label>
+                            <input type="text" name="biometricId" value={formData.biometricId || ''} onChange={handleInputChange} className="ss-input" placeholder="Enter Biometric ID" />
+                        </div>
+
+                        <div className="ss-form-group">
+                            <label className="ss-label">Previous Member ID</label>
+                            <input type="text" name="previousMemberId" value={formData.previousMemberId || ''} onChange={handleInputChange} className="ss-input" placeholder="Enter Previous ID" />
+                        </div>
+
+                        <div className="ss-form-group">
                             <label className="ss-label">Date Of Joining <span style={{ color: '#ef4444' }}>*</span></label>
-                            <input type="date" name="dateOfJoining" value={formData.dateOfJoining ? formData.dateOfJoining.split('T')[0] : ''} onChange={handleInputChange} className="ss-input" />
+                            <input type="date" name="dateJoined" value={formData.dateJoined ? formData.dateJoined.split('T')[0] : ''} onChange={handleInputChange} className="ss-input" />
                         </div>
 
                         <div className="ss-form-group">
@@ -307,6 +368,11 @@ const EmployeeProfile = () => {
                         <div className="ss-form-group">
                             <label className="ss-label">Training Completion Date</label>
                             <input type="date" name="trainingCompletionDate" value={formData.trainingCompletionDate ? formData.trainingCompletionDate.split('T')[0] : ''} onChange={handleInputChange} className="ss-input" />
+                        </div>
+
+                        <div className="ss-form-group">
+                            <label className="ss-label">Date of Permanent</label>
+                            <input type="date" name="dateOfPermanent" value={formData.dateOfPermanent ? formData.dateOfPermanent.split('T')[0] : ''} onChange={handleInputChange} className="ss-input" />
                         </div>
 
                         <div className="ss-form-group">
@@ -330,26 +396,17 @@ const EmployeeProfile = () => {
                         </div>
 
                         <div className="ss-form-group">
+                            <label className="ss-label">Sub Department</label>
+                            <input type="text" name="subDepartment" value={formData.subDepartment || ''} onChange={handleInputChange} className="ss-input" placeholder="Enter Sub Department" />
+                        </div>
+
+                        <div className="ss-form-group">
                             <SearchableSelect 
                                 label="Shift Timing"
                                 searchable={true}
                                 options={shifts.map(s => ({ value: s.shiftName, label: s.shiftName }))}
                                 value={formData.shift}
                                 onChange={(val) => setFormData(prev => ({ ...prev, shift: val }))}
-                            />
-                        </div>
-
-                        <div className="ss-form-group">
-                            <SearchableSelect 
-                                label="Status"
-                                options={[
-                                    { value: 'Active', label: 'Active' },
-                                    { value: 'Inactive', label: 'Inactive' },
-                                    { value: 'Onboarding', label: 'Onboarding' },
-                                    { value: 'Resigned', label: 'Resigned' }
-                                ]}
-                                value={formData.status}
-                                onChange={(val) => setFormData(prev => ({ ...prev, status: val }))}
                             />
                         </div>
 
@@ -406,8 +463,40 @@ const EmployeeProfile = () => {
                         </div>
 
                         <div className="ss-form-group">
+                            <SearchableSelect 
+                                label="International Worker"
+                                options={[
+                                    { value: 'No', label: 'No' },
+                                    { value: 'Yes', label: 'Yes' }
+                                ]}
+                                value={formData.isInternationalWorker || 'No'}
+                                onChange={(val) => setFormData(prev => ({ ...prev, isInternationalWorker: val }))}
+                            />
+                        </div>
+
+                        <div className="ss-form-group">
+                            <label className="ss-label">Retirement Age</label>
+                            <input type="number" name="retirementAge" value={formData.retirementAge || ''} onChange={handleInputChange} className="ss-input" placeholder="e.g. 60" />
+                        </div>
+
+                        <div className="ss-form-group">
                             <label className="ss-label">Date of Birth</label>
                             <input type="date" name="dateOfBirth" value={formData.dateOfBirth ? formData.dateOfBirth.split('T')[0] : ''} onChange={handleInputChange} className="ss-input" />
+                        </div>
+
+                        <div className="ss-form-group">
+                            <label className="ss-label">Insurance Number</label>
+                            <input type="text" name="insuranceNumber" value={formData.insuranceNumber || ''} onChange={handleInputChange} className="ss-input" placeholder="Enter Insurance No." />
+                        </div>
+
+                        <div className="ss-form-group">
+                            <label className="ss-label">Insurance Company Name</label>
+                            <input type="text" name="insuranceCompanyName" value={formData.insuranceCompanyName || ''} onChange={handleInputChange} className="ss-input" placeholder="Enter Company Name" />
+                        </div>
+
+                        <div className="ss-form-group">
+                            <label className="ss-label">Insurance Expiry Date</label>
+                            <input type="date" name="insuranceExpiryDate" value={formData.insuranceExpiryDate ? formData.insuranceExpiryDate.split('T')[0] : ''} onChange={handleInputChange} className="ss-input" />
                         </div>
                     </div>
                 </div>
