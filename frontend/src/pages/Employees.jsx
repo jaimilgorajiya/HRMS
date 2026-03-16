@@ -206,7 +206,7 @@ const Employees = () => {
                                                         justifyContent: 'center'
                                                     }}>
                                                         {emp.profilePhoto ? (
-                                                            <img src={`${API_URL}/${emp.profilePhoto}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                            <img src={`${API_URL}/uploads/${emp.profilePhoto}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                         ) : (
                                                             <span style={{ fontSize: '18px', fontWeight: '800', color: '#3B648B' }}>{getInitials(emp.name)}</span>
                                                         )}

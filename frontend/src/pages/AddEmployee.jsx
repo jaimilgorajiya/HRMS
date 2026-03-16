@@ -412,63 +412,6 @@ const AddEmployee = () => {
                              />
                         </div>
 
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Sub Department</label>
-                            <input type="text" name="subDepartment" className="hrm-input" placeholder="Enter sub department" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Grade</label>
-                            <input type="text" name="grade" className="hrm-input" placeholder="Enter grade (e.g. G1)" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Employee Level</label>
-                            <input type="text" name="employeeLevel" className="hrm-input" placeholder="Enter level (e.g. Junior)" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Biometric ID</label>
-                            <input type="text" name="biometricId" className="hrm-input" placeholder="Enter biometric ID" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Previous Member ID</label>
-                            <input type="text" name="previousMemberId" className="hrm-input" placeholder="Enter previous member ID" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <SearchableSelect 
-                                label="International Worker"
-                                required={false}
-                                options={[
-                                    { value: 'No', label: 'No' },
-                                    { value: 'Yes', label: 'Yes' }
-                                ]}
-                                value={formData.isInternationalWorker}
-                                onChange={(val) => setFormData(prev => ({ ...prev, isInternationalWorker: val }))}
-                            />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Retirement Age</label>
-                            <input type="number" name="retirementAge" className="hrm-input" placeholder="e.g. 60" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Insurance Number</label>
-                            <input type="text" name="insuranceNumber" className="hrm-input" placeholder="Enter insurance number" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Insurance Company</label>
-                            <input type="text" name="insuranceCompanyName" className="hrm-input" placeholder="Enter company name" onChange={handleInputChange} />
-                        </div>
-
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Insurance Expiry Date</label>
-                            <input type="date" name="insuranceExpiryDate" className="hrm-input" onChange={handleInputChange} />
-                        </div>
                     </div>
 
                  

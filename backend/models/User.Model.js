@@ -47,6 +47,11 @@ const userSchema = new mongoose.Schema(
         profilePhoto: {
             type: String
         },
+        phoneCountryCode: String,
+        emergencyCountryCode: String,
+        altPhoneCountryCode: String,
+        whatsappCountryCode: String,
+        companyPhoneCountryCode: String,
         address: {
             street: String,
             city: String,
@@ -59,12 +64,45 @@ const userSchema = new mongoose.Schema(
             relation: String,
             phone: String
         },
+        emergencyNumber: {
+            type: String
+        },
+        alternateMobileNumber: {
+            type: String
+        },
+        companyNumber: {
+            type: String
+        },
+        whatsAppNumber: {
+            type: String
+        },
+        personalEmail: {
+            type: String
+        },
+        currentAddress: {
+            type: String
+        },
+        permanentAddress: {
+            type: String
+        },
         aliasName: {
             type: String
         },
         countryCode: {
             type: String
         },
+        bloodGroup: String,
+        maritalStatus: String,
+        nationality: String,
+        pastExperience: [{
+            companyName: String,
+            designation: String,
+            workFrom: Date,
+            workTo: Date,
+            isCurrent: { type: Boolean, default: false },
+            location: String,
+            description: String
+        }],
         probationPeriodDays: {
             type: Number
         },

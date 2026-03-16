@@ -10,7 +10,7 @@ router.post("/add-employee", verifyToken, isAdmin, upload.single('profilePhoto')
 router.get("/", verifyToken, isAdmin, getUsers);
 router.get("/next-id", verifyToken, isAdmin, getNextEmployeeId);
 router.get("/:id", verifyToken, isAdmin, getUser);
-router.put("/:id", verifyToken, isAdmin, updateUser);
+router.put("/:id", verifyToken, isAdmin, upload.single('profilePhoto'), updateUser);
 router.delete("/:id", verifyToken, isAdmin, deleteUser);
 
 export default router;

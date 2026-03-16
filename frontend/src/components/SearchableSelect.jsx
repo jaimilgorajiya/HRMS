@@ -52,8 +52,8 @@ const SearchableSelect = ({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const filteredOptions = options.filter(option => 
-        option.label.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOptions = (options || []).filter(option => 
+        option && option.label && option.label.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const getSelectedLabels = () => {
@@ -77,30 +77,18 @@ const SearchableSelect = ({
             <div 
                 className={`select-trigger ${isOpen ? 'active' : ''}`}
                 onClick={toggleDropdown}
-                onMouseEnter={(e) => {
-                    if (!isOpen) {
-                        e.currentTarget.style.borderColor = '#CBD5E1';
-                        e.currentTarget.style.backgroundColor = '#F8FAFC';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    if (!isOpen) {
-                        e.currentTarget.style.borderColor = '#E2E8F0';
-                        e.currentTarget.style.backgroundColor = '#fff';
-                    }
-                }}
                 style={{
-                    minHeight: '45px',
+                    minHeight: '48px',
                     padding: '8px 16px',
                     border: isOpen ? '1.5px solid #3B648B' : '1.5px solid #E2E8F0',
-                    borderRadius: '10px',
-                    backgroundColor: isOpen ? '#fff' : '#fff',
+                    borderRadius: '12px',
+                    backgroundColor: '#fff',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     cursor: 'pointer',
                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: isOpen ? '0 0 0 4px rgba(59, 100, 139, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08)' : '0 1px 2px rgba(15, 23, 42, 0.05)',
+                    boxShadow: isOpen ? '0 0 0 4px rgba(59, 100, 139, 0.08)' : 'none',
                 }}
             >
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', flex: 1 }}>
@@ -113,11 +101,11 @@ const SearchableSelect = ({
                                     gap: '4px',
                                     backgroundColor: 'rgba(59, 100, 139, 0.08)',
                                     color: '#3B648B',
-                                    padding: '2px 8px',
-                                    borderRadius: '6px',
+                                    padding: '2px 10px',
+                                    borderRadius: '8px',
                                     fontSize: '13px',
-                                    fontWeight: '500',
-                                    border: '1px solid rgba(59, 100, 139, 0.15)'
+                                    fontWeight: '600',
+                                    border: '1px solid rgba(59, 100, 139, 0.1)'
                                 }}>
                                     {opt.label}
                                     <X 
@@ -134,7 +122,7 @@ const SearchableSelect = ({
                         </span>
                     )}
                 </div>
-                <ChevronDown size={18} style={{ color: '#64748B', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none', marginLeft: '8px' }} />
+                <ChevronDown size={20} style={{ color: '#64748B', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none', marginLeft: '8px' }} />
             </div>
 
             {isOpen && (
@@ -145,16 +133,16 @@ const SearchableSelect = ({
                     right: 0,
                     backgroundColor: '#fff',
                     border: '1.5px solid #E2E8F0',
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                    borderRadius: '16px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
                     zIndex: 1000,
                     overflow: 'hidden',
                     animation: 'dropdownIn 0.2s ease-out'
                 }}>
                     {searchable && (
-                        <div style={{ padding: '8px', borderBottom: '1px solid #F1F5F9' }}>
+                        <div style={{ padding: '12px', borderBottom: '1px solid #F1F5F9' }}>
                             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                <Search size={14} style={{ position: 'absolute', left: '10px', color: '#94A3B8' }} />
+                                <Search size={16} style={{ position: 'absolute', left: '12px', color: '#94A3B8' }} />
                                 <input 
                                     type="text"
                                     autoFocus
@@ -164,20 +152,22 @@ const SearchableSelect = ({
                                     onClick={(e) => e.stopPropagation()}
                                     style={{
                                         width: '100%',
-                                        height: '36px',
-                                        padding: '0 10px 0 32px',
-                                        border: '1px solid #E2E8F0',
-                                        borderRadius: '8px',
+                                        height: '40px',
+                                        padding: '0 12px 0 38px',
+                                        border: '1.5px solid #E2E8F0',
+                                        borderRadius: '10px',
                                         fontSize: '14px',
+                                        fontWeight: '500',
                                         outline: 'none',
-                                        backgroundColor: '#F8FAFC'
+                                        backgroundColor: '#F8FAFC',
+                                        transition: 'all 0.2s'
                                     }}
                                 />
                             </div>
                         </div>
                     )}
                     
-                    <div style={{ maxHeight: '250px', overflowY: 'auto', padding: '4px' }}>
+                    <div style={{ maxHeight: '250px', overflowY: 'auto', padding: '6px' }}>
                         {filteredOptions.length > 0 ? (
                             filteredOptions.map((option) => {
                                 const isSelected = multiple 
@@ -192,29 +182,29 @@ const SearchableSelect = ({
                                             handleSelect(option.value);
                                         }}
                                         style={{
-                                            padding: '8px 12px',
-                                            fontSize: '14px',
-                                            fontWeight: '500',
+                                            padding: '10px 14px',
+                                            fontSize: '14.5px',
+                                            fontWeight: '600',
                                             color: isSelected ? '#3B648B' : '#475569',
                                             backgroundColor: isSelected ? 'rgba(59, 100, 139, 0.08)' : 'transparent',
-                                            borderRadius: '6px',
+                                            borderRadius: '10px',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'space-between',
-                                            transition: 'background 0.1s',
+                                            transition: 'all 0.15s',
                                             marginBottom: '2px'
                                         }}
                                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isSelected ? 'rgba(59, 100, 139, 0.08)' : '#F8FAFC'}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isSelected ? 'rgba(59, 100, 139, 0.08)' : 'transparent'}
                                     >
                                         {option.label}
-                                        {isSelected && <Check size={16} />}
+                                        {isSelected && <Check size={18} />}
                                     </div>
                                 );
                             })
                         ) : (
-                            <div style={{ padding: '20px', textAlign: 'center', color: '#94A3B8', fontSize: '14px' }}>
+                            <div style={{ padding: '24px', textAlign: 'center', color: '#94A3B8', fontSize: '14px', fontWeight: '500' }}>
                                 No results found
                             </div>
                         )}

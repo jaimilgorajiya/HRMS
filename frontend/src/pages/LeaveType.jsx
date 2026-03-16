@@ -1,7 +1,7 @@
 import authenticatedFetch from '../utils/apiHandler';
 import API_URL from '../config/api';
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, Check, Search, Filter, ChevronLeft, ChevronRight, ToggleLeft, ToggleRight, Info } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Check, Search, Filter, ChevronLeft, ChevronRight, ToggleLeft, ToggleRight, Info, Save } from 'lucide-react';
 import Swal from 'sweetalert2';
 import SearchableSelect from '../components/SearchableSelect';
 
@@ -235,7 +235,9 @@ const LeaveType = () => {
     );
 
     const totalPages = Math.ceil(filteredData.length / entriesPerPage);
-    const paginatedData = filteredData.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage);
+    const indexOfLastEntry = currentPage * entriesPerPage;
+    const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
+    const paginatedData = filteredData.slice(indexOfFirstEntry, indexOfLastEntry);
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {

@@ -1,11 +1,24 @@
 import User from "../models/User.Model.js";
+import Shift from "../models/Shift.Model.js";
 import bcrypt from "bcryptjs";
 import { generatePassword, sendWelcomeEmail } from "../utils/emailService.js";
 import { generateEmployeeId } from "../utils/employeeId.js";
 
 const createUser = async (req, res) => {
     try {
-        const { emailId, email, firstName, lastName } = req.body;
+        // Parse complex fields if they are sent as JSON strings via FormData
+        const bodyContent = { ...req.body };
+        Object.keys(bodyContent).forEach(key => {
+            if (typeof bodyContent[key] === 'string' && (bodyContent[key].startsWith('[') || bodyContent[key].startsWith('{'))) {
+                try {
+                    bodyContent[key] = JSON.parse(bodyContent[key]);
+                } catch (e) {
+                    // Not valid JSON
+                }
+            }
+        });
+
+        const { emailId, email, firstName, lastName } = bodyContent;
         const targetEmail = emailId || email;
         
         if (!targetEmail) {
@@ -19,13 +32,13 @@ const createUser = async (req, res) => {
         }
         
         // Handle profile photo if uploaded
-        let profilePhoto = req.body.profilePhoto;
+        let profilePhoto = bodyContent.profilePhoto;
         if (req.file) {
             profilePhoto = req.file.filename;
         }
 
         // Generate employee ID if not provided
-        let employeeId = req.body.employeeId;
+        let employeeId = bodyContent.employeeId;
         if (!employeeId || employeeId.trim() === '') {
             employeeId = await generateEmployeeId();
         }
@@ -35,15 +48,23 @@ const createUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
 
         // Construct full name
-        const name = `${firstName || ''} ${lastName || ''}`.trim() || req.body.name || 'Unnamed User';
+        const name = `${firstName || ''} ${lastName || ''}`.trim() || bodyContent.name || 'Unnamed User';
+
+        // Handle Shift resolution if shift name is provided
+        let shiftId = null;
+        if (bodyContent.shift) {
+            const shiftObj = await Shift.findOne({ shiftName: bodyContent.shift });
+            if (shiftObj) shiftId = shiftObj._id;
+        }
 
         // Create new user with all fields, mapping as necessary
         const newUser = new User({
-            ...req.body,
+            ...bodyContent,
             email: targetEmail,
-            dateJoined: req.body.dateOfJoining || req.body.dateJoined,
+            dateJoined: bodyContent.dateOfJoining || bodyContent.dateJoined,
             workSetup: {
-                location: req.body.jobLocation || req.body.branch || (req.body.workSetup ? req.body.workSetup.location : '')
+                location: bodyContent.jobLocation || bodyContent.branch || (bodyContent.workSetup ? bodyContent.workSetup.location : ''),
+                shift: shiftId
             },
             profilePhoto,
             name,
@@ -102,10 +123,21 @@ const getUsers = async (req, res) => {
     try {
         const users = await User.find({ 
             role: { $ne: 'Admin' },
-            status: { $in: ['Active', 'Inactive', 'Onboarding'] } // Keeping Onboarding just in case, but user said Active/Inactive. I'll stick to strict interpretation but add Onboarding if it's considered 'pre-active'. 
-            // actually, let's just do Active/Inactive/Onboarding to be safe against hiding new joiners completely
-        }).select("-password").sort({ createdAt: -1 });
-        res.status(200).json({ success: true, users });
+            status: { $in: ['Active', 'Inactive', 'Onboarding'] } 
+        })
+        .populate('workSetup.shift')
+        .select("-password")
+        .sort({ createdAt: -1 });
+
+        const processedUsers = users.map(user => {
+            const userObj = user.toObject();
+            if (userObj.workSetup && userObj.workSetup.shift) {
+                userObj.shift = userObj.workSetup.shift.shiftName;
+            }
+            return userObj;
+        });
+
+        res.status(200).json({ success: true, users: processedUsers });
     } catch (error) {
         console.log("Error in getUsers controller", error.message);
         res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -114,11 +146,21 @@ const getUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select("-password");
+        const user = await User.findById(req.params.id)
+            .populate('workSetup.shift')
+            .select("-password");
+
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
-        res.status(200).json({ success: true, user });
+
+        // Add top-level shift field for frontend compatibility
+        const userObj = user.toObject();
+        if (userObj.workSetup && userObj.workSetup.shift) {
+            userObj.shift = userObj.workSetup.shift.shiftName;
+        }
+
+        res.status(200).json({ success: true, user: userObj });
     } catch (error) {
         console.log("Error in getUser controller", error.message);
         res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -135,26 +177,84 @@ const updateUser = async (req, res) => {
         } else {
             delete updateData.password;
         }
+
+        // Handle profile photo update
+        // Map alternative field names if necessary (matching createUser logic)
+        if (updateData.dateOfJoining && !updateData.dateJoined) {
+            updateData.dateJoined = updateData.dateOfJoining;
+        }
+
+        // Handle profile photo update
+        if (req.file) {
+            updateData.profilePhoto = req.file.filename;
+        } else if (updateData.profilePhoto === 'null') {
+             // Handle case where photo might be explicitly cleared
+             updateData.profilePhoto = null;
+        }
         
+        // Handle Shift update if provided as name
+        if (updateData.shift) {
+            const shiftObj = await Shift.findOne({ shiftName: updateData.shift });
+            if (shiftObj) {
+                updateData['workSetup.shift'] = shiftObj._id;
+            }
+            delete updateData.shift; // Remove root field as it's not in schema
+        }
+
+        // Handle Branch/Location update
+        if (updateData.branch) {
+            updateData['workSetup.location'] = updateData.branch;
+            // Note: keeping root 'branch' as it exists in schema too
+        }
+
         // Update name if firstName or lastName changed
         if (updateData.firstName || updateData.lastName) {
-            const user = await User.findById(req.params.id);
-            const firstName = updateData.firstName || user.firstName || '';
-            const lastName = updateData.lastName || user.lastName || '';
+            const userForName = await User.findById(req.params.id);
+            const firstName = updateData.firstName || userForName.firstName || '';
+            const lastName = updateData.lastName || userForName.lastName || '';
             updateData.name = `${firstName} ${lastName}`.trim();
         }
+
+        // Handle nested fields that might have been sent as strings from FormData
+        delete updateData._id;
+        delete updateData.__v;
+        delete updateData.createdAt;
+        delete updateData.updatedAt;
+
+        // Certain fields in req.body might be "[object Object]" if not handled correctly on frontend
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === '[object Object]' || updateData[key] === 'undefined' || updateData[key] === 'null') {
+                delete updateData[key];
+                return;
+            }
+            
+            // Try to parse JSON strings (for arrays/objects sent via FormData)
+            if (typeof updateData[key] === 'string' && (updateData[key].startsWith('[') || updateData[key].startsWith('{'))) {
+                try {
+                    updateData[key] = JSON.parse(updateData[key]);
+                } catch (e) {
+                    // Not valid JSON, leave as is
+                }
+            }
+        });
 
         const user = await User.findByIdAndUpdate(
             req.params.id, 
             { $set: updateData }, 
             { new: true, runValidators: true }
-        ).select("-password");
+        ).select("-password").populate('workSetup.shift');
 
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        res.status(200).json({ success: true, message: "User updated successfully", user });
+        // Add top-level shift field for frontend compatibility
+        const userObj = user.toObject();
+        if (userObj.workSetup && userObj.workSetup.shift) {
+            userObj.shift = userObj.workSetup.shift.shiftName;
+        }
+
+        res.status(200).json({ success: true, message: "User updated successfully", user: userObj });
     } catch (error) {
         console.log("Error in updateUser controller", error.message);
         
@@ -167,7 +267,11 @@ const updateUser = async (req, res) => {
             });
         }
         
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error during profile update", 
+            error: error.message 
+        });
     }
 };
 
