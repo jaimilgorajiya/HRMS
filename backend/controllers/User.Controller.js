@@ -192,6 +192,7 @@ const getUsers = async (req, res) => {
             status: { $in: ['Active', 'Inactive', 'Onboarding'] } 
         })
         .populate('workSetup.shift')
+        .populate('leaveGroup')
         .select("-password")
         .sort({ createdAt: -1 });
 
@@ -214,6 +215,7 @@ const getUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
             .populate('workSetup.shift')
+            .populate('leaveGroup')
             .populate('documents.documentType')
             .select("-password");
 
@@ -309,7 +311,7 @@ const updateUser = async (req, res) => {
             req.params.id, 
             { $set: updateData }, 
             { new: true, runValidators: true }
-        ).select("-password").populate('workSetup.shift');
+        ).select("-password").populate('workSetup.shift').populate('leaveGroup');
 
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });

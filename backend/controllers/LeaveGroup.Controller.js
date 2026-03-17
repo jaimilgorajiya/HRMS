@@ -3,7 +3,7 @@ import LeaveGroup from '../models/LeaveGroup.Model.js';
 export const getLeaveGroups = async (req, res) => {
     try {
         const leaveGroups = await LeaveGroup.find({ adminId: req.user._id }).sort({ createdAt: -1 });
-        res.status(200).json(leaveGroups);
+        res.status(200).json({ success: true, leaveGroups });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

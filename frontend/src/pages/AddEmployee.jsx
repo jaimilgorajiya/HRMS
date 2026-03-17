@@ -15,6 +15,7 @@ const AddEmployee = () => {
     const [departments, setDepartments] = useState([]);
     const [designations, setDesignations] = useState([]);
     const [shifts, setShifts] = useState([]);
+    const [leaveGroups, setLeaveGroups] = useState([]);
     
     const [countries, setCountries] = useState([]);
     
@@ -24,6 +25,7 @@ const AddEmployee = () => {
         branch: '',
         department: '',
         shift: '',
+        leaveGroup: '',
         firstName: '',
         lastName: '',
         aliasName: '',
@@ -95,22 +97,25 @@ const AddEmployee = () => {
 
     const fetchDropdownData = async () => {
         try {
-            const [branchRes, deptRes, desigRes, shiftRes] = await Promise.all([
+            const [branchRes, deptRes, desigRes, shiftRes, leaveGroupRes] = await Promise.all([
                 authenticatedFetch(`${API_URL}/api/branches`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/departments`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/designations`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                authenticatedFetch(`${API_URL}/api/shifts`, { headers: { 'Authorization': `Bearer ${token}` } })
+                authenticatedFetch(`${API_URL}/api/shifts`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                authenticatedFetch(`${API_URL}/api/leave-groups`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             const bData = await branchRes.json();
             const dData = await deptRes.json();
             const deData = await desigRes.json();
             const sData = await shiftRes.json();
+            const lgData = await leaveGroupRes.json();
 
             if (bData.success) setBranches(bData.branches);
             if (dData.success) setDepartments(dData.departments);
             if (deData.success) setDesignations(deData.designations);
             if (sData.success) setShifts(sData.shifts);
+            if (lgData.success) setLeaveGroups(lgData.leaveGroups);
 
         } catch (error) {
             console.error("Error fetching dropdown data:", error);
@@ -317,6 +322,18 @@ const AddEmployee = () => {
                                 options={shifts.map(s => ({ value: s.shiftName, label: s.shiftName }))}
                                 value={formData.shift}
                                 onChange={(val) => setFormData(prev => ({ ...prev, shift: val }))}
+                            />
+                        </div>
+
+                        <div className="hrm-form-group">
+                            <SearchableSelect 
+                                label="Leave Group"
+                                required={true}
+                                searchable={true}
+                                placeholder="Select Leave Group"
+                                options={leaveGroups.map(lg => ({ value: lg._id, label: lg.leaveGroupName }))}
+                                value={formData.leaveGroup}
+                                onChange={(val) => setFormData(prev => ({ ...prev, leaveGroup: val }))}
                             />
                         </div>
 

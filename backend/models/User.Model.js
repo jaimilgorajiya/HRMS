@@ -129,6 +129,10 @@ const userSchema = new mongoose.Schema(
         department: {
             type: String
         },
+        leaveGroup: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'LeaveGroup'
+        },
         dateJoined: {
             type: Date
         },

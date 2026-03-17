@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Camera, ArrowLeft, ChevronDown, Search, Plus, Trash2, FileText } from 'lucide-react';
+import { User, Camera, ArrowLeft, ChevronDown, Search, Plus, Trash2, FileText, Check } from 'lucide-react';
 import authenticatedFetch from '../utils/apiHandler';
 import API_URL from '../config/api';
 import Swal from 'sweetalert2';
@@ -15,6 +15,7 @@ const EmployeeOnboarding = () => {
     const [departments, setDepartments] = useState([]);
     const [designations, setDesignations] = useState([]);
     const [shifts, setShifts] = useState([]);
+    const [leaveGroups, setLeaveGroups] = useState([]);
     const [countries, setCountries] = useState([]);
     const [documentTypes, setDocumentTypes] = useState([]);
     
@@ -32,6 +33,7 @@ const EmployeeOnboarding = () => {
         branch: '',
         department: '',
         shift: '',
+        leaveGroup: '',
         firstName: '',
         lastName: '',
         countryCode: '+91',
@@ -54,6 +56,8 @@ const EmployeeOnboarding = () => {
         gender: 'Male',
         employmentType: 'Full Time',
         idProofType: '',
+        maritalStatus: '',
+        bloodGroup: '',
         personalEmail: '',
         currentAddress: '',
         permanentAddress: '',
@@ -115,11 +119,12 @@ const EmployeeOnboarding = () => {
 
     const fetchDropdownData = async () => {
         try {
-            const [branchRes, deptRes, desigRes, shiftRes, docTypeRes] = await Promise.all([
+            const [branchRes, deptRes, desigRes, shiftRes, leaveGroupRes, docTypeRes] = await Promise.all([
                 authenticatedFetch(`${API_URL}/api/branches`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/departments`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/designations`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/shifts`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                authenticatedFetch(`${API_URL}/api/leave-groups`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 authenticatedFetch(`${API_URL}/api/document-types`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
@@ -127,12 +132,14 @@ const EmployeeOnboarding = () => {
             const dData = await deptRes.json();
             const deData = await desigRes.json();
             const sData = await shiftRes.json();
+            const lgData = await leaveGroupRes.json();
             const dtData = await docTypeRes.json();
 
             if (bData.success) setBranches(bData.branches);
             if (dData.success) setDepartments(dData.departments);
             if (deData.success) setDesignations(deData.designations);
             if (sData.success) setShifts(sData.shifts);
+            if (lgData.success) setLeaveGroups(lgData.leaveGroups);
             if (dtData.success) setDocumentTypes(dtData.documentTypes.filter(d => d.status === true));
 
         } catch (error) {
@@ -191,7 +198,7 @@ const EmployeeOnboarding = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         
         // Prevent multiple submissions
         if (isSubmitting) {
@@ -290,6 +297,7 @@ const EmployeeOnboarding = () => {
                 if (!formData.designation.trim()) errors.push('Designation is required');
                 if (!formData.branch.trim()) errors.push('Branch is required');
                 if (!formData.department.trim()) errors.push('Department is required');
+                if (!formData.leaveGroup.trim()) errors.push('Leave Group is required');
                 if (!formData.employmentType.trim()) errors.push('Employment Type is required');
                 if (!formData.email.trim()) errors.push('Email ID is required');
                 if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.push('Please enter a valid email address');
@@ -326,6 +334,29 @@ const EmployeeOnboarding = () => {
         }
         
         if (activeStep < steps.length - 1) setActiveStep(prev => prev + 1);
+    };
+
+    const handleStepClick = (idx) => {
+        if (idx === activeStep) return;
+        
+        if (idx < activeStep) {
+            setActiveStep(idx);
+        } else {
+            // If moving forward, must validate all steps in between
+            for (let i = activeStep; i < idx; i++) {
+                const errors = validateStep(i);
+                if (errors.length > 0) {
+                    Swal.fire({
+                        title: 'Required Fields',
+                        text: `Please complete step ${i + 1} before moving to step ${idx + 1}.`,
+                        icon: 'warning',
+                        confirmButtonColor: '#3B648B'
+                    });
+                    return;
+                }
+            }
+            setActiveStep(idx);
+        }
     };
 
     const handlePrev = () => {
@@ -397,30 +428,34 @@ const EmployeeOnboarding = () => {
             <div className="hrm-card" style={{ padding: '40px' }}>
                 
                 {/* Steps Navigation */}
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '40px', overflowX: 'auto', paddingBottom: '10px' }}>
+                <div className="hrm-stepper">
+                    <div className="hrm-stepper-line" />
+                    <div 
+                        className="hrm-stepper-progress" 
+                        style={{ width: `${(activeStep / (steps.length - 1)) * 100}%` }} 
+                    />
                     {steps.map((step, idx) => (
-                        <button 
-                            key={idx}
-                            onClick={() => setActiveStep(idx)}
-                            style={{
-                                background: activeStep === idx ? '#3B648B' : (activeStep > idx ? '#94A3B8' : '#e2e8f0'),
-                                color: activeStep === idx ? '#ffffff' : (activeStep > idx ? '#ffffff' : '#64748b'),
-                                padding: '10px 24px',
-                                borderRadius: '8px',
-                                border: 'none',
-                                fontWeight: '700',
-                                fontSize: '13px',
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap',
-                                transition: 'all 0.2s'
-                            }}
+                        <div 
+                            key={idx} 
+                            className={`hrm-step ${activeStep === idx ? 'active' : ''} ${activeStep > idx ? 'completed' : ''}`}
+                            onClick={() => handleStepClick(idx)}
                         >
-                            {idx + 1}. {step}
-                        </button>
+                            <div className="hrm-step-circle">
+                                {activeStep > idx ? <Check size={20} /> : idx + 1}
+                            </div>
+                            <div className="hrm-step-label">{step}</div>
+                        </div>
                     ))}
                 </div>
 
-                <form onSubmit={handleSubmit}>
+                <form 
+                    onSubmit={handleSubmit}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                            e.preventDefault();
+                        }
+                    }}
+                >
                     
                     {/* STEP 1: Basic Info */}
                     {activeStep === 0 && (
@@ -682,6 +717,17 @@ const EmployeeOnboarding = () => {
                                         onChange={(val) => setFormData(prev => ({ ...prev, shift: val }))}
                                     />
                                 </div>
+                                <div className="hrm-form-group">
+                                    <SearchableSelect 
+                                        label="Leave Group"
+                                        required={true}
+                                        searchable={true}
+                                        placeholder="Select Leave Group"
+                                        options={leaveGroups.map(lg => ({ value: lg._id, label: lg.leaveGroupName }))}
+                                        value={formData.leaveGroup}
+                                        onChange={(val) => setFormData(prev => ({ ...prev, leaveGroup: val }))}
+                                    />
+                                </div>
                                 
                                 <div className="hrm-form-group">
                                     <label className="hrm-label">Email ID <span className="req">*</span> <span style={{ textTransform: 'none', color: '#94a3b8', fontSize: '12px', fontWeight: '500', marginLeft: '5px' }}>(Credentials will be sent here)</span></label>
@@ -747,9 +793,9 @@ const EmployeeOnboarding = () => {
 
                     {/* STEP 4: Other Info */}
                     {activeStep === 3 && (
-                        <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', overflow: 'visible' }}>
-                                <div className="hrm-form-group" style={{ position: 'relative', zIndex: 90 }}>
+                        <div style={{ animation: 'fadeIn 0.3s ease-out', minHeight: '300px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                                <div className="hrm-form-group" style={{ position: 'relative', zIndex: 100 }}>
                                     <SearchableSelect 
                                         label="Marital Status"
                                         searchable={false}
@@ -764,8 +810,7 @@ const EmployeeOnboarding = () => {
                                         onChange={(val) => setFormData(prev => ({ ...prev, maritalStatus: val }))}
                                     />
                                 </div>
-
-                                <div className="hrm-form-group" style={{ position: 'relative', zIndex: 89 }}>
+                                <div className="hrm-form-group" style={{ position: 'relative', zIndex: 99 }}>
                                     <SearchableSelect 
                                         label="Blood Group"
                                         searchable={false}
@@ -796,7 +841,7 @@ const EmployeeOnboarding = () => {
                                 Next Step
                             </button>
                         ) : (
-                            <button type="submit" className="btn-hrm btn-hrm-primary" disabled={isSubmitting} style={{ padding: '12px 40px', borderRadius: '8px', fontWeight: '700', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.6 : 1 }}>
+                            <button type="button" onClick={() => handleSubmit()} className="btn-hrm btn-hrm-primary" disabled={isSubmitting} style={{ padding: '12px 40px', borderRadius: '8px', fontWeight: '700', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.6 : 1 }}>
                                 {isSubmitting ? 'Saving...' : 'Save Employee'}
                             </button>
                         )}

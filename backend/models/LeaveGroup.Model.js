@@ -83,6 +83,10 @@ const leaveGroupSchema = new mongoose.Schema({
         enum: ['No', 'Yes'],
         default: 'No'
     },
+    maxUnpaidLeaveInMonth: {
+        type: Number,
+        default: null
+    },
     remark: {
         type: String,
         trim: true,
@@ -90,8 +94,21 @@ const leaveGroupSchema = new mongoose.Schema({
     },
     yearEndLeaveBalancePolicy: {
         type: String,
-        enum: ['Payout all (Manually)', 'Carry Forward', 'Lapse', 'Payout all (Auto)'],
+        enum: ['Payout all (Manually)', 'Payout or Carry forward (Manually)', 'Reset to zero', 'Carry forward all (Manually)'],
         default: 'Payout all (Manually)'
+    },
+    maxCarryForward: {
+        type: Number,
+        default: null
+    },
+    minCarryForward: {
+        type: Number,
+        default: null
+    },
+    carryForwardIncludes: {
+        type: String,
+        enum: ['Yes', 'No'],
+        default: 'Yes'
     },
     allowLeavePayoutRequest: {
         type: String,

@@ -13,23 +13,23 @@ const EditLeaveGroup = () => {
     const [formData, setFormData] = useState({
         leaveGroupName: '',
         leaveBalanceVisibility: 'Default (Multiple of 0.5)',
-        leaveIntimationEmails: '',
         generatePenaltyOnLeaveRequestPending: 'No',
         isPaidLeave: false,
         leaveAllocationType: 'Yearly',
         noOfPaidLeaves: '',
         leaveAppliedFormula: 'Multiple of 0.5',
         maxUseInMonth: '',
-        leaveFrequency: 'Annually',
-        leaveCalculation: 'Manual Calculation',
         leaveRestrictions: 'No',
         leaveAccordingToPayrollCycle: 'No',
         takeLeaveDuringProbationPeriod: 'No',
         takeLeaveDuringNoticePeriod: 'No',
-        addPaidLeaveBasedOnAttendance: 'No',
         restrictUnpaidLeaveToEmployeesMonthly: 'No',
+        maxUnpaidLeaveInMonth: '',
         remark: '',
         yearEndLeaveBalancePolicy: 'Payout all (Manually)',
+        maxCarryForward: '',
+        minCarryForward: '',
+        carryForwardIncludes: 'Yes',
         allowLeavePayoutRequest: 'No',
     });
 
@@ -42,11 +42,12 @@ const EditLeaveGroup = () => {
                     const lg = data.leaveGroup;
                     setFormData({
                         ...lg,
-                        leaveIntimationEmails: Array.isArray(lg.leaveIntimationEmails)
-                            ? lg.leaveIntimationEmails.join(', ')
-                            : lg.leaveIntimationEmails || '',
                         noOfPaidLeaves: lg.noOfPaidLeaves ?? '',
                         maxUseInMonth: lg.maxUseInMonth ?? '',
+                        maxUnpaidLeaveInMonth: lg.maxUnpaidLeaveInMonth ?? '',
+                        maxCarryForward: lg.maxCarryForward ?? '',
+                        minCarryForward: lg.minCarryForward ?? '',
+                        carryForwardIncludes: lg.carryForwardIncludes ?? 'Yes',
                     });
                 } else {
                     Swal.fire('Error', 'Leave Group not found', 'error');
@@ -75,11 +76,11 @@ const EditLeaveGroup = () => {
         try {
             const payload = {
                 ...formData,
-                leaveIntimationEmails: formData.leaveIntimationEmails
-                    ? formData.leaveIntimationEmails.split(',').map(s => s.trim()).filter(Boolean)
-                    : [],
                 noOfPaidLeaves: formData.noOfPaidLeaves !== '' ? Number(formData.noOfPaidLeaves) : 0,
                 maxUseInMonth: formData.maxUseInMonth !== '' ? Number(formData.maxUseInMonth) : null,
+                maxUnpaidLeaveInMonth: formData.maxUnpaidLeaveInMonth !== '' ? Number(formData.maxUnpaidLeaveInMonth) : null,
+                maxCarryForward: formData.maxCarryForward !== '' ? Number(formData.maxCarryForward) : null,
+                minCarryForward: formData.minCarryForward !== '' ? Number(formData.minCarryForward) : null,
             };
             const res = await authenticatedFetch(`${API_URL}/api/leave-groups/${id}`, {
                 method: 'PUT',
@@ -131,16 +132,12 @@ const EditLeaveGroup = () => {
                                 options={[
                                     { label: 'Default (Multiple of 0.5)', value: 'Default (Multiple of 0.5)' },
                                     { label: 'Multiple of 1', value: 'Multiple of 1' },
-                                    { label: 'Multiple of 0.25', value: 'Multiple of 0.25' },
                                 ]}
                                 value={formData.leaveBalanceVisibility}
                                 onChange={(val) => handleSelect('leaveBalanceVisibility', val)}
                             />
                         </div>
-                        <div className="hrm-form-group">
-                            <label className="hrm-label">Leave Intimation Emails</label>
-                            <input type="text" name="leaveIntimationEmails" className="hrm-input" value={formData.leaveIntimationEmails} onChange={handleChange} placeholder="Enter email IDs (comma separated)" />
-                        </div>
+
                         <div className="hrm-form-group">
                             <SearchableSelect
                                 label="Generate Penalty on Leave Request Pending"
@@ -185,22 +182,11 @@ const EditLeaveGroup = () => {
                                 <div className="hrm-form-group">
                                     <SearchableSelect label="Leave Applied Formula" options={[
                                         { label: 'Multiple of 0.5', value: 'Multiple of 0.5' }, { label: 'Multiple of 1', value: 'Multiple of 1' },
-                                        { label: 'Multiple of 0.25', value: 'Multiple of 0.25' },
                                     ]} value={formData.leaveAppliedFormula} onChange={(val) => handleSelect('leaveAppliedFormula', val)} />
                                 </div>
                                 <div className="hrm-form-group">
                                     <label className="hrm-label">Max Use in Month</label>
                                     <input type="number" name="maxUseInMonth" className="hrm-input" value={formData.maxUseInMonth} onChange={handleChange} placeholder="Enter max usage" min="0" />
-                                </div>
-                                <div className="hrm-form-group">
-                                    <SearchableSelect label="Leave Frequency" options={[
-                                        { label: 'Annually', value: 'Annually' }, { label: 'Monthly', value: 'Monthly' }, { label: 'Quarterly', value: 'Quarterly' },
-                                    ]} value={formData.leaveFrequency} onChange={(val) => handleSelect('leaveFrequency', val)} />
-                                </div>
-                                <div className="hrm-form-group">
-                                    <SearchableSelect label="Leave Calculation" options={[
-                                        { label: 'Manual Calculation', value: 'Manual Calculation' }, { label: 'Auto Calculation', value: 'Auto Calculation' },
-                                    ]} value={formData.leaveCalculation} onChange={(val) => handleSelect('leaveCalculation', val)} />
                                 </div>
                             </div>
 
@@ -221,11 +207,14 @@ const EditLeaveGroup = () => {
                                     <SearchableSelect label="Take Leave During Notice Period" required={true} options={[{ label: 'No', value: 'No' }, { label: 'Yes', value: 'Yes' }]} value={formData.takeLeaveDuringNoticePeriod} onChange={(val) => handleSelect('takeLeaveDuringNoticePeriod', val)} />
                                 </div>
                                 <div className="hrm-form-group">
-                                    <SearchableSelect label="Add Paid Leave Based on Attendance" required={true} options={[{ label: 'No', value: 'No' }, { label: 'Yes', value: 'Yes' }]} value={formData.addPaidLeaveBasedOnAttendance} onChange={(val) => handleSelect('addPaidLeaveBasedOnAttendance', val)} />
-                                </div>
-                                <div className="hrm-form-group">
                                     <SearchableSelect label="Restrict Unpaid Leave Monthly" options={[{ label: 'No', value: 'No' }, { label: 'Yes', value: 'Yes' }]} value={formData.restrictUnpaidLeaveToEmployeesMonthly} onChange={(val) => handleSelect('restrictUnpaidLeaveToEmployeesMonthly', val)} />
                                 </div>
+                                {formData.restrictUnpaidLeaveToEmployeesMonthly === 'Yes' && (
+                                    <div className="hrm-form-group" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                                        <label className="hrm-label">Max Unpaid Leave in Month</label>
+                                        <input type="number" name="maxUnpaidLeaveInMonth" className="hrm-input" value={formData.maxUnpaidLeaveInMonth} onChange={handleChange} placeholder="Enter max unpaid days" min="0" />
+                                    </div>
+                                )}
                             </div>
 
                             <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#334155', margin: '32px 0 24px 0', paddingBottom: '12px', borderBottom: '2px solid #F1F5F9' }}>
@@ -237,14 +226,47 @@ const EditLeaveGroup = () => {
                                     <textarea name="remark" className="hrm-input" value={formData.remark} onChange={handleChange} placeholder="Enter remark" rows={3} style={{ resize: 'vertical', minHeight: '48px' }} />
                                 </div>
                                 <div className="hrm-form-group">
-                                    <SearchableSelect label="Year-End Leave Balance Policy" options={[
-                                        { label: 'Payout all (Manually)', value: 'Payout all (Manually)' }, { label: 'Carry Forward', value: 'Carry Forward' },
-                                        { label: 'Lapse', value: 'Lapse' }, { label: 'Payout all (Auto)', value: 'Payout all (Auto)' },
+                                    <SearchableSelect label="Year-End Leave Balance Policy (if any)" options={[
+                                        { label: 'Payout all (Manually)', value: 'Payout all (Manually)' },
+                                        { label: 'Payout or Carry forward (Manually)', value: 'Payout or Carry forward (Manually)' },
+                                        { label: 'Reset to zero', value: 'Reset to zero' },
+                                        { label: 'Carry forward all (Manually)', value: 'Carry forward all (Manually)' },
                                     ]} value={formData.yearEndLeaveBalancePolicy} onChange={(val) => handleSelect('yearEndLeaveBalancePolicy', val)} />
                                 </div>
-                                <div className="hrm-form-group">
-                                    <SearchableSelect label="Allow Leave Payout Request" options={[{ label: 'No', value: 'No' }, { label: 'Yes', value: 'Yes' }]} value={formData.allowLeavePayoutRequest} onChange={(val) => handleSelect('allowLeavePayoutRequest', val)} />
-                                </div>
+
+                                {(['Payout or Carry forward (Manually)', 'Carry forward all (Manually)'].includes(formData.yearEndLeaveBalancePolicy)) && (
+                                    <>
+                                        <div className="hrm-form-group" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                                            <SearchableSelect 
+                                                label="Max Carry Forward" 
+                                                options={[...Array(61).keys()].map(n => ({ label: n.toString(), value: n.toString() }))}
+                                                value={formData.maxCarryForward}
+                                                onChange={(val) => handleSelect('maxCarryForward', val)}
+                                            />
+                                        </div>
+                                        <div className="hrm-form-group" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                                            <SearchableSelect 
+                                                label="Minimum Carry Forward" 
+                                                options={[...Array(61).keys()].map(n => ({ label: n.toString(), value: n.toString() }))}
+                                                value={formData.minCarryForward}
+                                                onChange={(val) => handleSelect('minCarryForward', val)}
+                                            />
+                                        </div>
+                                        <div className="hrm-form-group" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                                            <SearchableSelect 
+                                                label="Carry Forward Includes" 
+                                                options={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
+                                                value={formData.carryForwardIncludes}
+                                                onChange={(val) => handleSelect('carryForwardIncludes', val)}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                {(['Payout all (Manually)', 'Payout or Carry forward (Manually)'].includes(formData.yearEndLeaveBalancePolicy)) && (
+                                    <div className="hrm-form-group" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+                                        <SearchableSelect label="Allow Leave Payout Request" options={[{ label: 'No', value: 'No' }, { label: 'Yes', value: 'Yes' }]} value={formData.allowLeavePayoutRequest} onChange={(val) => handleSelect('allowLeavePayoutRequest', val)} />
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}

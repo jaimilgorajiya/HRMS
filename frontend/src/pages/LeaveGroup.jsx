@@ -24,7 +24,11 @@ const LeaveGroup = () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            if (Array.isArray(data)) setLeaveGroups(data);
+            if (data.success && Array.isArray(data.leaveGroups)) {
+                setLeaveGroups(data.leaveGroups);
+            } else if (Array.isArray(data)) {
+                setLeaveGroups(data);
+            }
         } catch (err) {
             console.error(err);
         } finally {
