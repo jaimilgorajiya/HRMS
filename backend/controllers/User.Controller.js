@@ -3,6 +3,7 @@ import Shift from "../models/Shift.Model.js";
 import bcrypt from "bcryptjs";
 import { generatePassword, sendWelcomeEmail } from "../utils/emailService.js";
 import { generateEmployeeId } from "../utils/employeeId.js";
+import DocumentType from "../models/DocumentType.Model.js";
 
 const createUser = async (req, res) => {
     try {
@@ -26,7 +27,18 @@ const createUser = async (req, res) => {
         }
 
         // Check if user already exists
-        const existingUser = await User.findOne({ email: targetEmail });
+        console.log('Checking email:', targetEmail);
+        console.log('Trimmed email:', targetEmail.trim());
+        
+        // Let MongoDB handle the lowercase conversion via the model schema
+        const existingUser = await User.findOne({ 
+            email: targetEmail.trim() 
+        });
+        console.log('Existing user found:', existingUser ? 'YES' : 'NO');
+        if (existingUser) {
+            console.log('Existing user email:', existingUser.email);
+        }
+        
         if (existingUser) {
             return res.status(400).json({ success: false, message: "User with this email already exists" });
         }
@@ -35,6 +47,59 @@ const createUser = async (req, res) => {
         let profilePhoto = bodyContent.profilePhoto;
         if (req.file) {
             profilePhoto = req.file.filename;
+        } else if (req.files && req.files.profilePhoto) {
+            profilePhoto = req.files.profilePhoto[0].filename;
+        }
+
+        // Handle documents (Resume, ID Proofs)
+        let documents = [];
+        
+        // Handle multiple ID Proofs if provided
+        if (req.files && req.files.idProofs) {
+            const types = bodyContent.idProofTypes || [];
+            // Handle both array and single string (if only one type sent)
+            const typeList = Array.isArray(types) ? types : [types];
+            
+            for (let i = 0; i < req.files.idProofs.length; i++) {
+                const typeName = typeList[i];
+                if (typeName) {
+                    const docType = await DocumentType.findOne({ name: typeName });
+                    if (docType) {
+                        documents.push({
+                            documentType: docType._id,
+                            fileUrl: req.files.idProofs[i].filename,
+                            originalName: req.files.idProofs[i].originalname
+                        });
+                    }
+                }
+            }
+        } else if (req.files && req.files.idProof && bodyContent.idProofType) {
+            // Backward compatibility for single idProof field
+            const docType = await DocumentType.findOne({ name: bodyContent.idProofType });
+            if (docType) {
+                documents.push({
+                    documentType: docType._id,
+                    fileUrl: req.files.idProof[0].filename,
+                    originalName: req.files.idProof[0].originalname
+                });
+            }
+        }
+
+        // Attempt to save Resume (Requires a DocumentType named 'Resume' to exist)
+        if (req.files && req.files.resume) {
+            let docType = await DocumentType.findOne({ name: 'Resume', adminId: req.user._id });
+            if (!docType) {
+                // Optionally create it on the fly if it doesn't exist
+                docType = new DocumentType({ name: 'Resume', adminId: req.user._id, status: true });
+                await docType.save();
+            }
+            if (docType) {
+                documents.push({
+                    documentType: docType._id,
+                    fileUrl: req.files.resume[0].filename,
+                    originalName: req.files.resume[0].originalname
+                });
+            }
         }
 
         // Generate employee ID if not provided
@@ -60,7 +125,7 @@ const createUser = async (req, res) => {
         // Create new user with all fields, mapping as necessary
         const newUser = new User({
             ...bodyContent,
-            email: targetEmail,
+            email: targetEmail.trim(),
             dateJoined: bodyContent.dateOfJoining || bodyContent.dateJoined,
             workSetup: {
                 location: bodyContent.jobLocation || bodyContent.branch || (bodyContent.workSetup ? bodyContent.workSetup.location : ''),
@@ -69,6 +134,7 @@ const createUser = async (req, res) => {
             profilePhoto,
             name,
             employeeId,
+            documents,
             password: hashedPassword,
             forcePasswordReset: true
         });

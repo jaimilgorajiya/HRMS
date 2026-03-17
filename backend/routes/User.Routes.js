@@ -6,7 +6,7 @@ import upload from "../middleware/Upload.Middleware.js";
 const router = express.Router();
 
 router.post("/create", verifyToken, isAdmin, createUser);
-router.post("/add-employee", verifyToken, isAdmin, upload.single('profilePhoto'), createUser);
+router.post("/add-employee", verifyToken, isAdmin, upload.fields([{ name: 'profilePhoto', maxCount: 1 }, { name: 'resume', maxCount: 1 }, { name: 'idProof', maxCount: 1 }, { name: 'idProofs', maxCount: 10 }]), createUser);
 router.get("/", verifyToken, isAdmin, getUsers);
 router.get("/next-id", verifyToken, isAdmin, getNextEmployeeId);
 router.get("/:id", verifyToken, isAdmin, getUser);

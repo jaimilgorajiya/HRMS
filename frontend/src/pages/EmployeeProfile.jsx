@@ -382,10 +382,23 @@ const EmployeeProfile = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handlePhoneInputChange = (e) => {
+        const { name, value } = e.target;
+        // Allow only digits for all phone number fields
+        const numericValue = value.replace(/\D/g, '');
+        setFormData(prev => ({ ...prev, [name]: numericValue }));
+    };
+
     const calculateExperience = (joiningDate) => {
         if (!joiningDate) return 'N/A';
         const start = new Date(joiningDate);
         const end = new Date();
+        
+        // Check if joining date is in the future
+        if (start > end) {
+            return 'Not Joined Yet';
+        }
+        
         let years = end.getFullYear() - start.getFullYear();
         let months = end.getMonth() - start.getMonth();
         let days = end.getDate() - start.getDate();
@@ -402,7 +415,7 @@ const EmployeeProfile = () => {
         let result = [];
         if (years > 0) result.push(`${years} ${years === 1 ? 'Year' : 'Years'}`);
         if (months > 0) result.push(`${months} ${months === 1 ? 'Month' : 'Months'}`);
-        if (days > 0 && years === 0) result.push(`${days} ${days === 1 ? 'Day' : 'Days'}`);
+        if (days > 0 && years === 0 && months === 0) result.push(`${days} ${days === 1 ? 'Day' : 'Days'}`);
         
         return result.length > 0 ? result.join(' ') : 'Joined Today';
     };
@@ -736,7 +749,7 @@ const EmployeeProfile = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <input type="text" name={name} value={value || ''} onChange={onChange} placeholder={placeholder || ""} />
+                                                <input type="text" name={name} value={value || ''} onChange={handlePhoneInputChange} placeholder={placeholder || ""} />
                                             </div>
                                         </div>
                                     );
@@ -1013,7 +1026,13 @@ const EmployeeProfile = () => {
 
                                             <div className="ss-form-group">
                                                 <label className="ss-label" style={{ fontSize: '12px' }}>Upload Document *</label>
-                                                <input type="file" className="ss-input" required onChange={e => setDocFormData(p => ({ ...p, file: e.target.files[0] }))} accept={selectedDocType.allowDocumentType === 'PDF Only' ? '.pdf' : selectedDocType.allowDocumentType === 'Image Only' ? 'image/*' : 'image/*,.pdf'} />
+                                                <input 
+                                                    type="file" 
+                                                    className="ss-input" 
+                                                    required 
+                                                    onChange={e => setDocFormData(p => ({ ...p, file: e.target.files[0] }))} 
+                                                    accept={selectedDocType.allowDocumentType === 'PDF Only' ? '.pdf' : selectedDocType.allowDocumentType === 'Image Only' ? 'image/*' : 'image/*,.pdf'} 
+                                                />
                                             </div>
                                         </>
                                     );

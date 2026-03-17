@@ -124,6 +124,8 @@ const Login = ({ isRegister }) => {
     const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
     
     const url = `${API_URL}${endpoint}`;
+    console.log('API URL:', url);
+    console.log('API_URL from config:', API_URL);
 
     const trimmedEmail = formData.email.trim().toLowerCase();
     const trimmedPassword = formData.password;
@@ -141,7 +143,17 @@ const Login = ({ isRegister }) => {
         }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (data.success) {
         // Save user data and token

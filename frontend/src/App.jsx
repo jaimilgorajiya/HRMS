@@ -22,7 +22,11 @@ import EditShift from './pages/EditShift';
 import PenaltyRules from './pages/PenaltyRules';
 import GraceTime from './pages/GraceTime';
 import LeaveType from './pages/LeaveType';
+import LeaveGroup from './pages/LeaveGroup';
+import AddLeaveGroup from './pages/AddLeaveGroup';
+import EditLeaveGroup from './pages/EditLeaveGroup';
 import EarningDeductionType from './pages/EarningDeductionType';
+import EmployeeOnboarding from './pages/EmployeeOnboarding';
 import PayrollTaxSetting from './pages/PayrollTaxSetting';
 import DocumentType from './pages/DocumentType';
 import OnboardingDocSetting from './pages/OnboardingDocSetting';
@@ -64,6 +68,9 @@ function App() {
               <Route path="shift/grace-time" element={<GraceTime />} />
               <Route path="shift-settings" element={<ModulePlaceholder title="Shift Settings" />} />
               <Route path="leave/type" element={<LeaveType />} />
+              <Route path="leave/group" element={<LeaveGroup />} />
+              <Route path="leave/group/add" element={<AddLeaveGroup />} />
+              <Route path="leave/group/edit/:id" element={<EditLeaveGroup />} />
               <Route path="leave/*" element={<ModulePlaceholder title="Leave Management" />} />
               <Route path="payroll-settings" element={<ModulePlaceholder title="Payroll Settings" />} />
               <Route path="payroll/tax-setting" element={<PayrollTaxSetting />} />
@@ -79,7 +86,7 @@ function App() {
               <Route path="employees/add" element={<AddEmployee />} />
               <Route path="employees/profile/:id" element={<EmployeeProfile />} />
               <Route path="employees/ex" element={<ModulePlaceholder title="Ex Employees" />} />
-              <Route path="employees/onboarding" element={<ModulePlaceholder title="Employee Onboarding" />} />
+              <Route path="employees/onboarding" element={<EmployeeOnboarding />} />
               <Route path="employees/offboarding" element={<ModulePlaceholder title="Employee Offboarding" />} />
               <Route path="employees/mgmt-role" element={<ModulePlaceholder title="Management Role" />} />
               <Route path="employees/level-assign" element={<ModulePlaceholder title="Level Assign" />} />

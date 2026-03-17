@@ -69,8 +69,8 @@ const SearchableSelect = ({
     return (
         <div className="searchable-select-container" ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
             {label && (
-                <label style={{ fontSize: '14.5px', fontWeight: '600', color: '#475569', marginBottom: '8px', display: 'block' }}>
-                    {label} {required && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
+                <label className="hrm-label" style={{ marginBottom: '8px', display: 'block' }}>
+                    {label} {required && <span className="req">*</span>}
                 </label>
             )}
             

@@ -25,6 +25,7 @@ import earningDeductionTypeRoutes from './routes/EarningDeductionType.Routes.js'
 import documentTypeRoutes from './routes/DocumentType.Routes.js';
 
 import onboardingDocSettingRoutes from './routes/OnboardingDocSetting.Routes.js';
+import leaveGroupRoutes from './routes/LeaveGroup.Routes.js';
 
 import payrollSettingRoutes from './routes/PayrollSetting.Routes.js';
 
@@ -74,6 +75,7 @@ app.use('/api/earning-deduction-types', earningDeductionTypeRoutes);
 app.use('/api/payroll-settings', payrollSettingRoutes);
 app.use('/api/document-types', documentTypeRoutes);
 app.use('/api/onboarding-doc-settings', onboardingDocSettingRoutes);
+app.use('/api/leave-groups', leaveGroupRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

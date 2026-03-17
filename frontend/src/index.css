@@ -666,6 +666,117 @@ body {
   background: var(--primary-blue);
 }
 
+/* Custom File Input Styling */
+.ss-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ss-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.ss-input {
+  padding: 12px 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  color: var(--text-dark);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.ss-input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Allow file inputs to use default browser styling */
+.ss-input[type="file"] {
+  padding: 8px 12px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ss-input[type="file"]:hover {
+  background-color: #F1F5F9;
+  border-color: var(--primary-blue);
+}
+
+/* Custom File Input Wrapper */
+.file-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.file-input-wrapper input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-input-display {
+  padding: 12px 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 48px;
+}
+
+.file-input-display:hover {
+  border-color: var(--primary-blue);
+}
+
+.file-input-display.has-file {
+  border-color: var(--primary-blue);
+  background-color: #F0F9FF;
+}
+
+.file-input-text {
+  flex: 1;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.file-input-display.has-file .file-input-text {
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.file-input-button {
+  background: var(--primary-blue);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.file-input-button:hover {
+  background: #2563EB;
+}
+
 /* Grid Components */
 .dashboard-grid {
   display: grid;
@@ -1672,7 +1783,7 @@ body {
 
 /* --- COMPANY DETAILS THEME --- */
 .company-details-container { padding: 32px; max-width: 1000px; margin: 0 auto; }
-.hrm-card { background: white; border: var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px; overflow: hidden; }
+.hrm-card { background: white; border: var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px; overflow: visible; }
 .card-header-hrm { padding: 20px 24px; border-bottom: 1px solid #F1F5F9; background: #fafafa; }
 .card-header-hrm h2 { font-size: 18px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 12px; margin: 0; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
@@ -2789,12 +2900,12 @@ select:focus {
     border-radius: 12px;
     border: 1px solid #E2E8F0;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    overflow: hidden;
+    overflow: visible;
 }
 
 .hrm-label {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #475569;
     margin-bottom: 8px;

@@ -185,7 +185,7 @@ const CompanyDetails = () => {
           } 
         }));
       }
-    } catch (error) {
+    } catch (error) { 
       console.error("Error fetching company details:", error);
     } finally {
       setLoading(false);

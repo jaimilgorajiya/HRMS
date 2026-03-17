@@ -33,11 +33,6 @@ const DocumentType = () => {
     const [formData, setFormData] = useState({
         name: '',
         shortName: '',
-        pages: 1,
-        documentNumberRequired: 'No',
-        allowDocumentType: 'Image And PDF',
-        issueDateRequired: 'No',
-        expiryDateRequired: 'No',
         requiredBeforeOnboarding: 'No',
         kycType: ''
     });
@@ -113,11 +108,6 @@ const DocumentType = () => {
         setFormData({
             name: doc.name,
             shortName: doc.shortName || '',
-            pages: doc.pages,
-            documentNumberRequired: doc.documentNumberRequired,
-            allowDocumentType: doc.allowDocumentType,
-            issueDateRequired: doc.issueDateRequired,
-            expiryDateRequired: doc.expiryDateRequired,
             requiredBeforeOnboarding: doc.requiredBeforeOnboarding,
             kycType: doc.kycType || ''
         });
@@ -219,11 +209,6 @@ const DocumentType = () => {
         setFormData({
             name: '',
             shortName: '',
-            pages: 1,
-            documentNumberRequired: 'No',
-            allowDocumentType: 'Image And PDF',
-            issueDateRequired: 'No',
-            expiryDateRequired: 'No',
             requiredBeforeOnboarding: 'No',
             kycType: ''
         });
@@ -287,10 +272,6 @@ const DocumentType = () => {
                                     </th>
                                     <th>Sr. No</th>
                                     <th>Name</th>
-                                    <th>Pages</th>
-                                    <th>Doc No Required</th>
-                                    <th>Issue Date Required</th>
-                                    <th>Expiry Date Required</th>
                                     <th>Before Onboarding</th>
                                     <th>Action</th>
                                 </tr>
@@ -303,10 +284,6 @@ const DocumentType = () => {
                                         </td>
                                         <td>{indexOfFirstRecord + index + 1}</td>
                                         <td>{doc.name}</td>
-                                        <td>{doc.pages}</td>
-                                        <td>{doc.documentNumberRequired}</td>
-                                        <td>{doc.issueDateRequired}</td>
-                                        <td>{doc.expiryDateRequired}</td>
                                         <td>{doc.requiredBeforeOnboarding}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -323,24 +300,22 @@ const DocumentType = () => {
                             </tbody>
                         </table>
                     </div>
-
-                   
                 </div>
             </div>
 
             {/* Modal */}
             {isModalOpen && (
                 <div className="hrm-modal-overlay">
-                    <div className="hrm-modal-content" style={{ width: '800px' }}>
-                        <div className="hrm-modal-header" style={{ background: '#3B648B' }}>
+                    <div className="hrm-modal-content" style={{ width: '800px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+                        <div className="hrm-modal-header" style={{ background: '#3B648B', flexShrink: 0 }}>
                             <h2 style={{ color: 'white' }}>{isEditing ? 'Edit Document Type' : 'Add Document Type'}</h2>
                             <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit}>
-                            <div className="hrm-modal-body">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                            <div className="hrm-modal-body" style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                     <div className="hrm-form-group">
                                         <label className="hrm-label">ID Proof Name <span className="req">*</span></label>
                                         <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="hrm-input" required placeholder="e.g. Aadhar Card" />
@@ -349,70 +324,7 @@ const DocumentType = () => {
                                         <label className="hrm-label">Document Short Name</label>
                                         <input type="text" name="shortName" value={formData.shortName} onChange={handleInputChange} className="hrm-input" placeholder="e.g. Aadhar" />
                                     </div>
-                                    <div className="hrm-form-group">
-                                        <SearchableSelect 
-                                            label="Pages"
-                                            required={true}
-                                            options={[
-                                                { value: 1, label: '1' },
-                                                { value: 2, label: '2' },
-                                             
-                                            ]}
-                                            value={formData.pages}
-                                            onChange={(val) => handleSelectChange('pages', val)}
-                                        />
-                                    </div>
 
-                                    <div className="hrm-form-group">
-                                        <SearchableSelect 
-                                            label="Document Number Required"
-                                            required={true}
-                                            options={[
-                                                { value: 'No', label: 'No' },
-                                                { value: 'Yes', label: 'Yes' }
-                                            ]}
-                                            value={formData.documentNumberRequired}
-                                            onChange={(val) => handleSelectChange('documentNumberRequired', val)}
-                                        />
-                                    </div>
-                                    <div className="hrm-form-group">
-                                        <SearchableSelect 
-                                            label="Allow Document Type"
-                                            required={true}
-                                            options={[
-                                                { value: 'Image And PDF', label: 'Image And PDF' },
-                                                { value: 'Image Only', label: 'Image Only' },
-                                                { value: 'PDF Only', label: 'PDF Only' }
-                                            ]}
-                                            value={formData.allowDocumentType}
-                                            onChange={(val) => handleSelectChange('allowDocumentType', val)}
-                                        />
-                                    </div>
-                                    <div className="hrm-form-group">
-                                        <SearchableSelect 
-                                            label="Issue Date Required"
-                                            required={true}
-                                            options={[
-                                                { value: 'No', label: 'No' },
-                                                { value: 'Yes', label: 'Yes' }
-                                            ]}
-                                            value={formData.issueDateRequired}
-                                            onChange={(val) => handleSelectChange('issueDateRequired', val)}
-                                        />
-                                    </div>
-
-                                    <div className="hrm-form-group">
-                                        <SearchableSelect 
-                                            label="Expiry Date Required"
-                                            required={true}
-                                            options={[
-                                                { value: 'No', label: 'No' },
-                                                { value: 'Yes', label: 'Yes' }
-                                            ]}
-                                            value={formData.expiryDateRequired}
-                                            onChange={(val) => handleSelectChange('expiryDateRequired', val)}
-                                        />
-                                    </div>
                                     <div className="hrm-form-group">
                                         <SearchableSelect 
                                             label="Required Before Onboarding"
@@ -428,7 +340,7 @@ const DocumentType = () => {
                                 
                                 </div>
                             </div>
-                            <div className="hrm-modal-footer">
+                            <div className="hrm-modal-footer" style={{ flexShrink: 0, padding: '20px', borderTop: '1px solid #e2e8f0' }}>
                                 <button type="submit" className="btn-hrm btn-hrm-primary" style={{ textTransform: 'none' }}>
                                     <Check size={18} /> {isEditing ? 'SAVE CHANGES' : 'ADD'}
                                 </button>
