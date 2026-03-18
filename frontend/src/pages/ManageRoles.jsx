@@ -47,8 +47,8 @@ const ManageRoles = () => {
                 setRoleName(role.roleName || 'Admin Sidebar Configuration');
                 setDescription(role.description || '');
                 const fetchedPerms = role.permissions || [];
-                if (!fetchedPerms.find(p => p.childModule === 'Management Role')) {
-                    fetchedPerms.push({ module: 'Core HRMS', subModule: 'Employee & Management', childModule: 'Management Role', access: true });
+                if (!fetchedPerms.find(p => p.childModule === 'Sidebar Setup')) {
+                    fetchedPerms.push({ module: 'Core HRMS', subModule: 'Employee & Management', childModule: 'Sidebar Setup', access: true });
                 }
                 setPermissions(fetchedPerms);
             } else {
@@ -74,7 +74,7 @@ const ManageRoles = () => {
             );
 
             if (exists) {
-                if (childModule === 'Management Role') return prev; // Lock this permission
+                if (childModule === 'Sidebar Setup') return prev; // Lock this permission
                 return prev.filter(p => !(
                     p.module === module && 
                     p.subModule === subModule && 
@@ -91,7 +91,7 @@ const ManageRoles = () => {
             const key = (p) => `${p.module}__${p.subModule ?? '∅'}__${p.childModule ?? '∅'}`;
             const map = new Map(prev.map(p => [key(p), p]));
             for (const r of rows) {
-                if (!shouldSelect && r.childModule === 'Management Role') continue; // Lock this permission
+                if (!shouldSelect && r.childModule === 'Sidebar Setup') continue; // Lock this permission
                 const k = key(r);
                 if (shouldSelect) map.set(k, { ...r, access: true });
                 else map.delete(k);
@@ -162,36 +162,29 @@ const ManageRoles = () => {
     };
 
     const isModulePartiallySelected = (moduleObj) => {
-        const module = moduleObj.title;
-        const inModule = permissions.filter(p => p.module === module);
-        if (inModule.length === 0) return false;
+        if (!moduleObj.subModules) return false;
         
-        let totalCount = 0;
-        if (!moduleObj.subModules) totalCount = 1;
-        else {
-            moduleObj.subModules.forEach(sub => {
-                if (!sub.children) totalCount++;
-                else totalCount += sub.children.length;
-            });
-        }
+        let hasSelected = false;
+        let hasUnselected = false;
         
-        return inModule.length > 0 && inModule.length < totalCount;
+        moduleObj.subModules.forEach(sub => {
+            const state = getSubSelectionState(moduleObj, sub);
+            if (state === 'full') hasSelected = true;
+            else if (state === 'none') hasUnselected = true;
+            else if (state === 'partial') {
+                hasSelected = true;
+                hasUnselected = true;
+            }
+        });
+        
+        return hasSelected && hasUnselected;
     };
 
     const isModuleFullySelected = (moduleObj) => {
-        const module = moduleObj.title;
-        const inModule = permissions.filter(p => p.module === module);
-        
-        let totalCount = 0;
-        if (!moduleObj.subModules) totalCount = 1;
-        else {
-            moduleObj.subModules.forEach(sub => {
-                if (!sub.children) totalCount++;
-                else totalCount += sub.children.length;
-            });
+        if (!moduleObj.subModules) {
+            return isPermissionactive(moduleObj.title, null, null);
         }
-        
-        return inModule.length === totalCount;
+        return moduleObj.subModules.every(sub => getSubSelectionState(moduleObj, sub) === 'full');
     };
 
     const handleSave = async () => {
@@ -279,13 +272,10 @@ const ManageRoles = () => {
         <div className="hrm-container">
             <div className="hrm-header">
                 <div>
-                    <h1 className="hrm-title" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'rgba(59, 100, 139, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3B648B' }}>
-                            <Shield size={24} />
-                        </div>
+                    <h1 className="hrm-title">
                         Sidebar Setup
                     </h1>
-                    <p style={{ fontSize: '13px', color: '#64748B', fontWeight: '600', marginTop: '6px', marginLeft: '60px' }}>
+                    <p style={{ fontSize: '13px', color: '#64748B', fontWeight: '600', marginTop: '6px' }}>
                         Configure the modules that appear in your sidebar
                     </p>
                 </div>
@@ -306,7 +296,7 @@ const ManageRoles = () => {
                 <div style={{ background: 'white', borderRadius: '24px', border: '1px solid #E2E8F0', overflow: 'hidden', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.04)' }}>
                     <div style={{ padding: '25px 30px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1E293B' }}>Module Matrix</h2>
+                            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1E293B' }}>Sidebar Setup</h2>
                             <p style={{ fontSize: '12px', color: '#64748B', fontWeight: '500', marginTop: '2px' }}>Configure feature-level access for your admin sidebar</p>
                         </div>
                         <div style={{ display: 'flex', gap: '15px' }}>
@@ -319,7 +309,7 @@ const ManageRoles = () => {
                                 Check All
                             </button>
                             <button 
-                                onClick={() => setPermissions([{ module: 'Core HRMS', subModule: 'Employee & Management', childModule: 'Management Role', access: true }])}
+                                onClick={() => setPermissions([{ module: 'Core HRMS', subModule: 'Employee & Management', childModule: 'Sidebar Setup', access: true }])}
                                 style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '12px', fontWeight: '800', cursor: 'pointer', textTransform: 'uppercase' }}
                             >
                                 Clear All
@@ -392,7 +382,7 @@ const ManageRoles = () => {
                                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginLeft: '30px' }}>
                                                             {sub.children.map((child, cIdx) => {
                                                                 const isActive = isPermissionactive(moduleObj.title, sub.title, child);
-                                                                const isLocked = child === 'Management Role';
+                                                                const isLocked = child === 'Sidebar Setup';
                                                                 return (
                                                                     <div 
                                                                         key={cIdx} 

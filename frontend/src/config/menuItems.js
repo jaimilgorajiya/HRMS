@@ -78,7 +78,7 @@ export const menuItems = [
           { title: "Ex Employee", path: "/admin/employees/ex" },
           { title: "Employee Onboarding", path: "/admin/employees/onboarding" },
           { title: "Employee Offboarding", path: "/admin/employees/offboarding" },
-          { title: "Management Role", path: "/admin/employees/mgmt-role" },
+          { title: "Sidebar Setup", path: "/admin/employees/mgmt-role" },
           { title: "Profile Change Request", path: "/admin/employees/profile-request" },
           { title: "Change Branch", path: "/admin/employees/change-branch" },
           { title: "Update Bulk Employee ID", path: "/admin/employees/bulk-id" },

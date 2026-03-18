@@ -105,14 +105,18 @@ const Sidebar = ({ isCollapsed }) => {
     });
   };
 
-  const isAllowed = (permissions, module, subModule = null, childModule = null) =>
-    permissions?.some(
+  const isAllowed = (permissions, module, subModule = null, childModule = null) => {
+    // Force allow Sidebar Setup for Admin safety
+    if (childModule === "Sidebar Setup") return true;
+
+    return permissions?.some(
       (p) =>
         p.access &&
         p.module === module &&
         (p.subModule ?? null) === (subModule ?? null) &&
         (p.childModule ?? null) === (childModule ?? null)
     );
+  };
 
   const filterItemsByPermissions = (items, permissions) => {
     return items
