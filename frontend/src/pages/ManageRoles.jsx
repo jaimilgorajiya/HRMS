@@ -207,18 +207,16 @@ const ManageRoles = () => {
 
             const data = await response.json();
             if (data.success) {
-                Swal.fire('Success', isEdit ? 'Role updated' : 'Role created', 'success');
-                await fetchRoles(); // Refresh the list
+                await Swal.fire({
+                    title: 'Success!',
+                    text: 'Sidebar settings updated successfully.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 
-                // If it was a create, we also want to select the newly created role, 
-                // but for simplicity, we can just reset to "Create New"
-                if (!isEdit) {
-                    handleSelectRole(null);
-                } else {
-                    // Update current selected role with latest
-                    const updated = data.role || { ...selectedRole, roleName, description, permissions };
-                    handleSelectRole(updated);
-                }
+                // Reload the page to reflect sidebar changes immediately
+                window.location.reload();
             } else {
                 Swal.fire('Error', data.message || 'Failed to save role', 'error');
             }
