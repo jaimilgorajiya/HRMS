@@ -36,6 +36,7 @@ import AddEmployee from './pages/AddEmployee';
 import EmployeeProfile from './pages/EmployeeProfile';
 import ExEmployees from './pages/ExEmployees';
 import ManageRoles from './pages/ManageRoles';
+import ChangeBranch from './pages/ChangeBranch';
 
 function App() {
   return (
@@ -92,7 +93,7 @@ function App() {
               <Route path="employees/offboarding" element={<EmployeeOffboarding />} />
               <Route path="employees/mgmt-role" element={<ManageRoles />} />
               <Route path="employees/profile-request" element={<ModulePlaceholder title="Profile Request" />} />
-              <Route path="employees/change-branch" element={<ModulePlaceholder title="Change Branch" />} />
+              <Route path="employees/change-branch" element={<ChangeBranch />} />
               <Route path="employees/bulk-id" element={<ModulePlaceholder title="Bulk ID Update" />} />
               <Route path="employees/hierarchy" element={<ModulePlaceholder title="Hierarchy Chart" />} />
               <Route path="employees/resignation" element={<ModulePlaceholder title="Resignations" />} />

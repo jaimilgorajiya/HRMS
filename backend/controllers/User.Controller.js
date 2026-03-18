@@ -462,4 +462,41 @@ const deleteUserDocument = async (req, res) => {
     }
 };
 
-export { createUser, getUsers, getExEmployees, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument };
+const changeBranch = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { branch, department } = req.body;
+
+        if (!branch) {
+            return res.status(400).json({ success: false, message: "Branch is required" });
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Employee not found" });
+        }
+
+        user.branch = branch;
+        if (department) {
+            user.department = department;
+        }
+
+        await user.save();
+
+        res.status(200).json({ 
+            success: true, 
+            message: `Employee ${user.name} has been successfully moved to ${branch} branch.`,
+            user: {
+                _id: user._id,
+                name: user.name,
+                branch: user.branch,
+                department: user.department
+            }
+        });
+    } catch (error) {
+        console.error("Error in changeBranch controller:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
+    }
+};
+
+export { createUser, getUsers, getExEmployees, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument, changeBranch };

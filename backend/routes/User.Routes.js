@@ -1,5 +1,5 @@
 import express from "express";
-import { createUser, getUsers, getExEmployees, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument } from "../controllers/User.Controller.js";
+import { createUser, getUsers, getExEmployees, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument, changeBranch } from "../controllers/User.Controller.js";
 import { verifyToken, isAdmin } from "../middleware/Auth.Middleware.js";
 import upload from "../middleware/Upload.Middleware.js";
 
@@ -15,5 +15,6 @@ router.put("/:id", verifyToken, isAdmin, upload.single('profilePhoto'), updateUs
 router.delete("/:id", verifyToken, isAdmin, deleteUser);
 router.post("/:id/documents", verifyToken, isAdmin, upload.single('file'), uploadUserDocument);
 router.delete("/:id/documents/:docId", verifyToken, isAdmin, deleteUserDocument);
+router.put("/:id/change-branch", verifyToken, isAdmin, changeBranch);
 
 export default router;

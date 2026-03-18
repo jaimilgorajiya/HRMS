@@ -65,12 +65,8 @@ const Employees = () => {
     const relevantEmployees = useMemo(() => {
         if (!activeBranchId) return [];
         const activeBranch = branches.find(b => b._id === activeBranchId);
-        return employees.filter(emp => 
-            emp.workSetup?.location === activeBranch?.branchName || 
-            emp.workSetup?.location === activeBranch?._id ||
-            emp.branch === activeBranch?.branchName ||
-            emp.branch === activeBranch?._id
-        );
+        if (!activeBranch) return [];
+        return employees.filter(emp => emp.branch === activeBranch.branchName);
     }, [employees, activeBranchId, branches]);
 
     const availableDepartments = useMemo(() => {
@@ -159,7 +155,7 @@ const Employees = () => {
             }}>
                 {branches.map(branch => {
                     const isActive = activeBranchId === branch._id;
-                    const count = employees.filter(emp => emp.branch === branch._id || emp.branch === branch.branchName).length;
+                    const count = employees.filter(emp => emp.branch === branch.branchName).length;
                     
                     return (
                         <button 
@@ -310,8 +306,8 @@ const Employees = () => {
                     Object.entries(employeesByBranch).map(([deptName, deptEmployees]) => (
                         <div key={deptName}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '1px solid #E2E8F0', paddingBottom: '12px' }}>
-                                <h2 style={{ fontSize: '15px', fontWeight: '800', color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                                    {deptName} <span style={{ color: '#94A3B8', fontWeight: '600' }}>({deptEmployees.length})</span>
+                                <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    <span style={{ color: '#94A3B8' }}>Department:</span> {deptName} <span style={{ color: '#94A3B8', fontWeight: '600' }}>({deptEmployees.length})</span>
                                 </h2>
                             </div>
 
