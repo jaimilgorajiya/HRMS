@@ -187,9 +187,17 @@ const createUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // Inclusion of full current day
+
         const users = await User.find({ 
-            role: { $ne: 'Admin' },
-            status: { $in: ['Active', 'Inactive', 'Onboarding'] } 
+            $or: [
+                { status: { $in: ['Active', 'Inactive', 'Onboarding'] } },
+                { 
+                    status: 'Resigned', 
+                    exitDate: { $gt: today } 
+                }
+            ]
         })
         .populate('workSetup.shift')
         .populate('leaveGroup')
@@ -207,6 +215,32 @@ const getUsers = async (req, res) => {
         res.status(200).json({ success: true, users: processedUsers });
     } catch (error) {
         console.log("Error in getUsers controller", error.message);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+const getExEmployees = async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+
+        const users = await User.find({ 
+            role: { $ne: 'Admin' },
+            $or: [
+                { status: { $in: ['Ex-Employee', 'Terminated', 'Absconding', 'Retired'] } },
+                { 
+                    status: 'Resigned', 
+                    exitDate: { $lte: today } 
+                }
+            ]
+        })
+        .populate('workSetup.shift')
+        .select("-password")
+        .sort({ exitDate: -1 });
+
+        res.status(200).json({ success: true, users });
+    } catch (error) {
+        console.log("Error in getExEmployees controller", error.message);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
@@ -428,4 +462,4 @@ const deleteUserDocument = async (req, res) => {
     }
 };
 
-export { createUser, getUsers, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument };
+export { createUser, getUsers, getExEmployees, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument };

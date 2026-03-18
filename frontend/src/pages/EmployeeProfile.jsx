@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
     ArrowLeft, Mail, Phone, MapPin, Building2, Briefcase, 
     Calendar, User, ShieldCheck, Clock, Award, FileText,
-    Check, X, Camera, ChevronDown, Search, GraduationCap,
+    Check, X, Camera, ChevronDown, Search, GraduationCap, RotateCcw,
     History, AlertCircle, StickyNote, Plus, Trash2, Edit2, Eye
 } from 'lucide-react';
 import authenticatedFetch from '../utils/apiHandler';
@@ -67,12 +67,31 @@ const EmployeeProfile = () => {
     const [formData, setFormData] = useState({});
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [companyName, setCompanyName] = useState('Company');
 
     useEffect(() => {
         fetchEmployeeDetails();
         fetchDropdownData();
         fetchCountryCodes();
+        fetchCompanyDetails();
     }, [id]);
+
+    const fetchCompanyDetails = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await authenticatedFetch(`${API_URL}/api/company`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.companyName) {
+                    setCompanyName(data.companyName);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching company details:", error);
+        }
+    };
 
     // Auto-calculate Training Completion Date and Date of Permanent
     useEffect(() => {
@@ -496,6 +515,117 @@ const EmployeeProfile = () => {
         }
     };
 
+    const handleMarkExEmployee = async () => {
+        const { value: formValues } = await Swal.fire({
+            title: '<span style="font-size: 24px; font-weight: 800; color: #1E293B;">Employee Separation</span>',
+            html: `
+                <div style="padding: 10px 5px; text-align: left;">
+                    <p style="color: #64748B; font-size: 14px; margin-bottom: 30px; line-height: 1.5; text-align: center;">Please provide the official separation details below. This action will archive the employee profile.</p>
+                    
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; font-weight: 700; font-size: 12px; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px;">Resignation Date</label>
+                        <input id="swal-resignation-date" type="date" style="width: 100%; padding: 12px 15px; border: 1.5px solid #E2E8F0; border-radius: 12px; font-size: 15px; color: #1E293B; outline: none; transition: border-color 0.2s;" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+
+                    <div style="margin-bottom: 22px;">
+                        <label style="display: block; font-weight: 700; font-size: 12px; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px;">Exit Date</label>
+                        <input id="swal-exit-date" type="date" style="width: 100%; padding: 12px 15px; border: 1.5px solid #E2E8F0; border-radius: 12px; font-size: 15px; color: #1E293B; outline: none; transition: border-color 0.2s;" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 700; font-size: 12px; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px;">Reason for Exit</label>
+                        <textarea id="swal-exit-reason" style="width: 100%; height: 100px; padding: 12px 15px; border: 1.5px solid #E2E8F0; border-radius: 12px; font-size: 15px; color: #1E293B; outline: none; resize: none; font-family: inherit;" placeholder="Enter specific reasons or remarks..."></textarea>
+                    </div>
+                </div>
+            `,
+            width: '450px',
+            padding: '2.5rem',
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Confirm Separation',
+            cancelButtonText: 'Keep Active',
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#F1F5F9',
+            customClass: {
+                confirmButton: 'swal-confirm-separation',
+                cancelButton: 'swal-cancel-separation',
+                popup: 'swal-custom-popup'
+            },
+            preConfirm: () => {
+                const resignationDate = document.getElementById('swal-resignation-date').value;
+                const exitDate = document.getElementById('swal-exit-date').value;
+                const exitReason = document.getElementById('swal-exit-reason').value;
+                if (!resignationDate || !exitDate) {
+                    Swal.showValidationMessage('Both dates are required');
+                    return false;
+                }
+                return { resignationDate, exitDate, exitReason };
+            }
+        });
+
+        // Add some style to the confirm/cancel buttons via CSS injection
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .swal-confirm-separation { padding: 12px 30px !important; border-radius: 12px !important; font-weight: 700 !important; font-size: 14px !important; height: 48px !important; margin-right: 10px !important; }
+            .swal-cancel-separation { padding: 12px 30px !important; border-radius: 12px !important; font-weight: 700 !important; font-size: 14px !important; height: 48px !important; color: #64748B !important; }
+            #swal-resignation-date:focus, #swal-exit-date:focus, #swal-exit-reason:focus { border-color: #3B648B !important; box-shadow: 0 0 0 4px rgba(59, 100, 139, 0.1); }
+            .swal-custom-popup { border-radius: 24px !important; }
+        `;
+        document.head.appendChild(style);
+
+        if (formValues) {
+            try {
+                setSaving(true);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                const exitDateObj = new Date(formValues.exitDate);
+                const targetStatus = exitDateObj > today ? 'Resigned' : 'Ex-Employee';
+
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: targetStatus,
+                        resignationDate: formValues.resignationDate,
+                        exitDate: formValues.exitDate,
+                        exitReason: formValues.exitReason
+                    })
+                });
+                
+                const resData = await response.json();
+                if (resData.success) {
+                    const isFuture = targetStatus === 'Resigned';
+                    Swal.fire({
+                        title: isFuture ? 'Marked as Resigned!' : 'Marked as Ex-Employee!',
+                        text: isFuture 
+                            ? `This employee is now in notice period until ${formValues.exitDate}.`
+                            : 'Redirecting to Ex-Employee list...',
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        if (isFuture) {
+                            fetchEmployeeDetails();
+                        } else {
+                            navigate('/admin/employees/ex');
+                        }
+                    });
+                } else {
+                    Swal.fire('Error', resData.message || 'Failed to update status', 'error');
+                }
+            } catch (error) {
+                console.error("Mark Ex-Employee error:", error);
+                Swal.fire('Error', error.message, 'error');
+            } finally {
+                setSaving(false);
+            }
+        }
+    };
+
     const filteredDepartments = React.useMemo(() => {
         // Find the selected branch object to get its ID
         const selectedBranch = branches.find(b => b.branchName === formData.branch || b._id === formData.branch);
@@ -510,6 +640,64 @@ const EmployeeProfile = () => {
         const uniqueNames = Array.from(new Set(list.map(d => d.name)));
         return uniqueNames.map(name => list.find(d => d.name === name));
     }, [departments, formData.branch, branches]);
+
+    const handleReactive = async () => {
+        const result = await Swal.fire({
+            title: '<span style="font-size: 22px; font-weight: 800; color: #1E293B;">Re-activate Employee?</span>',
+            text: "This will set the employee status back to Active and clear separation records.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Re-activate',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#45B79E',
+            cancelButtonColor: '#F1F5F9',
+            customClass: {
+                confirmButton: 'swal-confirm-separation',
+                cancelButton: 'swal-cancel-separation',
+                popup: 'swal-custom-popup'
+            }
+        });
+
+        if (result.isConfirmed) {
+            try {
+                setSaving(true);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/api/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'Active',
+                        resignationDate: null,
+                        exitDate: null,
+                        exitReason: ''
+                    })
+                });
+                
+                const resData = await response.json();
+                if (resData.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Employee status restored to Active.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        fetchEmployeeDetails();
+                    });
+                } else {
+                    Swal.fire('Error', resData.message || 'Failed to update status', 'error');
+                }
+            } catch (error) {
+                console.error("Reactive error:", error);
+                Swal.fire('Error', error.message, 'error');
+            } finally {
+                setSaving(false);
+            }
+        }
+    };
 
     if (loading) return <div className="loading-container">Loading Profile...</div>;
     if (!employee) return <div className="loading-container">Employee not found.</div>;
@@ -572,7 +760,26 @@ const EmployeeProfile = () => {
                                 <input type="file" hidden onChange={handleFileChange} accept="image/*" />
                             </label>
                         </div>
-                        <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', margin: '0 0 5px' }}>{formData.name}</h2>
+                        <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#1e293b', margin: '0 0 5px' }}>
+                            {formData.name}
+                            {formData.status === 'Resigned' && (
+                                <>
+                                    <br />
+                                    <span style={{ 
+                                        fontSize: '9px', 
+                                        fontWeight: '800', 
+                                        background: '#FEF2F2', 
+                                        color: '#EF4444', 
+                                        padding: '2px 10px', 
+                                        borderRadius: '50px',
+                                        textTransform: 'uppercase',
+                                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                                        display: 'inline-block',
+                                        marginTop: '4px'
+                                    }}>Notice Period</span>
+                                </>
+                            )}
+                        </h2>
                         <p style={{ fontSize: '14px', color: '#64748b', fontWeight: '600', margin: '0 0 20px' }}>{formData.designation || 'Web Developer'}</p>
                         
                         <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px', textAlign: 'left' }}>
@@ -595,6 +802,104 @@ const EmployeeProfile = () => {
                                 <span style={{ fontSize: '13px', color: '#475569', fontWeight: '600' }}>{formData.gender}</span>
                             </div>
                         </div>
+
+                        {/* Mark as Ex-Emp Button */}
+                        {!['Ex-Employee', 'Resigned', 'Terminated', 'Absconding', 'Retired'].includes(formData.status) ? (
+                            <button 
+                                onClick={handleMarkExEmployee}
+                                style={{
+                                    marginTop: '25px',
+                                    width: '100%',
+                                    padding: '12px',
+                                    background: 'rgba(239, 68, 68, 0.08)',
+                                    color: '#EF4444',
+                                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.background = '#EF4444';
+                                    e.currentTarget.style.color = 'white';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)';
+                                    e.currentTarget.style.color = '#EF4444';
+                                }}
+                            >
+                                <X size={16} /> Mark as Ex-Emp
+                            </button>
+                        ) : (
+                            <div style={{ marginTop: '25px', borderTop: '1px solid #f1f5f9', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '800' }}>Resignation Date:</span>
+                                    <span style={{ fontSize: '13px', color: '#1e293b', fontWeight: '700' }}>
+                                        {formData.resignationDate ? new Date(formData.resignationDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '800' }}>Company Last Day:</span>
+                                    <span style={{ fontSize: '13px', color: '#1e293b', fontWeight: '700' }}>
+                                        {formData.exitDate ? new Date(formData.exitDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '800' }}>Perform By:</span>
+                                    <span style={{ fontSize: '13px', color: '#1e293b', fontWeight: '700' }}>{companyName}</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '800' }}>Resignation Remark:</span>
+                                    <span style={{ fontSize: '13px', color: '#1e293b', fontWeight: '700' }}>{formData.exitReason || '-'}</span>
+                                </div>
+
+                                {formData.status !== 'Resigned' && (
+                                    <button 
+                                        onClick={handleReactive}
+                                        style={{
+                                            marginTop: '15px',
+                                            width: '100%',
+                                            padding: '12px 20px',
+                                            background: 'rgba(59, 100, 139, 0.08)',
+                                            color: '#3B648B',
+                                            border: '1.5px solid rgba(59, 100, 139, 0.2)',
+                                            borderRadius: '12px',
+                                            fontSize: '12.5px',
+                                            fontWeight: '800',
+                                            cursor: 'pointer',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.8px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '10px',
+                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            boxShadow: '0 4px 12px rgba(59, 100, 139, 0.05)'
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.background = '#3B648B';
+                                            e.currentTarget.style.color = 'white';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 100, 139, 0.2)';
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.background = 'rgba(59, 100, 139, 0.08)';
+                                            e.currentTarget.style.color = '#3B648B';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 100, 139, 0.05)';
+                                        }}
+                                    >
+                                        <RotateCcw size={16} strokeWidth={2.5} />
+                                        RE-ACTIVATE EMPLOYEE
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 

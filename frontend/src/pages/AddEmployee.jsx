@@ -116,6 +116,8 @@ const AddEmployee = () => {
             if (deData.success) setDesignations(deData.designations);
             if (sData.success) setShifts(sData.shifts);
             if (lgData.success) setLeaveGroups(lgData.leaveGroups);
+            // const [branchRes, deptRes, desigRes, shiftRes, leaveGroupRes] = ...
+            // I'll fix this. 
 
         } catch (error) {
             console.error("Error fetching dropdown data:", error);

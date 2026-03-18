@@ -299,7 +299,10 @@ export const finalizeOffboarding = async (req, res) => {
         if (!offboarding) return res.status(404).json({ success: false, message: 'Record not found' });
 
         // Update User Status
-        await User.findByIdAndUpdate(offboarding.employeeId, { status: 'Inactive', exitDate: offboarding.lastWorkingDate });
+        await User.findByIdAndUpdate(offboarding.employeeId, { 
+            status: offboarding.exitType || 'Ex-Employee', 
+            exitDate: offboarding.lastWorkingDate 
+        });
 
         offboarding.status = 'Archived';
         

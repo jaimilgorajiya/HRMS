@@ -28,10 +28,23 @@ const userSchema = new mongoose.Schema(
             enum: ["Admin", "Manager", "Employee"],
             default: "Employee"
         },
+        managementRole: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Role"
+        },
         status: {
             type: String,
-            enum: ["Active", "Inactive", "Onboarding", "Resigned", "Terminated", "Absconding", "Retired"],
+            enum: ["Active", "Inactive", "Onboarding", "Ex-Employee", "Resigned", "Terminated", "Absconding", "Retired"],
             default: "Active"
+        },
+        exitDate: {
+            type: Date
+        },
+        resignationDate: {
+            type: Date
+        },
+        exitReason: {
+            type: String
         },
         phone: {
             type: String

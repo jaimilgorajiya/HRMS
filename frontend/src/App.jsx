@@ -27,12 +27,15 @@ import AddLeaveGroup from './pages/AddLeaveGroup';
 import EditLeaveGroup from './pages/EditLeaveGroup';
 import EarningDeductionType from './pages/EarningDeductionType';
 import EmployeeOnboarding from './pages/EmployeeOnboarding';
+import EmployeeOffboarding from './pages/EmployeeOffboarding';
 import PayrollTaxSetting from './pages/PayrollTaxSetting';
 import DocumentType from './pages/DocumentType';
 import OnboardingDocSetting from './pages/OnboardingDocSetting';
 import Employees from './pages/Employees';
 import AddEmployee from './pages/AddEmployee';
 import EmployeeProfile from './pages/EmployeeProfile';
+import ExEmployees from './pages/ExEmployees';
+import ManageRoles from './pages/ManageRoles';
 
 function App() {
   return (
@@ -79,17 +82,15 @@ function App() {
               <Route path="document/emp-types" element={<DocumentType />} />
               <Route path="document/onboarding-setting" element={<OnboardingDocSetting />} />
               <Route path="document/*" element={<ModulePlaceholder title="Document Management" />} />
-              <Route path="app-access" element={<ModulePlaceholder title="App Access" />} />
 
               {/* Core HRMS placeholders */}
               <Route path="employees/list" element={<Employees />} />
               <Route path="employees/add" element={<AddEmployee />} />
               <Route path="employees/profile/:id" element={<EmployeeProfile />} />
-              <Route path="employees/ex" element={<ModulePlaceholder title="Ex Employees" />} />
+              <Route path="employees/ex" element={<ExEmployees />} />
               <Route path="employees/onboarding" element={<EmployeeOnboarding />} />
-              <Route path="employees/offboarding" element={<ModulePlaceholder title="Employee Offboarding" />} />
-              <Route path="employees/mgmt-role" element={<ModulePlaceholder title="Management Role" />} />
-              <Route path="employees/level-assign" element={<ModulePlaceholder title="Level Assign" />} />
+              <Route path="employees/offboarding" element={<EmployeeOffboarding />} />
+              <Route path="employees/mgmt-role" element={<ManageRoles />} />
               <Route path="employees/profile-request" element={<ModulePlaceholder title="Profile Request" />} />
               <Route path="employees/change-branch" element={<ModulePlaceholder title="Change Branch" />} />
               <Route path="employees/bulk-id" element={<ModulePlaceholder title="Bulk ID Update" />} />

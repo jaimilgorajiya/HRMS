@@ -98,7 +98,9 @@ const login = async (req, res) => {
     email = email.trim().toLowerCase();
 
     // Find user - using case-insensitive search to be safe for existing data
-    const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+    // Populate managementRole so frontend immediately knows permissions
+    const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } })
+      .populate("managementRole");
 
     if (!user) {
       return res.status(401).json({
@@ -140,6 +142,7 @@ const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        managementRole: user.managementRole || null,
       },
     });
 
@@ -172,7 +175,9 @@ const logout = async (req, res) => {
 
 const verifyUser = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select("-password");
+        const user = await User.findById(req.user._id)
+            .select("-password")
+            .populate("managementRole");
         res.status(200).json({ success: true, user });
     } catch (error) {
         res.status(500).json({ success: false, message: "Internal Server Error" });

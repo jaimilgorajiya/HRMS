@@ -53,7 +53,7 @@ const MyProfile = () => {
     };
 
     fetchCompanyData();
-  }, [apiUrl]);
+  }, [API_URL]);
 
   const getFullLogoUrl = (logoPath) => {
     if (!logoPath) return null;

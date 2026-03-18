@@ -1,20 +1,34 @@
 import mongoose from "mongoose";
 
 const roleSchema = new mongoose.Schema({
-    name: { 
-        type: String, 
-        required: true, 
-        unique: true 
+    roleName: {
+        type: String,
+        required: [true, "Role name is required"],
+        trim: true
     },
-    permissions: [{ 
-        type: String 
-    }], // e.g., 'view_employees', 'manage_payroll'
-    description: { 
-        type: String 
+    description: {
+        type: String,
+        trim: true
+    },
+    permissions: [{
+        module: String,
+        subModule: String,
+        childModule: String,
+        access: {
+            type: Boolean,
+            default: true
+        }
+    }],
+    admin: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Reference to the Admin/User who created it
+        required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
-}, {
-    timestamps: true
-});
+}, { timestamps: true });
 
 const Role = mongoose.model("Role", roleSchema);
 
