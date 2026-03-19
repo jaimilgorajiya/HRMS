@@ -42,7 +42,6 @@ export const syncRetirementRecords = async (adminId) => {
 
     const today = new Date();
     const employees = await User.find({
-        // Exclude admins and ex-employees
         role: { $ne: 'Admin' },
         status: { $in: ['Active', 'Inactive', 'Onboarding'] },
         dateOfBirth: { $exists: true, $ne: null }
@@ -54,8 +53,10 @@ export const syncRetirementRecords = async (adminId) => {
         const age = resolveRetirementAge(emp, setting);
         const retDate = calcRetirementDate(emp.dateOfBirth, age);
 
-        // Skip already retired
-        if (retDate <= today) continue;
+        // Skip if retired more than 30 days ago
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        if (retDate < thirtyDaysAgo) continue;
 
         await RetirementRecord.findOneAndUpdate(
             { adminId, employeeId: emp._id },
@@ -66,7 +67,8 @@ export const syncRetirementRecords = async (adminId) => {
                     retirementAge: age,
                     retirementDate: retDate,
                     originalRetirementDate: retDate,
-                    status: 'Upcoming'
+                    status: retDate <= today ? 'Completed' : 'Upcoming',
+                    completedAt: retDate <= today ? retDate : undefined
                 }
             },
             { upsert: true }
@@ -78,6 +80,15 @@ export const syncRetirementRecords = async (adminId) => {
             existing.retirementAge = age;
             existing.retirementDate = retDate;
             existing.originalRetirementDate = retDate;
+            // Reset to Upcoming if exit was never actually initiated
+            if (!existing.exitInitiatedAt && existing.status === 'In Process') {
+                existing.status = 'Upcoming';
+            }
+            // Auto-complete if retirement date has passed
+            if (retDate <= today && !['Completed'].includes(existing.status)) {
+                existing.status = 'Completed';
+                existing.completedAt = existing.completedAt || retDate;
+            }
             await existing.save();
         }
     }
@@ -96,6 +107,8 @@ export const getRetirementList = async (req, res) => {
             .sort({ retirementDate: 1 });
 
         const today = new Date();
+        const sixMonthsLater = new Date();
+        sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
 
         let list = records
             .filter(r => r.employeeId) // guard against deleted employees
@@ -125,6 +138,9 @@ export const getRetirementList = async (req, res) => {
                     notes: r.notes
                 };
             });
+
+        // Only show employees retiring within 6 months or recently past retirement date
+        list = list.filter(r => new Date(r.retirementDate) <= sixMonthsLater && r.daysRemaining >= -30);
 
         // Apply filters
         if (department) list = list.filter(r => r.department === department);

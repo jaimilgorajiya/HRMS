@@ -14,6 +14,7 @@ const STATUS_COLORS = {
 };
 
 const DAY_COLOR = (days) => {
+    if (days < 0) return { bg: '#FEF2F2', color: '#EF4444', label: 'Overdue' };
     if (days <= 30) return { bg: '#FEF2F2', color: '#EF4444', label: 'Critical' };
     if (days <= 90) return { bg: '#FFF7ED', color: '#F97316', label: 'Soon' };
     return { bg: '#F0FDF4', color: '#16A34A', label: 'Upcoming' };
@@ -199,14 +200,14 @@ const UpcomingRetirement = () => {
                     <div>
                         <label className="hrm-label">Department</label>
                         <SearchableSelect
-                            options={[{ value: '', label: 'All Departments' }, ...departments.map(d => ({ value: d.name, label: d.name }))]}
+                            options={[{ value: '', label: 'All ' }, ...departments.map(d => ({ value: d.name, label: d.name }))]}
                             value={filterDept} onChange={setFilterDept} placeholder="All Departments"
                         />
                     </div>
                     <div>
                         <label className="hrm-label">Designation</label>
                         <SearchableSelect
-                            options={[{ value: '', label: 'All Designations' }, ...designations.map(d => ({ value: d.name, label: d.name }))]}
+                            options={[{ value: '', label: 'All' }, ...designations.map(d => ({ value: d.designationName, label: d.designationName }))]}
                             value={filterDesig} onChange={setFilterDesig} placeholder="All Designations"
                         />
                     </div>
@@ -214,7 +215,7 @@ const UpcomingRetirement = () => {
                         <label className="hrm-label">Status</label>
                         <SearchableSelect
                             options={[
-                                { value: '', label: 'All Status' },
+                                { value: '', label: 'All ' },
                                 { value: 'Upcoming', label: 'Upcoming' },
                                 { value: 'Notified', label: 'Notified' },
                                 { value: 'In Process', label: 'In Process' },
@@ -251,6 +252,7 @@ const UpcomingRetirement = () => {
                     <span style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
                         <strong style={{ color: '#1E293B' }}>{filtered.length}</strong> employee(s) found
                     </span>
+                    <span style={{ fontSize: 12, color: '#94A3B8' }}>Employees retiring within the next 6 months</span>
                 </div>
                 <div className="hrm-table-wrapper">
                     <table className="hrm-table">
@@ -303,7 +305,7 @@ const UpcomingRetirement = () => {
                                         </td>
                                         <td>
                                             <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: dc.bg, color: dc.color }}>
-                                                {r.daysRemaining} days
+                                                {r.daysRemaining < 0 ? `${Math.abs(r.daysRemaining)}d overdue` : `${r.daysRemaining} days`}
                                             </span>
                                         </td>
                                         <td style={{ fontSize: 13, color: '#475569' }}>{r.department || '--'}</td>
