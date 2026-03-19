@@ -30,6 +30,7 @@ import leaveGroupRoutes from './routes/LeaveGroup.Routes.js';
 import payrollSettingRoutes from './routes/PayrollSetting.Routes.js';
 import roleRoutes from './routes/Role.Routes.js';
 import retirementRoutes from './routes/Retirement.Routes.js';
+import promotionRoutes from './routes/Promotion.Routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -80,6 +81,7 @@ app.use('/api/onboarding-doc-settings', onboardingDocSettingRoutes);
 app.use('/api/leave-groups', leaveGroupRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/retirement', retirementRoutes);
+app.use('/api/promotions', promotionRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

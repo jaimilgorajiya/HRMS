@@ -41,6 +41,7 @@ import BulkEmployeeId from './pages/BulkEmployeeId';
 import EmployeeIdFormat from './pages/EmployeeIdFormat';
 import RetirementSettings from './pages/RetirementSettings';
 import UpcomingRetirement from './pages/UpcomingRetirement';
+import EmployeePromotion from './pages/EmployeePromotion';
 
 function App() {
   return (
@@ -106,7 +107,7 @@ function App() {
               <Route path="employees/other" element={<ModulePlaceholder title="Other Employees" />} />
               <Route path="employees/retirement" element={<UpcomingRetirement />} />
               <Route path="employees/bulk-upload" element={<ModulePlaceholder title="Bulk Upload" />} />
-              <Route path="employees/promotion" element={<ModulePlaceholder title="Employee Promotion" />} />
+              <Route path="employees/promotion" element={<EmployeePromotion />} />
               <Route path="employees/*" element={<ModulePlaceholder title="Employee Management" />} />
               <Route path="shifts/*" element={<ModulePlaceholder title="Shift Operations" />} />
               <Route path="leaves/*" element={<ModulePlaceholder title="Leave Operations" />} />

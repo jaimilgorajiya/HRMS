@@ -88,7 +88,7 @@ export const menuItems = [
           { title: "Employee Resignation", path: "/admin/employees/resignation" },
           // { title: "Other Employee", path: "/admin/employees/other" },
           { title: "Upcoming Retirement", path: "/admin/employees/retirement" },
-          { title: "Bulk Upload", path: "/admin/employees/bulk-upload" },
+          // { title: "Bulk Upload", path: "/admin/employees/bulk-upload" },
           { title: "Employee Promotion", path: "/admin/employees/promotion" },
         ],
       },

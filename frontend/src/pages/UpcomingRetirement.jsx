@@ -23,13 +23,13 @@ const DAY_COLOR = (days) => {
 const fmt = (date) => date ? new Date(date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '--';
 
 const StatCard = ({ label, value, bg, color }) => (
-    <div className="hrm-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 22, fontWeight: 800, color }}>{value}</span>
+    <div className="hrm-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
+        <div style={{ width: 40, height: 40, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 18, fontWeight: 800, color }}>{value}</span>
         </div>
         <div>
-            <p style={{ fontSize: 12, color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.6 }}>{label}</p>
-            <p style={{ fontSize: 20, fontWeight: 800, color: '#1E293B', marginTop: 2 }}>{value}</p>
+            <p style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.6 }}>{label}</p>
+            <p style={{ fontSize: 22, fontWeight: 800, color: '#1E293B', marginTop: 2 }}>{value}</p>
         </div>
     </div>
 );
@@ -187,11 +187,11 @@ const UpcomingRetirement = () => {
             </div>
 
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 20 }}>
-                <StatCard label="Total Upcoming" value={stats.total} bg="#EFF6FF" color="#2563EB" />
+            <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
                 <StatCard label="Within 30 Days" value={stats.within30} bg="#FEF2F2" color="#EF4444" />
                 <StatCard label="Within 90 Days" value={stats.within90} bg="#FFF7ED" color="#F97316" />
-                <StatCard label="Beyond 90 Days" value={stats.beyond90} bg="#F0FDF4" color="#16A34A" />
+                <StatCard label="In Process" value={records.filter(r => r.status === 'In Process').length} bg="#FEF9C3" color="#A16207" />
+                <StatCard label="Completed" value={records.filter(r => r.status === 'Completed').length} bg="#F0FDF4" color="#16A34A" />
             </div>
 
             {/* Filters */}
