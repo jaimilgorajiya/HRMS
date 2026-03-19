@@ -186,6 +186,12 @@ const userSchema = new mongoose.Schema(
         employeeLevel: {
             type: String
         },
+        retirementAge: {
+            type: Number
+        },
+        retireAt: {
+            type: Date
+        },
         biometricId: {
             type: String
         },

@@ -3,6 +3,29 @@ import API_URL from '../config/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { menuItems } from '../config/menuItems';
+
+const buildSearchableItems = () => {
+  const items = [];
+  for (const mod of menuItems) {
+    if (!mod.subItems) {
+      if (mod.path) items.push({ title: mod.title, path: mod.path, breadcrumb: mod.title });
+      continue;
+    }
+    for (const sub of mod.subItems) {
+      if (!sub.children) {
+        if (sub.path) items.push({ title: sub.title, path: sub.path, breadcrumb: mod.title + ' / ' + sub.title });
+        continue;
+      }
+      for (const child of sub.children) {
+        items.push({ title: child.title, path: child.path, breadcrumb: sub.title + ' / ' + child.title });
+      }
+    }
+  }
+  return items;
+};
+
+
 
 const Header = ({ title, toggleSidebar, isCollapsed }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -71,76 +94,8 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Flattened menu items for searching - normally this might come from a shared config
-  const searchableItems = [
-    { title: "Dashboard", path: "/admin" },
-    { title: "Company details", path: "/admin/company/details" },
-    { title: "Designation", path: "/admin/company/designation" },
-    { title: "Branches", path: "/admin/company/branches" },
-    { title: "Departments", path: "/admin/company/departments" },
-    { title: "Daily Attendance Email", path: "/admin/company/attendance-email" },
-    { title: "Break Type", path: "/admin/attendance/break-type" },
-    { title: "Attendance/Breaks Setting", path: "/admin/attendance/breaks-setting" },
-    { title: "EMP Attendance Setting", path: "/admin/attendance/emp-setting" },
-    { title: "Add Shift", path: "/admin/shift/add" },
-    { title: "Manage Shift", path: "/admin/shift/manage" },
-    { title: "Penalty Rules", path: "/admin/shift/penalty" },
-    { title: "Add Next Day Grace Time", path: "/admin/shift/grace-time" },
-    { title: "Leave Type", path: "/admin/leave/type" },
-    { title: "Leave Group", path: "/admin/leave/group" },
-    { title: "Payroll & Tax Setting", path: "/admin/payroll/tax-setting" },
-    { title: "Earning & Deduction Type", path: "/admin/payroll/earning-deduction" },
-    { title: "Employee Documents Types", path: "/admin/document/emp-types" },
-    { title: "Onboarding Doc. Setting", path: "/admin/document/onboarding-setting" },
-    { title: "App Access", path: "/admin/app-access" },
-    { title: "Employees Management", path: "/admin/employees/manage" },
-    { title: "Ex Employee", path: "/admin/employees/ex" },
-    { title: "Emp Onboarding", path: "/admin/employees/onboarding" },
-    { title: "Emp Offboarding", path: "/admin/employees/offboarding" },
-    { title: "Shift Rotation", path: "/admin/shifts/rotation" },
-    { title: "Emp Shift", path: "/admin/shifts/emp" },
-    { title: "Shift change request", path: "/admin/shifts/request" },
-    { title: "Attendance Dashboard", path: "/admin/attendance/dashboard" },
-    { title: "View Attendance", path: "/admin/attendance/view" },
-    { title: "Add Attendance", path: "/admin/attendance/add" },
-    { title: "Monthly Attendance", path: "/admin/attendance/monthly" },
-    { title: "Pending Attendance", path: "/admin/attendance/pending" },
-    { title: "Punch Out Request", path: "/admin/attendance/punch-request" },
-    { title: "Punch Out Missing", path: "/admin/attendance/punch-missing" },
-    { title: "Attendance Request", path: "/admin/attendance/request" },
-    { title: "Absent Emp", path: "/admin/attendance/absent" },
-    { title: "Delete Attendance", path: "/admin/attendance/delete" },
-    { title: "Assign Bulk Leave", path: "/admin/leaves/bulk" },
-    { title: "Leave Balance", path: "/admin/leaves/balance" },
-    { title: "Leave Request", path: "/admin/leaves/request" },
-    { title: "Auto Leave", path: "/admin/leaves/auto" },
-    { title: "Leave Pay Out", path: "/admin/leaves/payout" },
-    { title: "Short Leave", path: "/admin/leaves/short" },
-    { title: "Sandwich Leave", path: "/admin/leaves/sandwich" },
-    { title: "Deleted Auto Leave", path: "/admin/leaves/auto-deleted" },
-    { title: "Leave Enchashment Request", path: "/admin/leaves/encashment" },
-    { title: "Carry Forward Leave", path: "/admin/leaves/carry-forward" },
-    { title: "Short Leave Request", path: "/admin/leaves/short-request" },
-    { title: "Leave Cancellation", path: "/admin/leaves/cancellation" },
-    { title: "Employee CTC", path: "/admin/payroll/ctc" },
-    { title: "Create Salary Slip", path: "/admin/payroll/create" },
-    { title: "Create Bulk Salary Slip", path: "/admin/payroll/create-bulk" },
-    { title: "Generated Salary Slip", path: "/admin/payroll/generated" },
-    { title: "Checked Salary Slip", path: "/admin/payroll/checked" },
-    { title: "Published Salary Slip", path: "/admin/payroll/published" },
-    { title: "Other Earning / Deduction", path: "/admin/payroll/other" },
-    { title: "Manage Incentive", path: "/admin/payroll/incentive" },
-    { title: "FnF", path: "/admin/payroll/fnf" },
-    { title: "Bank Accounts", path: "/admin/payroll/bank" },
-    { title: "Form T", path: "/admin/payroll/form-t" },
-    { title: "WFH Requests", path: "/admin/wfh/requests" },
-    { title: "WFH Balance Sheet", path: "/admin/wfh/balance" },
-    { title: "Add Holiday", path: "/admin/holidays/add" },
-    { title: "Manage Holiday", path: "/admin/holidays/manage" },
-    { title: "Manage Company Docs", path: "/admin/documents/company" },
-    { title: "Employee Docs", path: "/admin/documents/employee" },
-    { title: "Upcoming Celebrations", path: "/admin/engagement/celebrations" }
-  ];
+  // Dynamically built from menuItems config
+  const searchableItems = buildSearchableItems();
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -242,7 +197,8 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
                 className="search-result-item" 
                 onClick={() => handleResultClick(result.path)}
               >
-                {result.title}
+                <div style={{ fontWeight: 600, fontSize: 13 }}>{result.title}</div>
+                <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>{result.breadcrumb}</div>
               </div>
             ))}
           </div>

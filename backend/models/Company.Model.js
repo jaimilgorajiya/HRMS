@@ -67,6 +67,12 @@ const companySchema = new mongoose.Schema({
   location: {
     lat: Number,
     lng: Number
+  },
+  employeeIdFormat: {
+    prefix: { type: String, default: 'EMP' },
+    includeYear: { type: Boolean, default: true },
+    digitCount: { type: Number, default: 4 },
+    separator: { type: String, default: '' }
   }
 }, { timestamps: true });
 

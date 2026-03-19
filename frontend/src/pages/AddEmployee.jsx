@@ -163,6 +163,14 @@ const AddEmployee = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Required field validation
+        if (!formData.dateOfBirth) {
+            return Swal.fire('Validation', 'Date of Birth is required', 'warning');
+        }
+        if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            return Swal.fire('Validation', 'A valid Email ID is required', 'warning');
+        }
         
         try {
             const data = new FormData();
@@ -372,13 +380,13 @@ const AddEmployee = () => {
                         </div>
 
                         <div className="hrm-form-group">
-                            <label className="hrm-label">Date Of Birth</label>
-                            <input type="date" name="dateOfBirth" className="hrm-input" onChange={handleInputChange} />
+                            <label className="hrm-label">Date Of Birth <span className="req">*</span></label>
+                            <input type="date" name="dateOfBirth" className="hrm-input" required onChange={handleInputChange} />
                         </div>
 
                         <div className="hrm-form-group">
-                            <label className="hrm-label">Email ID</label>
-                            <input type="email" name="email" className="hrm-input" placeholder="Enter email" onChange={handleInputChange} />
+                            <label className="hrm-label">Email ID <span className="req">*</span></label>
+                            <input type="email" name="email" className="hrm-input" required placeholder="Enter email" onChange={handleInputChange} />
                         </div>
 
                         <div className="hrm-form-group">

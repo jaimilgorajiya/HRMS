@@ -170,3 +170,37 @@ export const verifyEmailConfig = async () => {
         return false;
     }
 };
+
+// Send retirement notification email to HR/Admin
+export const sendRetirementNotificationEmail = async (hrEmail, employeeName, retirementDate, daysRemaining) => {
+    try {
+        const formattedDate = new Date(retirementDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+        const mailOptions = {
+            from: `"HRMS Retirement Alert" <${process.env.SMTP_FROM}>`,
+            to: hrEmail,
+            subject: `Retirement Alert: ${employeeName} retires in ${daysRemaining} day(s)`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background: #1E293B; color: white; padding: 24px; border-radius: 10px 10px 0 0; text-align: center;">
+                        <h2 style="margin: 0;">Retirement Notification</h2>
+                    </div>
+                    <div style="background: #F8FAFC; padding: 24px; border-radius: 0 0 10px 10px; border: 1px solid #E2E8F0;">
+                        <p>This is an automated reminder that <strong>${employeeName}</strong> is scheduled to retire in <strong>${daysRemaining} day(s)</strong>.</p>
+                        <div style="background: white; border-left: 4px solid #2563EB; padding: 16px; margin: 16px 0; border-radius: 4px;">
+                            <p style="margin: 0;"><strong>Employee:</strong> ${employeeName}</p>
+                            <p style="margin: 8px 0 0;"><strong>Retirement Date:</strong> ${formattedDate}</p>
+                            <p style="margin: 8px 0 0;"><strong>Days Remaining:</strong> ${daysRemaining}</p>
+                        </div>
+                        <p>Please take necessary action in the HRMS system.</p>
+                        <p style="color: #64748B; font-size: 12px;">This is an automated notification. Do not reply.</p>
+                    </div>
+                </div>
+            `
+        };
+        const info = await transporter.sendMail(mailOptions);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        console.error('Retirement notification email error:', error);
+        return { success: false, error: error.message };
+    }
+};

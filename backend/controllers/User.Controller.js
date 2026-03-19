@@ -105,7 +105,7 @@ const createUser = async (req, res) => {
         // Generate employee ID if not provided
         let employeeId = bodyContent.employeeId;
         if (!employeeId || employeeId.trim() === '') {
-            employeeId = await generateEmployeeId();
+            employeeId = await generateEmployeeId(req.user._id);
         }
 
         // Generate random password
@@ -393,10 +393,40 @@ const deleteUser = async (req, res) => {
 
 const getNextEmployeeId = async (req, res) => {
     try {
-        const nextId = await generateEmployeeId();
+        const nextId = await generateEmployeeId(req.user._id);
         res.status(200).json({ success: true, nextId });
     } catch (error) {
         console.log("Error in getNextEmployeeId controller", error.message);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+const bulkUpdateEmployeeIds = async (req, res) => {
+    try {
+        const { updates } = req.body; // [{ id, employeeId }]
+        if (!updates || !Array.isArray(updates) || updates.length === 0) {
+            return res.status(400).json({ success: false, message: "No updates provided" });
+        }
+
+        const results = { success: 0, failed: [] };
+        for (const { id, employeeId } of updates) {
+            if (!employeeId || !employeeId.trim()) {
+                results.failed.push({ id, reason: 'Empty employee ID' });
+                continue;
+            }
+            // Check for duplicate
+            const existing = await User.findOne({ employeeId: employeeId.trim(), _id: { $ne: id } });
+            if (existing) {
+                results.failed.push({ id, reason: `ID "${employeeId}" already in use` });
+                continue;
+            }
+            await User.findByIdAndUpdate(id, { employeeId: employeeId.trim() });
+            results.success++;
+        }
+
+        res.status(200).json({ success: true, message: `${results.success} updated, ${results.failed.length} failed`, results });
+    } catch (error) {
+        console.log("Error in bulkUpdateEmployeeIds", error.message);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
@@ -499,4 +529,4 @@ const changeBranch = async (req, res) => {
     }
 };
 
-export { createUser, getUsers, getExEmployees, getUser, updateUser, deleteUser, getNextEmployeeId, uploadUserDocument, deleteUserDocument, changeBranch };
+export { createUser, getUsers, getExEmployees, getUser, updateUser, deleteUser, getNextEmployeeId, bulkUpdateEmployeeIds, uploadUserDocument, deleteUserDocument, changeBranch };

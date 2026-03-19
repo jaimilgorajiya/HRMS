@@ -1,16 +1,35 @@
 import User from "../models/User.Model.js";
+import Company from "../models/Company.Model.js";
 
-// Helper function to generate unique employee ID
-export const generateEmployeeId = async () => {
+export const generateEmployeeId = async (adminId = null) => {
+    // Fetch format from company settings if adminId provided
+    let prefix = 'EMP';
+    let includeYear = true;
+    let digitCount = 4;
+    let separator = '';
+
+    if (adminId) {
+        const company = await Company.findOne({ adminId });
+        if (company?.employeeIdFormat) {
+            const fmt = company.employeeIdFormat;
+            prefix = fmt.prefix || 'EMP';
+            includeYear = fmt.includeYear !== undefined ? fmt.includeYear : true;
+            digitCount = fmt.digitCount || 4;
+            separator = fmt.separator || '';
+        }
+    }
+
     const year = new Date().getFullYear();
     const count = await User.countDocuments();
-    const id = `EMP${year}${String(count + 1).padStart(4, '0')}`;
-    
-    // Check if ID exists, if so increment
+
+    const numPart = String(count + 1).padStart(digitCount, '0');
+    const yearPart = includeYear ? `${separator}${year}${separator}` : separator;
+    const id = `${prefix}${yearPart}${numPart}`;
+
     const exists = await User.findOne({ employeeId: id });
     if (exists) {
-        // Try one more increment (simple retry, could be recursively robust but simple is fine for now)
-        return `EMP${year}${String(count + 2).padStart(4, '0')}`;
+        const numPart2 = String(count + 2).padStart(digitCount, '0');
+        return `${prefix}${yearPart}${numPart2}`;
     }
     return id;
 };

@@ -291,6 +291,7 @@ const EmployeeOnboarding = () => {
                 if (!formData.lastName.trim()) errors.push('Last Name is required');
                 if (!formData.phone.trim()) errors.push('Mobile Number is required');
                 if (formData.phone && formData.phone.length < 10) errors.push('Mobile Number must be at least 10 digits');
+                if (!formData.dateOfBirth) errors.push('Date of Birth is required');
                 break;
                 
             case 1: // Job Info
@@ -521,8 +522,8 @@ const EmployeeOnboarding = () => {
                                 <PhoneInput label="Mobile No." required={true} name="phone" countryCode={formData.countryCode} value={formData.phone} onCodeChange={(val) => setFormData(p => ({ ...p, countryCode: val }))} onChange={handleInputChange} placeholder="Enter mobile number" />
 
                                 <div className="hrm-form-group">
-                                    <label className="hrm-label">Date of Birth</label>
-                                    <input type="date" name="dateOfBirth" className="hrm-input" onChange={handleInputChange} value={formData.dateOfBirth} />
+                                    <label className="hrm-label">Date of Birth <span className="req">*</span></label>
+                                    <input type="date" name="dateOfBirth" className="hrm-input" required onChange={handleInputChange} value={formData.dateOfBirth} />
                                 </div>
 
                                 <div className="hrm-form-group">

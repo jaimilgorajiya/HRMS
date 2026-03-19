@@ -37,6 +37,10 @@ import EmployeeProfile from './pages/EmployeeProfile';
 import ExEmployees from './pages/ExEmployees';
 import ManageRoles from './pages/ManageRoles';
 import ChangeBranch from './pages/ChangeBranch';
+import BulkEmployeeId from './pages/BulkEmployeeId';
+import EmployeeIdFormat from './pages/EmployeeIdFormat';
+import RetirementSettings from './pages/RetirementSettings';
+import UpcomingRetirement from './pages/UpcomingRetirement';
 
 function App() {
   return (
@@ -60,6 +64,8 @@ function App() {
               <Route path="company/departments" element={<Department />} />
               <Route path="company/branches" element={<Branch />} />
               <Route path="company/profile" element={<MyProfile />} />
+              <Route path="company/emp-id-format" element={<EmployeeIdFormat />} />
+              <Route path="company/retirement-settings" element={<RetirementSettings />} />
               <Route path="company-settings" element={<ModulePlaceholder title="Company Settings" />} />
               <Route path="company/*" element={<ModulePlaceholder title="Company Management" />} />
               <Route path="attendance/break-type" element={<BreakType />} />
@@ -94,11 +100,11 @@ function App() {
               <Route path="employees/mgmt-role" element={<ManageRoles />} />
               <Route path="employees/profile-request" element={<ModulePlaceholder title="Profile Request" />} />
               <Route path="employees/change-branch" element={<ChangeBranch />} />
-              <Route path="employees/bulk-id" element={<ModulePlaceholder title="Bulk ID Update" />} />
+              <Route path="employees/bulk-id" element={<BulkEmployeeId />} />
               <Route path="employees/hierarchy" element={<ModulePlaceholder title="Hierarchy Chart" />} />
               <Route path="employees/resignation" element={<ModulePlaceholder title="Resignations" />} />
               <Route path="employees/other" element={<ModulePlaceholder title="Other Employees" />} />
-              <Route path="employees/retirement" element={<ModulePlaceholder title="Upcoming Retirement" />} />
+              <Route path="employees/retirement" element={<UpcomingRetirement />} />
               <Route path="employees/bulk-upload" element={<ModulePlaceholder title="Bulk Upload" />} />
               <Route path="employees/promotion" element={<ModulePlaceholder title="Employee Promotion" />} />
               <Route path="employees/*" element={<ModulePlaceholder title="Employee Management" />} />
