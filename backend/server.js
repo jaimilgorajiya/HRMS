@@ -31,6 +31,7 @@ import payrollSettingRoutes from './routes/PayrollSetting.Routes.js';
 import roleRoutes from './routes/Role.Routes.js';
 import retirementRoutes from './routes/Retirement.Routes.js';
 import promotionRoutes from './routes/Promotion.Routes.js';
+import employeeDashboardRoutes from './routes/EmployeeDashboard.Route.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -47,9 +48,11 @@ app.use(cors({
         'http://localhost:5173', 
         'http://localhost:5174', 
         'http://localhost:5175',
+        'http://localhost:8081',  // Expo web
         'http://192.168.29.90:5173',
         'http://192.168.29.90:5174',
-        'http://192.168.29.90:5175'
+        'http://192.168.29.90:5175',
+        'http://192.168.29.90:8081',  // Expo web on LAN
     ],
     credentials: true,
 }));
@@ -82,6 +85,7 @@ app.use('/api/leave-groups', leaveGroupRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/retirement', retirementRoutes);
 app.use('/api/promotions', promotionRoutes);
+app.use('/api/employee-dashboard', employeeDashboardRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

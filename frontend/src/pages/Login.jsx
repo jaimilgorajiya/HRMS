@@ -53,7 +53,7 @@ const Login = ({ isRegister }) => {
         const user = JSON.parse(userString);
         if (user && user.role) {
           const path = user.role === "Admin" ? "/admin" : 
-                       user.role === "Manager" ? "/manager-dashboard" : "/employee-dashboard";
+                       user.role === "Manager" ? "/manager-dashboard" : "/employee";
           navigate(path, { replace: true });
           return;
         }
@@ -177,7 +177,7 @@ const Login = ({ isRegister }) => {
         } else if (role === "Manager") {
           navigate("/manager-dashboard");
         } else {
-          navigate("/employee-dashboard");
+          navigate("/employee");
         }
       } else {
         setError(data.message || "An error occurred");

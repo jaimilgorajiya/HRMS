@@ -16,7 +16,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     // Redirect to their own dashboard if they try to access something they shouldn't
     const role = user.role;
     const redirectPath = role === 'Admin' ? '/admin' : 
-                         role === 'Manager' ? '/manager-dashboard' : '/employee-dashboard';
+                         role === 'Manager' ? '/manager-dashboard' : '/employee';
     return <Navigate to={redirectPath} replace />;
   }
 

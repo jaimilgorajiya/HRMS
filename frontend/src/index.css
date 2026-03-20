@@ -95,14 +95,13 @@ body {
   margin-right: 0;
 }
 
-
-
 .sidebar-logo {
-  padding: 20px 24px;
+  /* padding: 20px 24px; */
+  padding: 0px;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80px;
+  height: 70px;
 }
 
 .sidebar-logo img {

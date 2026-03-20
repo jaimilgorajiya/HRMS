@@ -229,7 +229,7 @@ const Header = ({ title, toggleSidebar, isCollapsed }) => {
                 <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Admin')}&background=0D8ABC&color=fff`} alt="Avatar" />
               )}
             </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#fff', transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3B648B', transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </div>
