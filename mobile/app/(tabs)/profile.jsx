@@ -1,216 +1,181 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  Image, TextInput, Alert,
+  View, Text, ScrollView, StyleSheet, Image, TouchableOpacity,
+  TextInput, ActivityIndicator, Animated, RefreshControl, Linking
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
-import Toast from 'react-native-toast-message';
-import { useAuth } from '../../context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 import { apiFetch, getImageUrl } from '../../utils/api';
 import { ENDPOINTS } from '../../constants/api';
 import { COLORS, SIZES, RADIUS, SHADOW } from '../../constants/theme';
+import Toast from 'react-native-toast-message';
 
-const TABS = ['Personal', 'Work', 'Documents', 'Security'];
-
-const InfoItem = ({ icon, label, value }) => (
-  <View style={styles.infoItem}>
-    <View style={styles.infoIcon}><Ionicons name={icon} size={16} color={COLORS.primary} /></View>
-    <View style={styles.infoText}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value || '—'}</Text>
+const ProfileItem = ({ label, value, icon }) => (
+  <View style={styles.profileItem}>
+    <View style={styles.iconBox}><Ionicons name={icon} size={18} color={COLORS.primary} /></View>
+    <View>
+      <Text style={styles.itemLabel}>{label}</Text>
+      <Text style={styles.itemValue}>{value || '—'}</Text>
     </View>
   </View>
 );
 
 export default function ProfileScreen() {
-  const { logout } = useAuth();
-  const [employee, setEmployee] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState('Personal');
-  const [passwords, setPasswords] = useState({ current: '', newPwd: '', confirm: '' });
-  const [showPwd, setShowPwd] = useState({ current: false, newPwd: false, confirm: false });
-  const [savingPwd, setSavingPwd] = useState(false);
+  const [activeTab, setActiveTab] = useState('Personal');
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await apiFetch(ENDPOINTS.employeeStats);
-        const json = await res.json();
-        if (json.success) setEmployee(json.employee);
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
-    };
-    load();
-  }, []);
-
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: logout },
-    ]);
-  };
-
-  const handleChangePassword = async () => {
-    if (!passwords.current || !passwords.newPwd || !passwords.confirm) {
-      Toast.show({ type: 'error', text1: 'Missing Fields', text2: 'Please fill all password fields.' });
-      return;
-    }
-    if (passwords.newPwd !== passwords.confirm) {
-      Toast.show({ type: 'error', text1: 'Mismatch', text2: 'New passwords do not match.' });
-      return;
-    }
-    if (passwords.newPwd.length < 6) {
-      Toast.show({ type: 'error', text1: 'Too Short', text2: 'Password must be at least 6 characters.' });
-      return;
-    }
-    setSavingPwd(true);
+  const loadData = async () => {
     try {
-      const res = await apiFetch(ENDPOINTS.changePassword, {
-        method: 'POST',
-        body: JSON.stringify({ currentPassword: passwords.current, newPassword: passwords.newPwd }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Toast.show({ type: 'success', text1: 'Password Updated!', text2: 'Your password has been changed.' });
-        setPasswords({ current: '', newPwd: '', confirm: '' });
-      } else {
-        Toast.show({ type: 'error', text1: 'Error', text2: data.message });
-      }
+      const res = await apiFetch(ENDPOINTS.employeeStats);
+      const json = await res.json();
+      if (json.success) setData(json.employee);
     } catch (e) {
-      Toast.show({ type: 'error', text1: 'Error', text2: 'Something went wrong.' });
-    } finally { setSavingPwd(false); }
+      console.error(e);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
-  const emp = employee || {};
-  const photoUrl = getImageUrl(emp.profilePhoto);
+  useEffect(() => { loadData(); }, []);
+
+  const photoUrl = data ? getImageUrl(data.profilePhoto) : null;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero */}
-        <LinearGradient colors={['#1E40AF', '#2563EB', '#60A5FA']} style={styles.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-          <View style={styles.heroContent}>
-            {photoUrl ? (
-              <Image source={{ uri: photoUrl }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarFallback}>
-                <Text style={styles.avatarText}>{(emp.name || 'E')[0]?.toUpperCase()}</Text>
-              </View>
-            )}
-            <Text style={styles.heroName}>{emp.name || '—'}</Text>
-            <Text style={styles.heroRole}>{emp.designation || 'Employee'} • {emp.department || '—'}</Text>
-            <View style={styles.heroBadges}>
-              {emp.employeeId && <View style={styles.heroBadge}><Text style={styles.heroBadgeText}>{emp.employeeId}</Text></View>}
-              {emp.status && <View style={[styles.heroBadge, styles.heroBadgeGreen]}><Text style={styles.heroBadgeGreenText}>{emp.status}</Text></View>}
-            </View>
-          </View>
-        </LinearGradient>
-
-        {/* Tabs */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
-          {TABS.map(t => (
-            <TouchableOpacity key={t} style={[styles.tab, tab === t && styles.tabActive]} onPress={() => setTab(t)}>
-              <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>{t}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        <View style={styles.body}>
-          {tab === 'Personal' && (
-            <View style={[styles.card, SHADOW.sm]}>
-              <InfoItem icon="person-outline" label="Full Name" value={emp.name} />
-              <InfoItem icon="mail-outline" label="Email" value={emp.email} />
-              <InfoItem icon="call-outline" label="Phone" value={emp.phone} />
-              <InfoItem icon="male-female-outline" label="Gender" value={emp.gender} />
-              <InfoItem icon="calendar-outline" label="Date of Birth" value={emp.dateOfBirth ? new Date(emp.dateOfBirth).toLocaleDateString('en-IN') : null} />
-              <InfoItem icon="water-outline" label="Blood Group" value={emp.bloodGroup} />
-              <InfoItem icon="heart-outline" label="Marital Status" value={emp.maritalStatus} />
-              <InfoItem icon="flag-outline" label="Nationality" value={emp.nationality} />
-            </View>
-          )}
-
-          {tab === 'Work' && (
-            <View style={[styles.card, SHADOW.sm]}>
-              <InfoItem icon="id-card-outline" label="Employee ID" value={emp.employeeId} />
-              <InfoItem icon="briefcase-outline" label="Designation" value={emp.designation} />
-              <InfoItem icon="business-outline" label="Department" value={emp.department} />
-              <InfoItem icon="location-outline" label="Branch" value={emp.branch} />
-              <InfoItem icon="people-outline" label="Reporting To" value={emp.reportingTo} />
-              <InfoItem icon="calendar-outline" label="Date Joined" value={emp.dateJoined ? new Date(emp.dateJoined).toLocaleDateString('en-IN') : null} />
-              <InfoItem icon="construct-outline" label="Employment Type" value={emp.employmentType} />
-              <InfoItem icon="desktop-outline" label="Work Mode" value={emp.workSetup?.mode} />
-            </View>
-          )}
-
-          {tab === 'Documents' && (
-            <View>
-              {emp.documents?.length > 0 ? emp.documents.map((doc, i) => (
-                <View key={i} style={[styles.docCard, SHADOW.sm]}>
-                  <View style={styles.docIcon}>
-                    <Ionicons name="document-text-outline" size={22} color={COLORS.primary} />
-                  </View>
-                  <View style={styles.docInfo}>
-                    <Text style={styles.docType}>{doc.documentType?.name || 'Document'}</Text>
-                    <Text style={styles.docName} numberOfLines={1}>{doc.originalName || doc.fileUrl}</Text>
-                    {doc.documentNumber && <Text style={styles.docMeta}>No: {doc.documentNumber}</Text>}
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-                </View>
-              )) : (
-                <View style={styles.emptyState}>
-                  <Ionicons name="document-outline" size={48} color={COLORS.textPlaceholder} />
-                  <Text style={styles.emptyText}>No documents found</Text>
-                  <Text style={styles.emptySubText}>Contact HR to upload your documents</Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {tab === 'Security' && (
-            <View style={[styles.card, SHADOW.sm]}>
-              <Text style={styles.secTitle}>Change Password</Text>
-              {[
-                { key: 'current', label: 'Current Password' },
-                { key: 'newPwd', label: 'New Password' },
-                { key: 'confirm', label: 'Confirm New Password' },
-              ].map(({ key, label }) => (
-                <View key={key} style={styles.formGroup}>
-                  <Text style={styles.formLabel}>{label}</Text>
-                  <View style={styles.pwdWrap}>
-                    <TextInput
-                      style={styles.pwdInput}
-                      placeholder="••••••••"
-                      placeholderTextColor={COLORS.textPlaceholder}
-                      secureTextEntry={!showPwd[key]}
-                      value={passwords[key]}
-                      onChangeText={v => setPasswords(p => ({ ...p, [key]: v }))}
-                    />
-                    <TouchableOpacity onPress={() => setShowPwd(p => ({ ...p, [key]: !p[key] }))}>
-                      <Ionicons name={showPwd[key] ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textLight} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))}
-              <TouchableOpacity style={styles.pwdBtn} onPress={handleChangePassword} disabled={savingPwd} activeOpacity={0.85}>
-                <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.pwdBtnGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-                  <Text style={styles.pwdBtnText}>{savingPwd ? 'Updating...' : 'Update Password'}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Logout */}
-          <TouchableOpacity style={[styles.logoutBtn, SHADOW.sm]} onPress={handleLogout} activeOpacity={0.85}>
-            <Ionicons name="log-out-outline" size={20} color={COLORS.danger} />
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={{ paddingBottom: 120 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData(); }} tintColor={COLORS.primary} />}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>My Profile</Text>
+          <Text style={styles.subTitle}>Manage your personal information</Text>
         </View>
 
-        <View style={{ height: 100 }} />
+        <View style={styles.body}>
+          <View style={[styles.profileHero, SHADOW.lg]}>
+            <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.heroBg} />
+            <View style={styles.heroContent}>
+              <View style={[styles.avatarWrap, SHADOW.md]}>
+                {photoUrl ? (
+                  <Image source={{ uri: photoUrl }} style={styles.avatar} />
+                ) : (
+                  <View style={styles.avatarPlaceholder}><Text style={styles.avatarText}>{(data?.name || 'E')[0]}</Text></View>
+                )}
+              </View>
+              <Text style={styles.heroName}>{data?.name || 'Employee'}</Text>
+              <Text style={styles.heroRole}>{data?.designation || 'Staff'}</Text>
+              <View style={styles.badgeRow}>
+                <View style={[styles.badge, styles.statusBadge]}><Text style={styles.badgeText}>{data?.personalInfo?.status || 'Active'}</Text></View>
+                <View style={[styles.badge, styles.idBadge]}><Text style={styles.badgeText}>ID: {data?.employeeId}</Text></View>
+              </View>
+            </View>
+          </View>
+
+          {/* Tabs */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBarScroll} contentContainerStyle={styles.tabBar}>
+            {['Personal', 'Work', 'Experience', 'Contact', 'Documents'].map(t => (
+              <TouchableOpacity key={t} style={[styles.tab, activeTab === t && styles.activeTab]} onPress={() => setActiveTab(t)}>
+                <Text style={[styles.tabText, activeTab === t && styles.activeTabText]}>{t}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <View style={[styles.card, SHADOW.sm]}>
+            {activeTab === 'Personal' && (
+              <View style={styles.tabContent}>
+                <ProfileItem icon="person-outline" label="Full Name" value={data?.name} />
+                <ProfileItem icon="calendar-outline" label="Birthday" value={data?.dateOfBirth ? new Date(data.dateOfBirth).toLocaleDateString() : null} />
+                <ProfileItem icon="transgender-outline" label="Gender" value={data?.gender} />
+                <ProfileItem icon="water-outline" label="Blood Group" value={data?.bloodGroup} />
+                <ProfileItem icon="heart-outline" label="Marital Status" value={data?.maritalStatus} />
+              </View>
+            )}
+            
+            {activeTab === 'Work' && (
+              <View style={styles.tabContent}>
+                <ProfileItem icon="business-outline" label="Branch" value={data?.branch} />
+                <ProfileItem icon="people-outline" label="Department" value={data?.department} />
+                <ProfileItem icon="briefcase-outline" label="Designation" value={data?.designation} />
+                <ProfileItem icon="calendar-outline" label="Joined On" value={data?.dateJoined ? new Date(data.dateJoined).toLocaleDateString() : null} />
+                <ProfileItem icon="time-outline" label="Work Mode" value={data?.workSetup?.mode} />
+                <ProfileItem icon="person-outline" label="Reporting To" value={data?.reportingTo} />
+              </View>
+            )}
+
+            {activeTab === 'Experience' && (
+              <View style={styles.tabContent}>
+                {(data?.pastExperience || []).length > 0 ? (
+                  data.pastExperience.map((exp, i) => {
+                    const from = exp.workFrom ? new Date(exp.workFrom).getFullYear() : '—';
+                    const to = exp.workTo ? new Date(exp.workTo).getFullYear() : 'Present';
+                    return (
+                      <View key={i} style={styles.expItem}>
+                        <Text style={styles.expCompany}>{exp.companyName || 'Unknown Company'}</Text>
+                        <Text style={styles.expRole}>{exp.designation || 'Position'}</Text>
+                        <Text style={styles.expYears}>{from} - {to}</Text>
+                        <View style={styles.divider} />
+                      </View>
+                    );
+                  })
+                ) : (
+                  <Text style={styles.emptyText}>No experience data available.</Text>
+                )}
+              </View>
+            )}
+
+            {activeTab === 'Contact' && (
+              <View style={styles.tabContent}>
+                <ProfileItem icon="mail-outline" label="Official Email" value={data?.email} />
+                <ProfileItem icon="at-outline" label="Personal Email" value={data?.personalEmail} />
+                <ProfileItem icon="call-outline" label="Mobile" value={data?.phone} />
+                <ProfileItem icon="home-outline" label="Current Address" value={data?.currentAddress} />
+                <ProfileItem icon="alert-circle-outline" label="Emergency Contact" value={`${data?.emergencyContact?.name} (${data?.emergencyContact?.relation})`} />
+                <ProfileItem icon="call-outline" label="Emergency Phone" value={data?.emergencyContact?.phone} />
+              </View>
+            )}
+
+            {activeTab === 'Documents' && (
+              <View style={styles.tabContent}>
+                {(data?.documents || []).length > 0 ? (
+                  data.documents.map((doc, i) => {
+                    const fullUrl = getImageUrl(doc.fileUrl);
+                    return (
+                      <TouchableOpacity 
+                        key={i} 
+                        style={styles.docItem} 
+                        activeOpacity={0.7}
+                        onPress={() => {
+                          if (fullUrl) {
+                            Linking.openURL(fullUrl).catch(err => {
+                              console.error("URL Open Error:", err);
+                              Toast.show({ type: 'error', text1: 'Unable to open file' });
+                            });
+                          }
+                        }}
+                      >
+                        <View style={styles.docIconBox}>
+                          <Ionicons name="document-outline" size={20} color={COLORS.primary} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.docName} numberOfLines={1}>{doc.originalName || 'Document'}</Text>
+                          <Text style={styles.docType}>{doc.documentType?.documentTypeName || 'Internal Doc'}</Text>
+                        </View>
+                        <Ionicons name="cloud-download-outline" size={20} color={COLORS.textMuted} />
+                      </TouchableOpacity>
+                    );
+                  })
+                ) : (
+                  <Text style={styles.emptyText}>No documents uploaded.</Text>
+                )}
+              </View>
+            )}
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -218,47 +183,45 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bgMain },
-  hero: { paddingTop: 24, paddingBottom: 32, paddingHorizontal: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
-  heroContent: { alignItems: 'center' },
-  avatar: { width: 90, height: 90, borderRadius: 24, borderWidth: 3, borderColor: 'rgba(255,255,255,0.5)', marginBottom: 14 },
-  avatarFallback: { width: 90, height: 90, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.25)', justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: 'rgba(255,255,255,0.4)', marginBottom: 14 },
-  avatarText: { fontSize: 36, fontWeight: '800', color: COLORS.white },
-  heroName: { fontSize: SIZES.xl, fontWeight: '800', color: COLORS.white, marginBottom: 4 },
-  heroRole: { fontSize: SIZES.sm, color: 'rgba(255,255,255,0.75)', marginBottom: 12 },
-  heroBadges: { flexDirection: 'row', gap: 8 },
-  heroBadge: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.full },
-  heroBadgeText: { fontSize: SIZES.xs, color: 'rgba(255,255,255,0.9)', fontWeight: '600' },
-  heroBadgeGreen: { backgroundColor: 'rgba(16,185,129,0.25)' },
-  heroBadgeGreenText: { fontSize: SIZES.xs, color: '#6EE7B7', fontWeight: '700' },
-  tabRow: { paddingHorizontal: 16, paddingVertical: 16, gap: 8 },
-  tab: { paddingHorizontal: 18, paddingVertical: 8, borderRadius: RADIUS.full, backgroundColor: COLORS.white, borderWidth: 1.5, borderColor: COLORS.border },
-  tabActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  tabText: { fontSize: SIZES.sm, fontWeight: '600', color: COLORS.textLight },
-  tabTextActive: { color: COLORS.white },
-  body: { paddingHorizontal: 16, gap: 12 },
-  card: { backgroundColor: COLORS.white, borderRadius: RADIUS.xl, padding: 8 },
-  infoItem: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 12, borderBottomWidth: 1, borderBottomColor: COLORS.borderLight },
-  infoIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: COLORS.primaryLight, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
-  infoText: { flex: 1 },
-  infoLabel: { fontSize: SIZES.xs, color: COLORS.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
-  infoValue: { fontSize: SIZES.sm, fontWeight: '600', color: COLORS.textDark, marginTop: 2 },
-  docCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: COLORS.white, borderRadius: RADIUS.lg, padding: 16, marginBottom: 10 },
-  docIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: COLORS.primaryLight, justifyContent: 'center', alignItems: 'center' },
-  docInfo: { flex: 1 },
-  docType: { fontSize: SIZES.sm, fontWeight: '700', color: COLORS.primary },
-  docName: { fontSize: SIZES.xs, color: COLORS.textLight, marginTop: 2 },
-  docMeta: { fontSize: SIZES.xs, color: COLORS.textMuted, marginTop: 2 },
-  emptyState: { alignItems: 'center', padding: 40, gap: 8 },
-  emptyText: { fontSize: SIZES.base, fontWeight: '700', color: COLORS.textMuted },
-  emptySubText: { fontSize: SIZES.sm, color: COLORS.textPlaceholder, textAlign: 'center' },
-  secTitle: { fontSize: SIZES.md, fontWeight: '700', color: COLORS.textDark, padding: 12, paddingBottom: 4 },
-  formGroup: { padding: 12, paddingBottom: 0 },
-  formLabel: { fontSize: SIZES.xs, fontWeight: '600', color: COLORS.textMain, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.3 },
-  pwdWrap: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: COLORS.border, borderRadius: RADIUS.md, paddingHorizontal: 14, backgroundColor: COLORS.bgMain },
-  pwdInput: { flex: 1, height: 48, fontSize: SIZES.md, color: COLORS.textDark },
-  pwdBtn: { margin: 12, borderRadius: RADIUS.md, overflow: 'hidden' },
-  pwdBtnGrad: { paddingVertical: 14, alignItems: 'center' },
-  pwdBtnText: { fontSize: SIZES.base, fontWeight: '700', color: COLORS.white },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: COLORS.white, borderRadius: RADIUS.xl, padding: 16, borderWidth: 1.5, borderColor: COLORS.dangerLight },
-  logoutText: { fontSize: SIZES.base, fontWeight: '700', color: COLORS.danger },
+  scroll: { flex: 1 },
+  header: { padding: 24, paddingBottom: 10 },
+  title: { fontSize: SIZES.xxl, fontWeight: '800', color: COLORS.textDark },
+  subTitle: { fontSize: SIZES.sm, color: COLORS.textLight, marginTop: 4 },
+  body: { padding: 20 },
+  profileHero: { backgroundColor: COLORS.white, borderRadius: 28, overflow: 'hidden', marginBottom: 24, paddingBottom: 24 },
+  heroBg: { height: 100, width: '100%', borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
+  heroContent: { marginTop: -50, alignItems: 'center' },
+  avatarWrap: { width: 100, height: 100, borderRadius: RADIUS.full, borderWidth: 4, borderColor: COLORS.white, overflow: 'hidden', backgroundColor: COLORS.bgMain },
+  avatar: { width: '100%', height: '100%' },
+  avatarPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.primaryLight },
+  avatarText: { fontSize: 36, fontWeight: '800', color: COLORS.primary },
+  heroName: { fontSize: 24, fontWeight: '800', color: COLORS.textDark, marginTop: 12 },
+  heroRole: { fontSize: 13, fontWeight: '700', color: COLORS.primary, marginTop: 2, textTransform: 'uppercase' },
+  badgeRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  statusBadge: { backgroundColor: COLORS.successLight },
+  idBadge: { backgroundColor: COLORS.bgMain },
+  badgeText: { fontSize: 11, fontWeight: '700', color: COLORS.textDark },
+  tabBarScroll: { maxHeight: 60, marginBottom: 16 },
+  tabBar: { flexDirection: 'row', backgroundColor: COLORS.white, borderRadius: 16, padding: 4, gap: 4, height: 56 },
+  tab: { paddingHorizontal: 20, paddingVertical: 12, alignItems: 'center', borderRadius: 12, minWidth: 100 },
+  activeTab: { backgroundColor: COLORS.primary },
+  tabText: { fontSize: 13, fontWeight: '700', color: COLORS.textMuted },
+  activeTabText: { color: COLORS.white },
+  card: { backgroundColor: COLORS.white, borderRadius: 24, padding: 20, minHeight: 400 },
+  tabContent: { gap: 18 },
+  profileItem: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  iconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.primaryLight, justifyContent: 'center', alignItems: 'center' },
+  itemLabel: { fontSize: 11, fontWeight: '600', color: COLORS.textMuted, textTransform: 'uppercase' },
+  itemValue: { fontSize: 15, fontWeight: '700', color: COLORS.textDark, marginTop: 2 },
+  expItem: { marginBottom: 10 },
+  expCompany: { fontSize: 15, fontWeight: '800', color: COLORS.textDark },
+  expRole: { fontSize: 13, color: COLORS.textMain, marginTop: 2 },
+  expYears: { fontSize: 12, color: COLORS.primary, fontWeight: '700', marginTop: 4 },
+  docItem: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: COLORS.bgMain, padding: 12, borderRadius: 16 },
+  docIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.white, justifyContent: 'center', alignItems: 'center' },
+  docName: { fontSize: 14, fontWeight: '700', color: COLORS.textDark },
+  docType: { fontSize: 11, color: COLORS.textMuted, marginTop: 1 },
+  divider: { height: 1, backgroundColor: COLORS.borderLight, marginTop: 12 },
+  emptyText: { textAlign: 'center', color: COLORS.textMuted, padding: 20 },
 });

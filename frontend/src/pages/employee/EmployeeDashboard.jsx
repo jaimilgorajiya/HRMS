@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Calendar, FileText, Clock, Briefcase, Award } from 'lucide-react';
 import authenticatedFetch from '../../utils/apiHandler';
 import API_URL from '../../config/api';
+import PunchWidget from '../../components/PunchWidget';
 import '../../styles/EmployeePanel.css';
 
 const EmployeeDashboard = () => {
@@ -104,22 +105,27 @@ const EmployeeDashboard = () => {
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="ep-stats-grid">
-        {statCards.map((card, i) => (
-          <div
-            key={i}
-            className={`ep-stat-card ${card.path ? 'clickable' : ''}`}
-            onClick={() => card.path && navigate(card.path)}
-          >
-            <div className={`ep-stat-icon ${card.color}`}>{card.icon}</div>
-            <div className="ep-stat-content">
-              <span className="ep-stat-title">{card.title}</span>
-              <span className="ep-stat-value">{card.value}</span>
-              <span className="ep-stat-sub">{card.sub}</span>
+      {/* Top row: Punch Widget + Stat Cards */}
+      <div className="ep-top-row">
+        <div className="ep-punch-highlight">
+          <PunchWidget />
+        </div>
+        <div className="ep-stats-grid">
+          {statCards.map((card, i) => (
+            <div
+              key={i}
+              className={`ep-stat-card ${card.path ? 'clickable' : ''}`}
+              onClick={() => card.path && navigate(card.path)}
+            >
+              <div className={`ep-stat-icon ${card.color}`}>{card.icon}</div>
+              <div className="ep-stat-content">
+                <span className="ep-stat-title">{card.title}</span>
+                <span className="ep-stat-value">{card.value}</span>
+                <span className="ep-stat-sub">{card.sub}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Info Grid */}

@@ -1,236 +1,241 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, ScrollView, StyleSheet, TouchableOpacity,
+  ActivityIndicator, RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Calendar } from 'react-native-calendars';
+import { apiFetch } from '../../utils/api';
+import { ENDPOINTS } from '../../constants/api';
 import { COLORS, SIZES, RADIUS, SHADOW } from '../../constants/theme';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const StatusBadge = ({ status }) => {
+  const isPresent = status === 'Present';
+  const isAbsent = status === 'Absent';
+  const isLeave = status === 'Leave';
+  const isLate = status === 'Late';
 
-const generateMockData = (year, month) => {
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const today = new Date();
-  const marks = {};
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month - 1, d);
-    if (date > today) continue;
-    const day = date.getDay();
-    const key = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    if (day === 0 || day === 6) { marks[key] = { status: 'weekend' }; continue; }
-    const r = Math.random();
-    if (r < 0.82) marks[key] = { status: r < 0.15 ? 'late' : 'present', punchIn: `0${8 + Math.floor(Math.random() * 2)}:${String(Math.floor(Math.random() * 59)).padStart(2, '0')}`, punchOut: `1${7 + Math.floor(Math.random() * 2)}:${String(Math.floor(Math.random() * 59)).padStart(2, '0')}` };
-    else if (r < 0.9) marks[key] = { status: 'absent' };
-    else marks[key] = { status: 'leave', leaveType: 'Casual Leave' };
-  }
-  return marks;
-};
-
-const STATUS = {
-  present: { color: COLORS.success, bg: COLORS.successLight, label: 'Present', dot: '#10B981' },
-  late: { color: COLORS.warning, bg: COLORS.warningLight, label: 'Late', dot: '#F59E0B' },
-  absent: { color: COLORS.danger, bg: COLORS.dangerLight, label: 'Absent', dot: '#EF4444' },
-  leave: { color: COLORS.purple, bg: COLORS.purpleLight, label: 'Leave', dot: '#8B5CF6' },
-  weekend: { color: COLORS.textMuted, bg: COLORS.bgMain, label: 'Weekend', dot: '#CBD5E1' },
-};
-
-function SimpleCalendar({ year, month, data, selected, onDayPress, onMonthChange }) {
-  const firstDay = new Date(year, month - 1, 1).getDay();
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const today = new Date();
-
-  const cells = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-
-  const prevMonth = () => {
-    const d = new Date(year, month - 2, 1);
-    onMonthChange({ year: d.getFullYear(), month: d.getMonth() + 1 });
-  };
-  const nextMonth = () => {
-    const d = new Date(year, month, 1);
-    onMonthChange({ year: d.getFullYear(), month: d.getMonth() + 1 });
-  };
-
-  const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  let color = COLORS.textMuted;
+  let bg = COLORS.bgMain;
+  if (isPresent) { color = COLORS.success; bg = COLORS.successLight; }
+  if (isAbsent) { color = COLORS.danger; bg = COLORS.dangerLight; }
+  if (isLeave) { color = COLORS.purple; bg = COLORS.purpleLight; }
+  if (isLate) { color = COLORS.warning; bg = COLORS.warningLight; }
 
   return (
-    <View style={cal.wrap}>
-      {/* Nav */}
-      <View style={cal.nav}>
-        <TouchableOpacity onPress={prevMonth} style={cal.navBtn}>
-          <Ionicons name="chevron-back" size={20} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={cal.monthTitle}>{monthName}</Text>
-        <TouchableOpacity onPress={nextMonth} style={cal.navBtn}>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
-      {/* Day headers */}
-      <View style={cal.row}>
-        {DAYS.map(d => <Text key={d} style={cal.dayHeader}>{d}</Text>)}
-      </View>
-      {/* Cells */}
-      <View style={cal.grid}>
-        {cells.map((d, i) => {
-          if (!d) return <View key={`e-${i}`} style={cal.cell} />;
-          const key = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const rec = data[key];
-          const cfg = rec ? STATUS[rec.status] : null;
-          const isToday = today.getFullYear() === year && today.getMonth() + 1 === month && today.getDate() === d;
-          const isSelected = selected === key;
-          return (
-            <TouchableOpacity
-              key={key}
-              style={[cal.cell, cfg && { backgroundColor: cfg.bg }, isSelected && { backgroundColor: cfg?.color || COLORS.primary }, isToday && cal.todayCell]}
-              onPress={() => rec && rec.status !== 'weekend' && onDayPress(key)}
-              activeOpacity={0.7}
-            >
-              <Text style={[cal.dayText, cfg && { color: cfg.color }, isSelected && { color: COLORS.white }, isToday && cal.todayText]}>
-                {d}
-              </Text>
-              {cfg && cfg.dot && !isSelected && (
-                <View style={[cal.dot, { backgroundColor: cfg.dot }]} />
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+    <View style={[styles.badge, { backgroundColor: bg }]}>
+      <Text style={[styles.badgeText, { color }]}>{status}</Text>
     </View>
   );
-}
+};
 
 export default function AttendanceScreen() {
-  const today = new Date();
-  const [selected, setSelected] = useState(null);
-  const [currentMonth, setCurrentMonth] = useState({ year: today.getFullYear(), month: today.getMonth() + 1 });
-  const data = generateMockData(currentMonth.year, currentMonth.month);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [month, setMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [markedDates, setMarkedDates] = useState({});
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [stats, setStats] = useState({ present: 0, absent: 0, late: 0, leaves: 0 });
 
-  const counts = Object.values(data).reduce((a, r) => { a[r.status] = (a[r.status] || 0) + 1; return a; }, {});
-  const selectedRec = selected ? data[selected] : null;
+  const loadData = async (m) => {
+    try {
+      const res = await apiFetch(`${ENDPOINTS.attendanceHistory}?month=${m}`);
+      const json = await res.json();
+      if (json.success) {
+        setData(json.records);
+        processAttendance(json.records);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const processAttendance = (records) => {
+    const marked = {};
+    let sPresent = 0, sAbsent = 0, sLate = 0, sLeaves = 0;
+
+    records.forEach(r => {
+      let dotColor = COLORS.textMuted;
+      if (r.status === 'Present') { dotColor = COLORS.success; sPresent++; }
+      if (r.status === 'Absent') { dotColor = COLORS.danger; sAbsent++; }
+      if (r.status === 'Late') { dotColor = COLORS.warning; sLate++; }
+      if (r.status === 'Leave') { dotColor = COLORS.purple; sLeaves++; }
+
+      marked[r.date] = {
+        marked: true,
+        dotColor,
+        customStyles: {
+          container: { backgroundColor: dotColor + '15', borderRadius: 8 },
+          text: { color: dotColor, fontWeight: '700' }
+        }
+      };
+    });
+
+    setMarkedDates(marked);
+    setStats({ present: sPresent, absent: sAbsent, late: sLate, leaves: sLeaves });
+  };
+
+  useEffect(() => { loadData(month); }, [month]);
+
+  const onMonthChange = (date) => {
+    const newMonth = format(new Date(date.dateString), 'yyyy-MM');
+    setMonth(newMonth);
+    setLoading(true);
+  };
+
+  const selectedRecord = selectedDate ? data.find(r => r.date === selectedDate) : null;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>My Attendance</Text>
-          <Text style={styles.subtitle}>{new Date(currentMonth.year, currentMonth.month - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}</Text>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>Attendance History</Text>
+        <Text style={styles.subTitle}>Track your daily logs and status</Text>
+      </View>
 
-        {/* Summary */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.summaryRow}>
-          {[
-            { label: 'Present', count: (counts.present || 0) + (counts.late || 0), color: COLORS.success, bg: COLORS.successLight },
-            { label: 'Absent', count: counts.absent || 0, color: COLORS.danger, bg: COLORS.dangerLight },
-            { label: 'Late', count: counts.late || 0, color: COLORS.warning, bg: COLORS.warningLight },
-            { label: 'On Leave', count: counts.leave || 0, color: COLORS.purple, bg: COLORS.purpleLight },
-          ].map((s, i) => (
-            <View key={i} style={[styles.summaryCard, { borderLeftColor: s.color, backgroundColor: s.bg }, SHADOW.sm]}>
-              <Text style={[styles.summaryCount, { color: s.color }]}>{s.count}</Text>
-              <Text style={styles.summaryLabel}>{s.label}</Text>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <View style={styles.body}>
+          <View style={styles.statsRow}>
+            <View style={[styles.statItem, SHADOW.sm]}>
+              <Text style={[styles.statVal, { color: COLORS.success }]}>{stats.present}</Text>
+              <Text style={styles.statLabel}>Present</Text>
             </View>
-          ))}
-        </ScrollView>
-
-        {/* Calendar */}
-        <View style={[styles.calCard, SHADOW.sm]}>
-          <SimpleCalendar
-            year={currentMonth.year}
-            month={currentMonth.month}
-            data={data}
-            selected={selected}
-            onDayPress={(key) => setSelected(key === selected ? null : key)}
-            onMonthChange={setCurrentMonth}
-          />
-          <View style={styles.legend}>
-            {Object.entries(STATUS).filter(([k]) => k !== 'weekend').map(([k, v]) => (
-              <View key={k} style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: v.dot }]} />
-                <Text style={styles.legendLabel}>{v.label}</Text>
-              </View>
-            ))}
+            <View style={[styles.statItem, SHADOW.sm]}>
+              <Text style={[styles.statVal, { color: COLORS.danger }]}>{stats.absent}</Text>
+              <Text style={styles.statLabel}>Absent</Text>
+            </View>
+            <View style={[styles.statItem, SHADOW.sm]}>
+              <Text style={[styles.statVal, { color: COLORS.warning }]}>{stats.late}</Text>
+              <Text style={styles.statLabel}>Late</Text>
+            </View>
+            <View style={[styles.statItem, SHADOW.sm]}>
+              <Text style={[styles.statVal, { color: COLORS.purple }]}>{stats.leaves}</Text>
+              <Text style={styles.statLabel}>Leaves</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Detail */}
-        {selectedRec && (
-          <View style={[styles.detailCard, SHADOW.sm]}>
-            <View style={styles.detailHeader}>
-              <Text style={styles.detailDate}>{new Date(selected).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
-              <View style={[styles.statusChip, { backgroundColor: STATUS[selectedRec.status]?.bg }]}>
-                <Text style={[styles.statusChipText, { color: STATUS[selectedRec.status]?.color }]}>{STATUS[selectedRec.status]?.label}</Text>
+          <View style={[styles.calendarCard, SHADOW.md]}>
+            <Calendar
+              onMonthChange={onMonthChange}
+              onDayPress={(day) => setSelectedDate(day.dateString)}
+              markedDates={{
+                ...markedDates,
+                [selectedDate]: { ...markedDates[selectedDate], selected: true, selectedColor: COLORS.primary }
+              }}
+              markingType={'custom'}
+              theme={{
+                calendarBackground: COLORS.white,
+                textSectionTitleColor: COLORS.textMuted,
+                selectedDayBackgroundColor: COLORS.primary,
+                selectedDayTextColor: COLORS.white,
+                todayTextColor: COLORS.primary,
+                dayTextColor: COLORS.textDark,
+                textDisabledColor: COLORS.border,
+                dotColor: COLORS.primary,
+                arrowColor: COLORS.primary,
+                monthTextColor: COLORS.textDark,
+                textDayFontWeight: '600',
+                textMonthFontWeight: '800',
+                textDayHeaderFontWeight: '700',
+                textDayFontSize: 14,
+                textMonthFontSize: 16,
+                textDayHeaderFontSize: 12
+              }}
+            />
+          </View>
+
+          {selectedDate && (
+            <View style={[styles.detailCard, SHADOW.sm]}>
+              <View style={styles.detailHeader}>
+                <Text style={styles.detailTitle}>{format(new Date(selectedDate), 'dd MMMM yyyy')}</Text>
+                {selectedRecord ? (
+                  <StatusBadge status={selectedRecord.status} />
+                ) : (
+                  <View style={styles.badge}><Text style={styles.badgeText}>No Record</Text></View>
+                )}
               </View>
-            </View>
-            {selectedRec.punchIn && (
-              <View style={styles.detailRows}>
-                {[
-                  { icon: 'log-in-outline', label: 'Punch In', value: selectedRec.punchIn },
-                  { icon: 'log-out-outline', label: 'Punch Out', value: selectedRec.punchOut },
-                ].map((r, i) => (
-                  <View key={i} style={styles.detailRow}>
-                    <View style={styles.detailRowIcon}><Ionicons name={r.icon} size={18} color={COLORS.primary} /></View>
-                    <View><Text style={styles.detailRowLabel}>{r.label}</Text><Text style={styles.detailRowValue}>{r.value}</Text></View>
+
+              {selectedRecord ? (
+                <View style={styles.detailGrid}>
+                  <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Punch In</Text>
+                    <Text style={styles.detailValue}>{selectedRecord.punchIn || '—'}</Text>
                   </View>
-                ))}
+                  <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Punch Out</Text>
+                    <Text style={styles.detailValue}>{selectedRecord.punchOut || '—'}</Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Working Hours</Text>
+                    <Text style={styles.detailValue}>{selectedRecord.workingFormatted || '—'}</Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Breaks</Text>
+                    <Text style={styles.detailValue}>{selectedRecord.breakCount || 0} Taken</Text>
+                  </View>
+                </View>
+              ) : (
+                <Text style={styles.emptyText}>No logs recorded for this day.</Text>
+              )}
+            </View>
+          )}
+
+          <Text style={styles.sectionTitle}>Recent Logs</Text>
+          {data.slice(0, 5).map((r, i) => (
+            <TouchableOpacity key={i} style={[styles.logCard, SHADOW.sm]} onPress={() => setSelectedDate(r.date)}>
+              <View style={styles.logLeft}>
+                <Text style={styles.logDate}>{format(new Date(r.date), 'dd MMM')}</Text>
+                <Text style={styles.logDay}>{format(new Date(r.date), 'EEE')}</Text>
               </View>
-            )}
-            {selectedRec.status === 'absent' && (
-              <View style={styles.absentNote}>
-                <Ionicons name="close-circle-outline" size={18} color={COLORS.danger} />
-                <Text style={styles.absentText}>Marked absent for this day</Text>
+              <View style={styles.logBody}>
+                <View style={styles.logRow}>
+                  <Ionicons name="enter-outline" size={14} color={COLORS.success} />
+                  <Text style={styles.logTime}>{r.punchIn || '—'}</Text>
+                  <View style={styles.logGap} />
+                  <Ionicons name="exit-outline" size={14} color={COLORS.danger} />
+                  <Text style={styles.logTime}>{r.punchOut || '—'}</Text>
+                </View>
               </View>
-            )}
-            {selectedRec.status === 'leave' && (
-              <View style={styles.detailRow}>
-                <View style={styles.detailRowIcon}><Ionicons name="leaf-outline" size={18} color={COLORS.purple} /></View>
-                <View><Text style={styles.detailRowLabel}>Leave Type</Text><Text style={styles.detailRowValue}>{selectedRec.leaveType}</Text></View>
-              </View>
-            )}
-          </View>
-        )}
-        <View style={{ height: 100 }} />
+              <StatusBadge status={r.status} />
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const cal = StyleSheet.create({
-  wrap: { padding: 12 },
-  nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  navBtn: { padding: 8 },
-  monthTitle: { fontSize: SIZES.base, fontWeight: '800', color: COLORS.textDark },
-  row: { flexDirection: 'row', marginBottom: 4 },
-  dayHeader: { flex: 1, textAlign: 'center', fontSize: SIZES.xs, fontWeight: '700', color: COLORS.textLight, paddingVertical: 4 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap' },
-  cell: { width: '14.28%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 8, padding: 2 },
-  dayText: { fontSize: SIZES.sm, fontWeight: '600', color: COLORS.textDark },
-  dot: { width: 4, height: 4, borderRadius: 2, marginTop: 2 },
-  todayCell: { borderWidth: 1.5, borderColor: COLORS.primary },
-  todayText: { color: COLORS.primary, fontWeight: '800' },
-});
-
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bgMain },
-  header: { padding: 20, paddingBottom: 8 },
+  header: { padding: 24, paddingBottom: 10 },
   title: { fontSize: SIZES.xxl, fontWeight: '800', color: COLORS.textDark },
-  subtitle: { fontSize: SIZES.sm, color: COLORS.textLight, marginTop: 2 },
-  summaryRow: { paddingHorizontal: 20, paddingVertical: 12, gap: 12 },
-  summaryCard: { paddingHorizontal: 18, paddingVertical: 14, borderRadius: RADIUS.lg, borderLeftWidth: 4, minWidth: 90, alignItems: 'center' },
-  summaryCount: { fontSize: SIZES.xxl, fontWeight: '800' },
-  summaryLabel: { fontSize: SIZES.xs, color: COLORS.textLight, fontWeight: '600', marginTop: 2 },
-  calCard: { marginHorizontal: 16, backgroundColor: COLORS.white, borderRadius: RADIUS.xl, overflow: 'hidden', marginBottom: 16 },
-  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, padding: 16, borderTopWidth: 1, borderTopColor: COLORS.borderLight },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendLabel: { fontSize: SIZES.xs, color: COLORS.textLight, fontWeight: '500' },
-  detailCard: { marginHorizontal: 16, backgroundColor: COLORS.white, borderRadius: RADIUS.xl, padding: 20, marginBottom: 16 },
-  detailHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  detailDate: { fontSize: SIZES.md, fontWeight: '700', color: COLORS.textDark, flex: 1 },
-  statusChip: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.full },
-  statusChipText: { fontSize: SIZES.xs, fontWeight: '700' },
-  detailRows: { gap: 12 },
-  detailRow: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: COLORS.bgMain, padding: 14, borderRadius: RADIUS.md },
-  detailRowIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: COLORS.primaryLight, justifyContent: 'center', alignItems: 'center' },
-  detailRowLabel: { fontSize: SIZES.xs, color: COLORS.textMuted, fontWeight: '600', textTransform: 'uppercase' },
-  detailRowValue: { fontSize: SIZES.base, fontWeight: '700', color: COLORS.textDark, marginTop: 2 },
-  absentNote: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: COLORS.dangerLight, padding: 14, borderRadius: RADIUS.md },
-  absentText: { fontSize: SIZES.sm, color: COLORS.danger, fontWeight: '600' },
+  subTitle: { fontSize: SIZES.sm, color: COLORS.textLight, marginTop: 4 },
+  body: { padding: 20 },
+  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+  statItem: { flex: 1, backgroundColor: COLORS.white, borderRadius: 16, padding: 12, alignItems: 'center' },
+  statVal: { fontSize: 18, fontWeight: '800' },
+  statLabel: { fontSize: 10, fontWeight: '700', color: COLORS.textMuted, marginTop: 2, textTransform: 'uppercase' },
+  calendarCard: { backgroundColor: COLORS.white, borderRadius: 24, padding: 10, marginBottom: 20, overflow: 'hidden' },
+  detailCard: { backgroundColor: COLORS.white, borderRadius: 24, padding: 20, marginBottom: 24 },
+  detailHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  detailTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textDark },
+  detailGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
+  detailItem: { width: '45%' },
+  detailLabel: { fontSize: 11, fontWeight: '600', color: COLORS.textMuted, textTransform: 'uppercase' },
+  detailValue: { fontSize: 14, fontWeight: '700', color: COLORS.textDark, marginTop: 4 },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  badgeText: { fontSize: 11, fontWeight: '700' },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textDark, marginBottom: 16 },
+  logCard: { backgroundColor: COLORS.white, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 16 },
+  logLeft: { alignItems: 'center', width: 45, borderRightWidth: 1, borderRightColor: COLORS.borderLight, paddingRight: 10 },
+  logDate: { fontSize: 14, fontWeight: '800', color: COLORS.textDark },
+  logDay: { fontSize: 10, fontWeight: '700', color: COLORS.textMuted, textTransform: 'uppercase' },
+  logBody: { flex: 1 },
+  logRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  logTime: { fontSize: 13, fontWeight: '600', color: COLORS.textMain },
+  logGap: { width: 10 },
+  emptyText: { textAlign: 'center', color: COLORS.textMuted, padding: 20 },
 });

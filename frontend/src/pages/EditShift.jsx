@@ -259,14 +259,6 @@ const EditShift = () => {
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Multiple Punch In/Out Allow</label>
-                            <select name="multiplePunchAllowed" value={formData.multiplePunchAllowed} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
                             <label>Required Out Of Range Reason</label>
                             <select name="requireOutOfRangeReason" value={formData.requireOutOfRangeReason} onChange={handleInputChange}>
                                 <option value={false}>No</option>
@@ -275,32 +267,8 @@ const EditShift = () => {
                         </div>
 
                         <div className="form-group-shift">
-                            <label>Hours Type In Shift Clock <span className="required">*</span></label>
-                            <select name="hoursType" value={formData.hoursType} onChange={handleInputChange}>
-                                <option value="Full Shift Hours">Full Shift Hours</option>
-                                <option value="Flexible Hours">Minimum Full Day Hours</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Attendance Calculation On Productive Hours</label>
-                            <select name="attendanceOnProductiveHours" value={formData.attendanceOnProductiveHours} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
                             <label>Deduct Break Time From Total Working Hours If Break Not Taken</label>
                             <select name="deductBreakIfNotTaken" value={formData.deductBreakIfNotTaken} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Deduct Full Break Time If Taken Break Time Is Less Than Assigned Time</label>
-                            <select name="deductFullBreakIfLessTaken" value={formData.deductFullBreakIfLessTaken} onChange={handleInputChange}>
                                 <option value={false}>No</option>
                                 <option value={true}>Yes</option>
                             </select>
@@ -330,44 +298,6 @@ const EditShift = () => {
                                 <option value="None">None</option>
                                 <option value="Optional">Optional</option>
                                 <option value="Mandatory">Mandatory</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Punch Out Missing Request Days</label>
-                            <input
-                                type="number"
-                                name="missingPunchRequestDays"
-                                value={formData.missingPunchRequestDays}
-                                onChange={handleInputChange}
-                                min="0"
-                            />
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Past Attendance Request Days</label>
-                            <input
-                                type="number"
-                                name="pastAttendanceRequestDays"
-                                value={formData.pastAttendanceRequestDays}
-                                onChange={handleInputChange}
-                                min="0"
-                            />
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Auto Select Alternate Shift (Max 2)</label>
-                            <select name="autoSelectAlternateShift" value={formData.autoSelectAlternateShift} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Allow Attendance Modification</label>
-                            <select name="allowAttendanceModification" value={formData.allowAttendanceModification} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
                             </select>
                         </div>
                     </div>
@@ -462,27 +392,42 @@ const EditShift = () => {
                             </select>
                         </div>
 
-                        <div className="form-group-shift">
-                            <label>Maximum Late In (Minutes)</label>
-                            <input
-                                type="number"
-                                name="maxLateInMinutes"
-                                value={formData.maxLateInMinutes}
-                                onChange={handleInputChange}
-                                min="0"
-                            />
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Maximum Early Out (Minutes)</label>
-                            <input
-                                type="number"
-                                name="maxEarlyOutMinutes"
-                                value={formData.maxEarlyOutMinutes}
-                                onChange={handleInputChange}
-                                min="0"
-                            />
-                        </div>
+                        {formData.lateEarlyType === 'Combined' ? (
+                            <div className="form-group-shift">
+                                <label>Maximum Combined Minutes (Late In + Early Out)</label>
+                                <input
+                                    type="number"
+                                    name="maxLateInMinutes"
+                                    value={formData.maxLateInMinutes}
+                                    onChange={handleInputChange}
+                                    min="0"
+                                    placeholder="e.g. 30"
+                                />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="form-group-shift">
+                                    <label>Maximum Late In (Minutes)</label>
+                                    <input
+                                        type="number"
+                                        name="maxLateInMinutes"
+                                        value={formData.maxLateInMinutes}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                    />
+                                </div>
+                                <div className="form-group-shift">
+                                    <label>Maximum Early Out (Minutes)</label>
+                                    <input
+                                        type="number"
+                                        name="maxEarlyOutMinutes"
+                                        value={formData.maxEarlyOutMinutes}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         <div className="form-group-shift">
                             <label>Apply Leave If Late/Early Limit Exceeded</label>
@@ -492,32 +437,41 @@ const EditShift = () => {
                             </select>
                         </div>
 
-                        <div className="form-group-shift">
-                            <label>Leave Type When Limit Exceeded</label>
-                            <select name="leaveTypeIfExceeded" value={formData.leaveTypeIfExceeded} onChange={handleInputChange}>
-                                <option value="Half Day">Half Day</option>
-                                <option value="Full Day">Full Day</option>
-                                <option value="Short Leave">Short Leave</option>
-                                  <option value="Short Leave">Quarter Day</option>
-                                <option value="Short Leave">Three-Quarters Day</option>
-                            </select>
-                        </div>
+                    
 
-                        <div className="form-group-shift">
-                            <label>Required Reason Of Late In</label>
-                            <select name="requireLateReason" value={formData.requireLateReason} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Required Reason Of Early Out</label>
-                            <select name="requireEarlyOutReason" value={formData.requireEarlyOutReason} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
+                        {formData.lateEarlyType === 'Combined' ? (
+                            <div className="form-group-shift">
+                                <label>Required Reason For Late In / Early Out</label>
+                                <select
+                                    name="requireLateReason"
+                                    value={formData.requireLateReason}
+                                    onChange={(e) => {
+                                        handleInputChange(e);
+                                        handleInputChange({ target: { name: 'requireEarlyOutReason', value: e.target.value, type: 'select' }});
+                                    }}
+                                >
+                                    <option value={false}>No</option>
+                                    <option value={true}>Yes</option>
+                                </select>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="form-group-shift">
+                                    <label>Required Reason Of Late In</label>
+                                    <select name="requireLateReason" value={formData.requireLateReason} onChange={handleInputChange}>
+                                        <option value={false}>No</option>
+                                        <option value={true}>Yes</option>
+                                    </select>
+                                </div>
+                                <div className="form-group-shift">
+                                    <label>Required Reason Of Early Out</label>
+                                    <select name="requireEarlyOutReason" value={formData.requireEarlyOutReason} onChange={handleInputChange}>
+                                        <option value={false}>No</option>
+                                        <option value={true}>Yes</option>
+                                    </select>
+                                </div>
+                            </>
+                        )}
 
                         <div className="form-group-shift">
                             <label>Late In Early Out Apply On Extra Day</label>
@@ -527,174 +481,6 @@ const EditShift = () => {
                             </select>
                         </div>
 
-                        <div className="form-group-shift">
-                            <label>Late In Penalty Minutes Deduct From Working Hours</label>
-                            <select name="deductLatePenaltyFromWorkHours" value={formData.deductLatePenaltyFromWorkHours} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Remove Late/Early When Completed Shift Hours</label>
-                            <select name="removeLateEarlyAfterFullHours" value={formData.removeLateEarlyAfterFullHours} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {/* SECTION 4 - LEAVE SETTINGS */}
-                <div className="shift-card">
-                    <h2 className="card-title">Leave Settings</h2>
-                    <div className="form-grid">
-                        <div className="form-group-shift">
-                            <label>
-                                Allow Short Leave 
-                                <span className="info-icon-wrapper" title="Policy for allowing short duration leaves">
-                                    <i className="fas fa-info-circle"></i>
-                                </span>
-                            </label>
-                            <select name="allowShortLeave" value={formData.allowShortLeave} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        {/* Show additional fields when Allow Short Leave is Yes */}
-                        {(formData.allowShortLeave === true || formData.allowShortLeave === 'true') && (
-                            <>
-                                <div className="form-group-shift">
-                                    <label>Number of Monthly Short Leaves</label>
-                                    <input
-                                        type="number"
-                                        name="monthlyShortLeaves"
-                                        value={formData.monthlyShortLeaves || ''}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        placeholder="Enter number"
-                                    />
-                                </div>
-
-                                <div className="form-group-shift">
-                                    <label>Short Leave Minutes (After/Before Shift Time)</label>
-                                    <input
-                                        type="number"
-                                        name="shortLeaveMinutes"
-                                        value={formData.shortLeaveMinutes || ''}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        placeholder="Enter minutes"
-                                    />
-                                </div>
-
-                                <div className="form-group-shift">
-                                    <label>Short Leave Type</label>
-                                    <select name="shortLeaveType" value={formData.shortLeaveType || 'Default'} onChange={handleInputChange}>
-                                        <option value="Default">Default</option>
-                                        <option value="Before Shift">Before Shift</option>
-                                        <option value="After Shift">After Shift</option>
-                                        <option value="Both">Both</option>
-                                    </select>
-                                </div>
-
-                                <div className="form-group-shift">
-                                    <label>Short Leave Buffer Minutes</label>
-                                    <input
-                                        type="number"
-                                        name="shortLeaveBufferMinutes"
-                                        value={formData.shortLeaveBufferMinutes || ''}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        placeholder="Enter minutes"
-                                    />
-                                </div>
-
-                                <div className="form-group-shift">
-                                    <label>Short Leave Days</label>
-                                    <input
-                                        type="text"
-                                        name="shortLeaveDays"
-                                        value={formData.shortLeaveDays || ''}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g., Monday, Tuesday"
-                                    />
-                                </div>
-                            </>
-                        )}
-
-                        <div className="form-group-shift">
-                            <label>Apply Sandwich Leave</label>
-                            <select name="applySandwichLeave" value={formData.applySandwichLeave} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Apply Half Day Before Fix Time Out</label>
-                            <select name="applyHalfDayBeforeFixedTimeout" value={formData.applyHalfDayBeforeFixedTimeout} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Apply Leave On Holiday</label>
-                            <select name="applyLeaveOnHoliday" value={formData.applyLeaveOnHoliday} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group-shift">
-                            <label>Apply Leave On Weekoff</label>
-                            <select name="applyLeaveOnWeekOff" value={formData.applyLeaveOnWeekOff} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {/* SECTION 5 - PENALTY SETTINGS */}
-                <div className="shift-card">
-                    <h2 className="card-title">Penalty Settings</h2>
-                    <div className="form-grid">
-                        <div className="form-group-shift">
-                            <label>Generate Penalty On Absent</label>
-                            <select name="generatePenaltyOnAbsent" value={formData.generatePenaltyOnAbsent} onChange={handleInputChange}>
-                                <option value={false}>No</option>
-                                <option value={true}>Yes</option>
-                            </select>
-                        </div>
-
-                        {/* Show additional fields when Generate Penalty on Absent is Yes */}
-                        {(formData.generatePenaltyOnAbsent === true || formData.generatePenaltyOnAbsent === 'true') && (
-                            <>
-                                <div className="form-group-shift">
-                                    <label>Penalty Type</label>
-                                    <select name="penaltyType" value={formData.penaltyType || 'Flat'} onChange={handleInputChange}>
-                                        <option value="Flat">Flat</option>
-                                        <option value="Percentage">Percentage</option>
-                                    </select>
-                                </div>
-
-                                <div className="form-group-shift">
-                                    <label>Penalty Value <span className="required">*</span></label>
-                                    <input
-                                        type="number"
-                                        name="penaltyValue"
-                                        value={formData.penaltyValue || 0}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        placeholder="Enter penalty value"
-                                        required
-                                    />
-                                </div>
-                            </>
-                        )}
                     </div>
                 </div>
 

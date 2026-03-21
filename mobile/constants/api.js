@@ -12,4 +12,7 @@ export const ENDPOINTS = {
   changePassword: '/api/auth/change-password',
   employeeStats: '/api/employee-dashboard/stats',
   company: '/api/company',
+  attendanceToday: '/api/attendance/today',
+  togglePunch: '/api/attendance/toggle-punch',
+  toggleBreak: '/api/attendance/toggle-break',
 };

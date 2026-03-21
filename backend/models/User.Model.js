@@ -253,6 +253,12 @@ const userSchema = new mongoose.Schema(
             },
             verifiedBy: String,
             verificationDate: Date
+        },
+        otp: {
+            type: String
+        },
+        otpExpiry: {
+            type: Date
         }
     },
     {

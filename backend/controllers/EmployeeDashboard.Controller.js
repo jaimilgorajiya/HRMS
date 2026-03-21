@@ -16,8 +16,14 @@ export const getEmployeeStats = async (req, res) => {
 
         const emp = employee.toObject();
 
+        // Get day name
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const todayName = days[new Date().getDay()];
+
         // Build shift info
         const shift = emp.workSetup?.shift || null;
+        const schedule = shift?.schedule?.[todayName] || null;
+        const isWeekOff = shift?.weekOffDays?.includes(todayName.charAt(0).toUpperCase() + todayName.slice(1)) || false;
 
         // Build leave balance info from leaveGroup
         const leaveGroup = emp.leaveGroup || null;
@@ -73,8 +79,9 @@ export const getEmployeeStats = async (req, res) => {
                 documentCount,
                 daysSinceJoining,
                 shiftName: shift?.shiftName || null,
-                shiftStart: shift?.schedule?.monday?.shiftStart || null,
-                shiftEnd: shift?.schedule?.monday?.shiftEnd || null,
+                shiftStart: schedule?.shiftStart || null,
+                shiftEnd: schedule?.shiftEnd || null,
+                isWeekOff,
                 weekOffDays: shift?.weekOffDays || [],
                 leaveGroupName: leaveGroup?.leaveGroupName || null,
             }

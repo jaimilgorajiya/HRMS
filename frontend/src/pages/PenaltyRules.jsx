@@ -253,23 +253,13 @@ const PenaltyRules = () => {
                                             )}
 
                                             <div className="hrm-form-group" style={{ marginBottom: 0 }}>
-                                                <SearchableSelect 
-                                                    label="Type"
-                                                    options={getTypeOptions(slab.penaltyType)}
-                                                    value={slab.type}
-                                                    onChange={(val) => handleSlabChange(index, 'type', val)}
-                                                />
-                                            </div>
-
-                                            <div className="hrm-form-group" style={{ marginBottom: 0 }}>
                                                 <label className="hrm-label">Penalty Value <span className="req">*</span></label>
                                                 <input 
                                                     type="number" 
                                                     className="hrm-input"
-                                                    placeholder={['Half Day Salary', 'Full Day Salary'].includes(slab.type) ? "Days" : "150"}
+                                                    placeholder="150"
                                                     value={slab.value}
                                                     onChange={(e) => handleSlabChange(index, 'value', e.target.value)}
-                                                    disabled={['Half Day Salary', 'Full Day Salary'].includes(slab.type)}
                                                 />
                                             </div>
 

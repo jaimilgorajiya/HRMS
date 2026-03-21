@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#2563EB"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.iflora.hrmsemployee"
@@ -21,7 +23,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2563EB"
       },
-      "package": "com.iflora.hrmsemployee"
+      "package": "com.iflora.hrmsemployee",
+      "usesCleartextTraffic": true
     },
     "plugins": [
       "expo-router",

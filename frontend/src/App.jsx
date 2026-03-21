@@ -42,14 +42,8 @@ import EmployeeIdFormat from './pages/EmployeeIdFormat';
 import RetirementSettings from './pages/RetirementSettings';
 import UpcomingRetirement from './pages/UpcomingRetirement';
 import EmployeePromotion from './pages/EmployeePromotion';
-import EmployeeLayout from './layout/EmployeeLayout';
-import EmployeeDashboard from './pages/employee/EmployeeDashboard';
-import EmployeeMyProfile from './pages/employee/EmployeeMyProfile';
-import EmployeeAttendance from './pages/employee/EmployeeAttendance';
-import EmployeeLeaves from './pages/employee/EmployeeLeaves';
-import EmployeePayslips from './pages/employee/EmployeePayslips';
-import EmployeeDocuments from './pages/employee/EmployeeDocuments';
-import EmployeeShift from './pages/employee/EmployeeShift';
+import AdminAttendance from './pages/AdminAttendance';
+import UseMobileApp from './pages/employee/UseMobileApp';
 
 function App() {
   return (
@@ -78,6 +72,7 @@ function App() {
               <Route path="company-settings" element={<ModulePlaceholder title="Company Settings" />} />
               <Route path="company/*" element={<ModulePlaceholder title="Company Management" />} />
               <Route path="attendance/break-type" element={<BreakType />} />
+              <Route path="attendance/records" element={<AdminAttendance />} />
               <Route path="attendance-settings" element={<ModulePlaceholder title="Attendance Settings" />} />
               <Route path="attendance/*" element={<ModulePlaceholder title="Attendance Management" />} />
               <Route path="shift/add" element={<AddShift />} />
@@ -128,22 +123,15 @@ function App() {
             <Route path="/admin-dashboard" element={<Navigate to="/admin" replace />} />
           </Route>
 
-          {/* Manager/Employee Dashboards (Placeholder protection) */}
+          {/* Manager Dashboards */}
           <Route element={<ProtectedRoute allowedRoles={['Manager']} />}>
             <Route path="/manager-dashboard" element={<Dashboard title="Manager Dashboard" />} />
           </Route>
           
+          {/* Employee Redirect to Mobile App Message */}
           <Route element={<ProtectedRoute allowedRoles={['Employee']} />}>
-            <Route path="/employee" element={<EmployeeLayout />}>
-              <Route index element={<EmployeeDashboard />} />
-              <Route path="dashboard" element={<EmployeeDashboard />} />
-              <Route path="profile" element={<EmployeeMyProfile />} />
-              <Route path="attendance" element={<EmployeeAttendance />} />
-              <Route path="leaves" element={<EmployeeLeaves />} />
-              <Route path="payslips" element={<EmployeePayslips />} />
-              <Route path="documents" element={<EmployeeDocuments />} />
-              <Route path="shift" element={<EmployeeShift />} />
-            </Route>
+            <Route path="/employee" element={<UseMobileApp />} />
+            <Route path="/employee/*" element={<Navigate to="/employee" replace />} />
             <Route path="/employee-dashboard" element={<Navigate to="/employee" replace />} />
           </Route>
 

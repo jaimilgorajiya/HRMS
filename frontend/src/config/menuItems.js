@@ -105,6 +105,7 @@ export const menuItems = [
         title: "Attendance",
         path: "/admin/attendance",
         children: [
+          { title: "Attendance Records", path: "/admin/attendance/records" },
           { title: "Attendance Dashboard", path: "/admin/attendance/dashboard" },
           { title: "View Attendance", path: "/admin/attendance/view" },
           { title: "Add Attendance", path: "/admin/attendance/add" },
